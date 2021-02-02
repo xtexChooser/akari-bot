@@ -1,7 +1,0 @@
-graia-application-mirai
-pillow
-googletrans
-ffmpy
-aiohttp
-beautifulsoup4
-psutil~=5.7.2
