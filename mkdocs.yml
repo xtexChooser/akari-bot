@@ -14,7 +14,6 @@ nav:
   - 开发:
     - 技术实现: dev/implementation.md
     - 新建模块指南: dev/new_module.md
-    - GitHub 仓库备注: dev/github.md
 
 theme:
   name: material

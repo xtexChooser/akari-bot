@@ -1,1 +1,2 @@
-This branch contains the [doc](https://bot.teahou.se/).
+# contributing
+Rules every one needs to obey here when contributing to Teahouse Studios projects
