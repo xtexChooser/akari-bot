@@ -5,13 +5,23 @@ site_author: Teahouse Studios
 repo_url: https://github.com/Teahouse-Studios/bot
 repo_name: Teahouse-Studios/bot
 
+edit_uri: https://github.com/Teahouse-Studios/bot/edit/doc/docs/
+
 nav:
   - 信息:
     - 首页: index.md
     - 常见问题: faq.md
     - 开始: setup.md
   - 模块:
-    - Wiki: modules/wiki.md
+    - core: modules/core.md
+    - bugtracker: modules/bugtracker.md
+    - wiki: modules/wiki.md
+    - mcv: modules/mcv.md
+    - mcv_rss: modules/mcv_rss.md
+    - server: modules/server.md
+    - user: modules/user.md
+    - utils: modules/unils.md
+  
   - 开发:
     - 技术实现: dev/implementation.md
     - 新建模块指南: dev/new_module.md
