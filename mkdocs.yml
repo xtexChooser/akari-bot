@@ -10,7 +10,8 @@ nav:
     - 首页: index.md
     - 常见问题: faq.md
     - 开始: setup.md
-  - 模块: modules.md
+  - 模块:
+    - Wiki: modules/wiki.md
   - 开发:
     - 技术实现: dev/implementation.md
     - 新建模块指南: dev/new_module.md
