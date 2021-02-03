@@ -1,4 +1,4 @@
-require('dotenv/types').config()
+require('dotenv').config()
 const {NodeSSH} = require('node-ssh')
 const ssh = new NodeSSH()
 
