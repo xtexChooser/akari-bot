@@ -9,22 +9,45 @@ edit_uri: https://github.com/Teahouse-Studios/bot/edit/doc/docs/
 
 nav:
   - 信息:
-    - 首页: index.md
-    - 常见问题: faq.md
-    - 开始: setup.md
+      - 首页: index.md
+      - 常见问题: faq.md
+      - 开始: setup.md
   - 模块:
-    - core: modules/core.md
-    - bugtracker: modules/bugtracker.md
-    - wiki: modules/wiki.md
-    - mcv: modules/mcv.md
-    - mcv_rss: modules/mcv_rss.md
-    - server: modules/server.md
-    - user: modules/user.md
-    - utils: modules/unils.md
-  
+      - 简介: modules/index.md
+      - 核心:
+          - core: modules/core.md
+          - ping: modules/core/#ping
+          - enable: modules/core/#enable-disable
+          - disable: modules/core/#enable-disable
+      - Wiki:
+          - wiki: modules/wiki/wiki.md
+          - wiki_start_site: modules/wiki/wiki_start_site.md
+          - interwiki: modules/wiki/interwiki.md
+          - wiki_regex: modules/wiki/wiki_regex.md
+          - wiki_infobox: modules/wiki/wiki_infobox.md
+          - wiki_fandom_addon: modules/wiki/wiki_fandom_addon.md
+          - wiki_gamepedia_addon: modules/wiki/wiki_gamepedia_addon.md
+          - user: modules/wiki/user.md
+      - Mojira:
+          - bug: modules/bug/bug.md
+          - bug_regex: modules/bug/bug_regex.md
+      - 订阅:
+          - mcv_rss: modules/rss/mcv_rss.md
+          - mcv_jira_rss: modules/rss/mcv_jira_rss.md
+      - server: modules/server.md
+      - Minecraft 版本更新:
+          - mcv: modules/mcv/mcv.md
+          - mcbv: modules/mcv/mcbv.md
+          - mcdv: modules/mcv/mcdv.md
+      - b30: modules/b30.md
+      - Minecraft Wiki 维护实用工具:
+          - rc: modules/utils/rc.md
+          - ab: modules/utils/ab.md
+          - newbie: modules/utils/newbie.md
+
   - 开发:
-    - 技术实现: dev/implementation.md
-    - 新建模块指南: dev/new_module.md
+      - 技术实现: dev/implementation.md
+      - 新建模块指南: dev/new_module.md
 
 theme:
   name: material
@@ -53,7 +76,7 @@ extra:
       link: mailto:admin@teahou.se
       name: Email us
 
-extra_css: 
+extra_css:
   - custom/custom.css
 
 extra_javascript:
