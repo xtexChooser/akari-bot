@@ -47,6 +47,7 @@ nav:
   - 开发:
       - 技术实现: dev/implementation.md
       - 新建模块指南: dev/new_module.md
+      - infobox_render: dev/web_render.md
 
 theme:
   name: material
