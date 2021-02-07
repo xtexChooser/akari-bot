@@ -15,10 +15,9 @@ nav:
   - 模块:
       - 简介: modules/index.md
       - 核心:
-          - core: modules/core.md
-          - ping: modules/core/#ping
-          - enable: modules/core/#enable-disable
-          - disable: modules/core/#enable-disable
+          - core: modules/core/core.md
+          - ping: modules/core/ping.md
+          - enable/disable: modules/core/enable-disable.md
       - Wiki:
           - wiki: modules/wiki/wiki.md
           - wiki_start_site: modules/wiki/wiki_start_site.md
