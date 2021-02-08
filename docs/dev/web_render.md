@@ -4,10 +4,11 @@
 
 本文假定您有基础 Node.js 操作技能。配置过程中需要 yarn。
 
-```
-git clone https://github.com/Teahouse-Studios/oa-web-render
-yarn install
-yarn build
+```powershell
+$ git clone https://github.com/Teahouse-Studios/oa-web-render
+$ cd oa-web-render
+$ yarn install
+$ yarn build
 ```
 
 前往 <https://github.com/adieuadieu/serverless-chrome/releases> 下载任意版本 Chromium（Linux），或前往 Chromium 官方进行下载。
@@ -16,8 +17,14 @@ yarn build
 
 在上方clone的仓库目录中新建 `.env` 文件，内容如下：
 
-```
-CHROMIUM_PATH= // CChromium 可执行文件位置
+```python
+CHROMIUM_PATH = # Chromium 可执行文件位置
 ```
 
-运行`dist/index.js`，API监听端口位15551，您可自行选择配置反代，`infobox_render`配置项中填写访问地址，如`http://127.0.0.1:15551/`。
+之后，运行 `dist/index.js`。
+
+```powershell
+$ node dist/index.js
+```
+
+API 监听端口位于 15551。您可自行选择配置代理。`infobox_render` 配置项中填写访问地址，如`http://127.0.0.1:15551/`。
