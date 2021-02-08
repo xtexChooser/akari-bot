@@ -5,7 +5,7 @@
 
 ## `user`
 <figure style="float: right;">
-  <img src="/assets/user-example.jpg" width="300px" alt="例子" />
+  <img src="/assets/user-example.png" width="300px" alt="例子" />
   <figcaption>图片返回结果示例</figcaption>
 </figure>
 
