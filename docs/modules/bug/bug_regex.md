@@ -21,4 +21,4 @@
     - [ ] `https://bugs.mojang.com/browse/4`
 
 
-此指令可以让你无需输入命令查询一个来自 Mojira（Minecraft 的工作室——Mojang Studios）的指定漏洞汇报的详情。
+此指令可以让你无需输入命令查询一个来自 Mojira（Minecraft 的工作室——Mojang Studios 的漏洞汇报器）的指定漏洞汇报的详情。
