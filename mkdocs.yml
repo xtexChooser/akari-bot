@@ -49,6 +49,9 @@ nav:
       - 新建模块指南: dev/new_module.md
       - infobox_render: dev/web_render.md
 
+  - 条款和政策:
+      - 隐私政策: policy/privacy.md
+
 theme:
   name: material
   font:
