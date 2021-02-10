@@ -10,8 +10,8 @@
 
 用法：
 
- - 添加新的 interwiki：`interwiki add <interwiki 名称> <wiki 域名/脚本路径>`
- - 删除现有的 interwiki：`interwiki del <interwiki 名称>`
+ - 添加新的 interwiki：`~interwiki add <interwiki 名称> <wiki 域名/脚本路径>`
+ - 删除现有的 interwiki：`~interwiki del <interwiki 名称>`
 
 
 此指令可以设置使用 [`wiki`](/modules/wiki/wiki/) 指令时的 interwiki。设置完毕后，可以在使用 `wiki` 时在前面加上 interwiki 的名称加<strong>英文</strong>冒号（`:`）以获取此 wiki 的内容。
