@@ -9,7 +9,7 @@
 :octicons-unlock-24: 公开 ·
 :octicons-reply-24: 一分钟后撤回
 
-用法：`ab`
+用法：`~ab`
 
 此模块可以让你查询设定的起始Wiki的滥用日志。
 
