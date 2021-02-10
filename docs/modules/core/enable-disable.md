@@ -9,7 +9,7 @@
 :octicons-unlock-24: 公开 ·
 :octicons-issue-opened-24: 强制
 
-用法：`<enable|disable> [<self>] <模块名称|all>`
+用法：`~<enable|disable> [<self>] <模块名称|all>`
 
 使用此指令以开关所有模块。
 
