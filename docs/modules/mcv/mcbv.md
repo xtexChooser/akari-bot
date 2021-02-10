@@ -8,6 +8,6 @@
 ## `mcbv`
 :octicons-unlock-24: 公开
 
-用法：`mcbv`
+用法：`~mcbv`
 
 此指令可以让你查询Minecraft：基岩版在 Mojira（Minecraft 的工作室——Mojang Studios 的漏洞汇报器）记载的最新版本。
