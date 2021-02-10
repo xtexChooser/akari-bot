@@ -3,7 +3,7 @@
 
 :octicons-file-code-24: 开源
 
-此模块可以让你查询中文 Minecraft Wiki 的滥用日志。
+此模块可以让你查询设定的起始Wiki的滥用日志。
 
 ## `ab`
 :octicons-unlock-24: 公开 ·
@@ -11,23 +11,24 @@
 
 用法：`ab`
 
-此指令可以让你查询中文 Minecraft Wiki 的滥用日志。
-
-!!! bug
-    本指令已知无法进行中文 Minecraft Wiki 之外的滥用日志查询。
+此模块可以让你查询设定的起始Wiki的滥用日志。
 
 !!! example "示例"
     本指令返回的结果示例：
     ```
     •Minecraft Wiki:沙盒/Sculk Sensor - Zollo757347于18时33分
     过滤器名：插入零宽字符
-    处理结果：tag•Minecraft Wiki:沙盒/Sculk Sensor - Zollo757347于18时27分
+    处理结果：tag
+    •Minecraft Wiki:沙盒/Sculk Sensor - Zollo757347于18时27分
     过滤器名：插入零宽字符
-    处理结果：warn•User:HLDoramon/Msgbox/Potato - 36.157.70.134于18时19分
+    处理结果：warn•
+    User:HLDoramon/Msgbox/Potato - 36.157.70.134于18时19分
     过滤器名：新用户和IP用户编辑他人用户页
-    处理结果：disallow•MinecraftEdu - DSDlonDTX于17时28分
+    处理结果：disallow
+    •MinecraftEdu - DSDlonDTX于17时28分
     过滤器名：创建未翻译的页面
-    处理结果：warn•Minecraft Wiki:管理员告示板 - Ff98sha于22时36分
+    处理结果：warn
+    •Minecraft Wiki:管理员告示板 - Ff98sha于22时36分
     过滤器名：未替换应当替换使用的模板
     处理结果：warn
     ...仅显示前5条内容
