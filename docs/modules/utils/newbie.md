@@ -3,17 +3,14 @@
 
 :octicons-file-code-24: 开源
 
-此模块可以让你查询中文 Minecraft Wiki 的新用户日志。
+此指令可以让你查询设置的起始Wiki的新用户日志。
 
 ## `newbie`
 :octicons-unlock-24: 公开
 
 用法：`newbie`
 
-此指令可以让你查询中文 Minecraft Wiki 的新用户日志。
-
-!!! bug
-    本指令已知无法进行中文 Minecraft Wiki 之外的新用户日志查询。
+此指令可以让你查询设置的起始Wiki的新用户日志。
 
 !!! example "示例"
     本指令返回的结果示例：
