@@ -8,7 +8,7 @@
 ## `wiki_start_site`
 :octicons-unlock-24: 公开
 
-用法：`wiki_start_site <wiki 的脚本路径>`
+用法：`~wiki_start_site <wiki 的脚本路径>`
 
 此指令可以设置使用 [`wiki`](/modules/wiki/wiki/) 指令时的默认 wiki。
 
