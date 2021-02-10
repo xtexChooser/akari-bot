@@ -11,7 +11,7 @@
 
 此命令可以查询某个 MediaWiki 网站中的用户信息。
 
-用法：`user [-<p|r>] [~<Gamepedia 网站域名>] [<interwiki>:]<用户名>`
+用法：`~user [-<p|r>] [~<Gamepedia 网站域名>] [<interwiki>:]<用户名>`
 
 - `-p`：返回一张在 Gamepedia 的用户的详情图片，若非 Gamepedia 用户，则图片中只会展示编辑数。
 - `-r`：返回 Gamepedia 取得的更多信息。
