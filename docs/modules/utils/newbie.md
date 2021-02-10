@@ -8,7 +8,7 @@
 ## `newbie`
 :octicons-unlock-24: 公开
 
-用法：`newbie`
+用法：`~newbie`
 
 此指令可以让你查询设置的起始Wiki的新用户日志。
 
