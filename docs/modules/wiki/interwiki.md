@@ -10,11 +10,9 @@
 
 用法：
 
- - 添加新的 interwiki：`interwiki add <interwiki 名称>><wiki 的脚本路径>`
+ - 添加新的 interwiki：`interwiki add <interwiki 名称> <wiki 域名/脚本路径>`
  - 删除现有的 interwiki：`interwiki del <interwiki 名称>`
 
-!!! hint "提醒"
-    注意：添加 interwiki 时，在 interwiki 名称后有 `>`，切勿遗漏。
 
 此指令可以设置使用 [`wiki`](/modules/wiki/wiki/) 指令时的 interwiki。设置完毕后，可以在使用 `wiki` 时在前面加上 interwiki 的名称加<strong>英文</strong>冒号（`:`）以获取此 wiki 的内容。
 
@@ -35,4 +33,4 @@
     3. 找到此表格的第二行（对于中文 wiki 来说，这一行的表头为“脚本路径”）第二列（对于中文 wiki 来说，这一列的表头为“URL”）内容。右键此字符并复制链接，即为此 wiki 的脚本路径。
 
 !!! warning "警告"
-    某些网站已经被列入黑名单，使用此命令无法获取某些网站的信息。即使网站不在黑名单内，返回的内容仍将经过小可云智能过滤，请不要作死。
+    某些网站已经被列入黑名单，使用此命令无法获取某些网站的某些信息，请不要作死。
