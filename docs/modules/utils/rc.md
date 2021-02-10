@@ -3,17 +3,14 @@
 
 :octicons-file-code-24: 开源
 
-此模块可以让你查询中文 Minecraft Wiki 的最近更改。
+此指令可以让你查询设置的起始Wiki的最近更改。
 
 ## `rc`
 :octicons-unlock-24: 公开
 
 用法：`rc`
 
-此指令可以让你查询中文 Minecraft Wiki 的最近更改。
-
-!!! bug
-    本指令已知无法进行中文 Minecraft Wiki 之外的最近更改查询。
+此指令可以让你查询设置的起始Wiki的最近更改。
 
 !!! example "示例"
     本指令返回的结果示例：
