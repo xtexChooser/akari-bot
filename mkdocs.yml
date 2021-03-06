@@ -30,15 +30,18 @@ nav:
       - Mojira:
           - bug: modules/bug/bug.md
           - bug_regex: modules/bug/bug_regex.md
-      - 订阅:
+      - Minecraft 版本订阅:
           - mcv_rss: modules/rss/mcv_rss.md
           - mcv_jira_rss: modules/rss/mcv_jira_rss.md
-      - server: modules/server.md
+      - Minecraft 实用工具: 
+        - server: modules/server.md
       - Minecraft 版本更新:
           - mcv: modules/mcv/mcv.md
           - mcbv: modules/mcv/mcbv.md
           - mcdv: modules/mcv/mcdv.md
-      - b30: modules/b30.md
+      - 音游分享工具: 
+        - b30（Arcaea）: modules/mug/b30.md
+        - cytoid: modules/mug/cytoid.md
       - Minecraft Wiki 维护实用工具:
           - rc: modules/utils/rc.md
           - ab: modules/utils/ab.md

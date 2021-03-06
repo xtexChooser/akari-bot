@@ -1,13 +1,18 @@
-# `b30`
+# `cytoid`
 
-:octicons-file-code-24: 闭源（For 工作室成员：[这里](https://github.com/Teahouse-Studios/arcb30_bot_module)）
+:octicons-file-code-24: 开源
 
-此模块可以让你查询 Arcaea B30 结果。
+此模块可以让你查询 Cytoid 游戏中的信息。
 
-## `b30`
+!!! seealso "另见"
+    本模块返回的是 Arcaea B30 结果。关于 Cytoid 的 B30 结果，[见此](./cytoid/#)。
+
+## `cytoid profile`
 :octicons-unlock-24: 公开
 
-用法：`~b30 <Arcaea ID>`
+用法：`~cytoid profile <UID>`
+
+此命令可以获取一个 Cytoid 用户的账号信息。
 
 !!! example "示例"
     这是返回的结果示例：
@@ -28,7 +33,7 @@
     ```
 
 !!! faq "无法使用？"
-    请检查您是否输入的是 Arcaea 用户<strong>数字</strong> ID。
+    请检查您是否输入的是 Cytoid 用户<strong>数字</strong> ID。
 
 !!! warning "警告"
     返回的图像将经过小可云智能过滤，请不要作死。
