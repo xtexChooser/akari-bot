@@ -27,6 +27,8 @@ nav:
           - wiki_fandom_addon: modules/wiki/wiki_fandom_addon.md
           - wiki_gamepedia_addon: modules/wiki/wiki_gamepedia_addon.md
           - user: modules/wiki/user.md
+      - GitHub:
+          - github: modules/github.md
       - Mojira:
           - bug: modules/bug/bug.md
           - bug_regex: modules/bug/bug_regex.md
