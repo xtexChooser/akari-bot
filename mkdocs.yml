@@ -43,6 +43,7 @@ nav:
           - mcdv: modules/mcv/mcdv.md
       - 音游分享工具: 
         - b30（Arcaea）: modules/mug/b30.md
+        - ptt（Arcaea）: modules/mug/ptt.md
         - cytoid: modules/mug/cytoid.md
       - Minecraft Wiki 维护实用工具:
           - rc: modules/utils/rc.md
