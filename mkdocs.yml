@@ -18,7 +18,7 @@ nav:
           - core: modules/core/core.md
           - ping: modules/core/ping.md
           - enable/disable: modules/core/enable-disable.md
-      - Wiki:
+      - MediaWiki:
           - wiki: modules/wiki/wiki.md
           - wiki_start_site: modules/wiki/wiki_start_site.md
           - interwiki: modules/wiki/interwiki.md
@@ -45,7 +45,7 @@ nav:
         - b30（Arcaea）: modules/mug/b30.md
         - ptt（Arcaea）: modules/mug/ptt.md
         - cytoid: modules/mug/cytoid.md
-      - Minecraft Wiki 维护实用工具:
+      - MediaWiki 维护实用工具:
           - rc: modules/utils/rc.md
           - ab: modules/utils/ab.md
           - newbie: modules/utils/newbie.md
