@@ -1,7 +1,7 @@
 # `interwiki`
 
 !!! warning "注意"
-    此命令已被整合至[`wiki`](/modules/wiki/wiki/)模块，可使用`~wiki iw add/del <wiki 的脚本路径>`来设置默认 wiki 而非打开本模块设置。
+    此命令已被整合至[`wiki`](/modules/wiki/wiki/)模块，可使用`~wiki iw add/del <wiki 的脚本路径>`来设置自定义 interwiki 而非打开本模块设置。
 
 :octicons-file-code-24: 开源 ·
 :octicons-package-dependencies-24: 依赖：[`wiki`](/modules/wiki/wiki/) 或 [`wiki_regex`](/modules/wiki/wiki_regex/)
