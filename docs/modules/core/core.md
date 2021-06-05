@@ -5,7 +5,22 @@
 
 **`core`** 模块是小可最基础的模块。此模块集可以让你启用或禁用模块、查看帮助以及使用管理员设置。
 
+## `enable` / `disable`
+
+:octicons-lock-24: 仅管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~<enable|disable> [<self>] <模块名称|all>`
+
+使用此指令以开关所有模块。
+
+若在模块名称前加上 `self`，则此模块的开/关仅适用于此命令的运行者。
+
+!!! seealso "另见"
+    查看所有可用的模块，请见[modules](/modules/core/core/#modules)。
+
 ## `help`
+
 :octicons-reply-24: 一分钟后撤回 ·
 :octicons-unlock-24: 公开 ·
 :octicons-issue-opened-24: 强制
@@ -26,6 +41,7 @@
     ```
 
 ## `modules`
+
 :octicons-reply-24: 一分钟后撤回 ·
 :octicons-unlock-24: 公开
 
@@ -41,3 +57,83 @@
     使用~help <模块名>查看详细信息。
     [本消息将在一分钟后撤回]
     ```
+
+## `version`
+
+:octicons-unlock-24: 公开 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~version`
+
+获得目前机器人运行的软件版本。应该是一个 Git commit hash 的前六位。
+
+## `add_base_su`
+
+:octicons-lock-24: 仅管理员 ·
+:octicons-issue-opened-24: 强制 ·
+:octicons-thumbsdown-24: 不推荐
+
+用法：`~add_base_su`
+
+让本机器人的拥有者成为群聊的管理员。
+
+## `add_su`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~add_su <QQ 号>`
+
+添加一个新的超级管理员。
+
+## `del_su`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~del_su <QQ 号>`
+
+撤销超级管理员权限。
+
+## `set`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~set <self> <do> <id>`
+
+操作数据库。详见[源码](https://github.com/Teahouse-Studios/bot/blob/master/database/__init__.py#L53)。
+
+## `restart`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~restart`
+
+重启机器人软件。
+
+## `update`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~update`
+
+从 GitHub 下载新版本小可并更新。
+
+## `update&restart`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+从 GitHub 下载新版本小可并更新，之后重启机器人软件。
+
+## `echo`
+
+:octicons-lock-24: 仅超级管理员 ·
+:octicons-issue-opened-24: 强制
+
+用法：`~echo <信息>`
+
+重复消息。

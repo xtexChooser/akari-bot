@@ -12,15 +12,14 @@ nav:
       - 首页: index.md
       - 常见问题: faq.md
       - 开始: setup.md
+      - 权限: permission.md
   - 模块:
       - 简介: modules/index.md
       - 核心:
           - core: modules/core/core.md
           - ping: modules/core/ping.md
-          - enable/disable: modules/core/enable-disable.md
       - MediaWiki:
           - wiki: modules/wiki/wiki.md
-          - wiki_start_site: modules/wiki/wiki_start_site.md
           - interwiki: modules/wiki/interwiki.md
           - wiki_regex: modules/wiki/wiki_regex.md
           - wiki_infobox: modules/wiki/wiki_infobox.md
@@ -33,18 +32,20 @@ nav:
           - bug: modules/bug/bug.md
           - bug_regex: modules/bug/bug_regex.md
       - Minecraft 版本订阅:
-          - mcv_rss: modules/rss/mcv_rss.md
-          - mcv_jira_rss: modules/rss/mcv_jira_rss.md
-      - Minecraft 实用工具: 
-        - server: modules/server.md
+          - mcv_rss: modules/mcv_rss/mcv_rss.md
+          - mcv_jira_rss: modules/mcv_rss/mcv_jira_rss.md
+      - Minecraft 实用工具:
+          - server: modules/server.md
+      - Minecraft Wiki 每周页面:
+          - weekly: modules/weekly.md
       - Minecraft 版本更新:
           - mcv: modules/mcv/mcv.md
           - mcbv: modules/mcv/mcbv.md
           - mcdv: modules/mcv/mcdv.md
-      - 音游分享工具: 
-        - b30（Arcaea）: modules/mug/b30.md
-        - ptt（Arcaea）: modules/mug/ptt.md
-        - cytoid: modules/mug/cytoid.md
+      - 音游分享工具:
+          - b30（Arcaea）: modules/mug/b30.md
+          - ptt（Arcaea）: modules/mug/ptt.md
+          - cytoid: modules/mug/cytoid.md
       - MediaWiki 维护实用工具:
           - rc: modules/utils/rc.md
           - ab: modules/utils/ab.md
@@ -61,15 +62,15 @@ nav:
 theme:
   name: material
   font:
-    text: Source Sans Pro
-    language: zh
+  text: Source Sans Pro
+  language: zh
   features:
     - navigation.instant
     - navigation.tabs
     - navigation.tabs.sticky
     - toc.integrate
   icon:
-    repo: octicons/mark-github-16
+  repo: octicons/mark-github-16
   favicon: assets/favicon.ico
   logo: assets/logo.svg
 
