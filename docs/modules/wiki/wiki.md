@@ -9,6 +9,8 @@
 
 用法：`~wiki [<interwiki>:]<页面名>`
 
+快捷使用前缀：`~w`
+
 此指令可以让你查询一个基于 MediaWiki 的网站的指定页面的详情。
 
 ## `wiki random`
