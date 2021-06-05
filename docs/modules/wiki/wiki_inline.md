@@ -1,10 +1,10 @@
-# `wiki_regex`
+# `wiki_inline`
 
 :octicons-file-code-24: 开源
 
 此模块可以让你无需机器人前缀查询一个基于 MediaWiki 的网站的指定页面的详情。
 
-## `wiki_regex`
+## `wiki_inline`
 :octicons-unlock-24: 公开
 
 用法：`[[[<interwiki>]:<页面名>]]`（无需前缀，可使用于消息的任何位置）
