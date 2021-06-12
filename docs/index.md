@@ -1,4 +1,7 @@
 # 小可
+
+欢迎前往wiki：https://wiki.bot.teahou.se/
+
 <figure>
   <img src="assets/avatar.png" alt="小可的头像" width="200px" />
   <figcaption>2 号姬的头像（乖巧.png）</figcaption>
