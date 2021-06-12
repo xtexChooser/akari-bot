@@ -1,2 +1,2 @@
-# contributing
-Rules every one needs to obey here when contributing to Teahouse Studios projects
+# 已弃用
+https://wiki.bot.teahou.se/
