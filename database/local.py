@@ -1,7 +1,7 @@
 import datetime
 
 import ujson as json
-from sqlalchemy import create_engine, Column, Text, TIMESTAMP, text
+from sqlalchemy import TIMESTAMP, Column, Text, create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from tenacity import retry, stop_after_attempt
@@ -49,7 +49,8 @@ class DirtyWordCache:
     @auto_rollback_error
     def __init__(self, query_word):
         self.query_word = query_word
-        self.query = session.query(DirtyFilterTable).filter_by(desc=self.query_word).first()
+        self.query = session.query(DirtyFilterTable).filter_by(
+            desc=self.query_word).first()
         self.need_insert = False
         if self.query is None:
             self.need_insert = True
@@ -61,7 +62,8 @@ class DirtyWordCache:
     @retry(stop=stop_after_attempt(3))
     @auto_rollback_error
     def update(self, result: dict):
-        session.add_all([DirtyFilterTable(desc=self.query_word, result=json.dumps(result))])
+        session.add_all(
+            [DirtyFilterTable(desc=self.query_word, result=json.dumps(result))])
         session.commit()
 
     def get(self):

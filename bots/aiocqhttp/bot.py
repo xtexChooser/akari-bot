@@ -5,12 +5,13 @@ import re
 from aiocqhttp import Event
 
 from bots.aiocqhttp.client import bot
-from bots.aiocqhttp.message import MessageSession, FetchTarget
+from bots.aiocqhttp.message import FetchTarget, MessageSession
 from bots.aiocqhttp.message_guild import MessageSession as MessageSessionGuild
 from config import Config
-from core.elements import MsgInfo, Session, EnableDirtyWordCheck, PrivateAssets, Url
+from core.elements import (EnableDirtyWordCheck, MsgInfo, PrivateAssets,
+                           Session, Url)
 from core.parser.message import parser
-from core.utils import init, load_prompt, init_async, MessageTaskManager
+from core.utils import MessageTaskManager, init, init_async, load_prompt
 from database import BotDBUtil
 
 PrivateAssets.set(os.path.abspath(os.path.dirname(__file__) + '/assets'))
@@ -36,7 +37,8 @@ async def _(event: Event):
     if event.detail_type == 'private':
         if event.sub_type == 'group':
             return await bot.send(event, '请先添加好友后再进行命令交互。')
-    filter_msg = re.match(r'.*?\[CQ:(?:json|xml).*?].*?|.*?<\?xml.*?>.*?', event.message)
+    filter_msg = re.match(
+        r'.*?\[CQ:(?:json|xml).*?].*?|.*?<\?xml.*?>.*?', event.message)
     if filter_msg:
         return
     replyId = None
@@ -49,7 +51,9 @@ async def _(event: Event):
         if match_at.group(1) == qq_account:
             prefix = ['']
 
-    targetId = 'QQ|' + (f'Group|{str(event.group_id)}' if event.detail_type == 'group' else str(event.user_id))
+    targetId = 'QQ|' + \
+        (f'Group|{str(event.group_id)}' if event.detail_type ==
+         'group' else str(event.user_id))
 
     msg = MessageSession(MsgInfo(targetId=targetId,
                                  senderId=f'QQ|{str(event.user_id)}',
@@ -117,7 +121,8 @@ async def _(event: Event):
                                                  senderId=event.operator_id).add_and_check('mute', str(event.duration))
         if result:
             await bot.call_action('set_group_leave', group_id=event.group_id)
-            BotDBUtil.SenderInfo('QQ|' + str(event.operator_id)).edit('isInBlockList', True)
+            BotDBUtil.SenderInfo('QQ|' + str(event.operator_id)
+                                 ).edit('isInBlockList', True)
             await bot.call_action('delete_friend', friend_id=event.operator_id)
 
 

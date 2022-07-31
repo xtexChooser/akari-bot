@@ -213,7 +213,7 @@ assets
         │  adobe_simhei.otf
         │  aliases.csv
         │  msyh.ttc
-        │  
+        │
         └─mai
             │...
 ```
@@ -255,5 +255,3 @@ assets
 暂时无根本的解决方法，当前可行的方法是将 `quart` 降级到 0.14 版本。
 
 `pip install quart==0.14 jinja2==3.0.3 werkzeug==2.0.3`
-
-

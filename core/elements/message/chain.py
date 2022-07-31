@@ -1,18 +1,20 @@
 import base64
 import re
-from typing import Union, List, Tuple
+from typing import List, Tuple, Union
 from urllib.parse import urlparse
 
 import ujson as json
 
 from core.elements.others import Secret
 from core.logger import Logger
-from .internal import Plain, Image, Voice, Embed, Url, ErrorMessage
+
+from .internal import Embed, ErrorMessage, Image, Plain, Url, Voice
 
 
 class MessageChain:
     def __init__(self, elements: Union[str, List[Union[Plain, Image, Voice, Embed, Url]],
-                                       Tuple[Union[Plain, Image, Voice, Embed, Url]],
+                                       Tuple[Union[Plain, Image,
+                                                   Voice, Embed, Url]],
                                        Plain, Image, Voice, Embed, Url]):
         self.value = []
         if isinstance(elements, ErrorMessage):
@@ -51,7 +53,8 @@ class MessageChain:
             self.value.append(
                 Plain(ErrorMessage('机器人尝试发送非法消息链，请联系机器人开发者解决问题。')))
         if not self.value:
-            self.value.append(Plain(ErrorMessage('机器人尝试发送空消息链，请联系机器人开发者解决问题。')))
+            self.value.append(
+                Plain(ErrorMessage('机器人尝试发送空消息链，请联系机器人开发者解决问题。')))
 
     @property
     def is_safe(self):
@@ -68,30 +71,37 @@ class MessageChain:
                 for secret in Secret.list:
                     if v.title is not None:
                         if v.title.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.title', secret, v.title))
+                            Logger.warn(unsafeprompt(
+                                'Embed.title', secret, v.title))
                             return False
                     if v.description is not None:
                         if v.description.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.description', secret, v.description))
+                            Logger.warn(unsafeprompt(
+                                'Embed.description', secret, v.description))
                             return False
                     if v.footer is not None:
                         if v.footer.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.footer', secret, v.footer))
+                            Logger.warn(unsafeprompt(
+                                'Embed.footer', secret, v.footer))
                             return False
                     if v.author is not None:
                         if v.author.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.author', secret, v.author))
+                            Logger.warn(unsafeprompt(
+                                'Embed.author', secret, v.author))
                             return False
                     if v.url is not None:
                         if v.url.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.url', secret, v.url))
+                            Logger.warn(unsafeprompt(
+                                'Embed.url', secret, v.url))
                             return False
                     for f in v.fields:
                         if f.name.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.field.name', secret, f.name))
+                            Logger.warn(unsafeprompt(
+                                'Embed.field.name', secret, f.name))
                             return False
                         if f.value.upper().find(secret.upper()) != -1:
-                            Logger.warn(unsafeprompt('Embed.field.value', secret, f.value))
+                            Logger.warn(unsafeprompt(
+                                'Embed.field.value', secret, f.value))
                             return False
         return True
 
@@ -157,7 +167,8 @@ def match_kecode(text: str) -> List[Union[Plain, Image, Voice, Embed]]:
                             if parse_url[0] == 'file' or parse_url[1] in site_whitelist:
                                 img = Image(path=ma.group(2))
                         if ma.group(1) == 'headers':
-                            img.headers = json.loads(str(base64.b64decode(ma.group(2)), "UTF-8"))
+                            img.headers = json.loads(
+                                str(base64.b64decode(ma.group(2)), "UTF-8"))
                         if img is not None:
                             elements.append(img)
                     else:

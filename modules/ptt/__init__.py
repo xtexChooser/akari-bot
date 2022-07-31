@@ -44,8 +44,10 @@ async def pttimg(msg: MessageSession):
         pttimg = 'off'
     pttimgr = Image.open(f'{assets_path}/ptt/rating_{str(pttimg)}.png')
     ptttext = Image.new("RGBA", (119, 119))
-    font1 = ImageFont.truetype(os.path.abspath(f'{assets_path}/Fonts/Exo-SemiBold.ttf'), 49)
-    font2 = ImageFont.truetype(os.path.abspath(f'{assets_path}/Fonts/Exo-SemiBold.ttf'), 33)
+    font1 = ImageFont.truetype(os.path.abspath(
+        f'{assets_path}/Fonts/Exo-SemiBold.ttf'), 49)
+    font2 = ImageFont.truetype(os.path.abspath(
+        f'{assets_path}/Fonts/Exo-SemiBold.ttf'), 33)
     if ptt >= 0 and ptt <= 99.99:
         rawptt = str(ptt).split('.')
         if len(rawptt) < 2:
@@ -61,12 +63,14 @@ async def pttimg(msg: MessageSession):
         font2_width, font2_height = font2.getsize(ptt2)
         print(font1_width, font1_height)
         print(font2_width, font2_height)
-        pttimg = Image.new("RGBA", (font1_width + font2_width + 6, font1_height + 6))
+        pttimg = Image.new(
+            "RGBA", (font1_width + font2_width + 6, font1_height + 6))
         drawptt = ImageDraw.Draw(pttimg)
         stroke_color = '#52495d'
         if int(ptt1) >= 13:
             stroke_color = '#81122F'
-        drawptt.text((0, 0), ptt1 + '.', 'white', font=font1, stroke_width=3, stroke_fill=stroke_color)
+        drawptt.text((0, 0), ptt1 + '.', 'white', font=font1,
+                     stroke_width=3, stroke_fill=stroke_color)
         print(int(int(font1_height) - int(font2_height)))
         drawptt.text((font1_width, int(int(font1_height) - int(font2_height))), ptt2, 'white', font=font2,
                      stroke_width=3, stroke_fill=stroke_color)
@@ -76,7 +80,8 @@ async def pttimg(msg: MessageSession):
         font1_width, font1_height = font1.getsize(ptt)
         pttimg = Image.new("RGBA", (font1_width + 6, font1_height + 6))
         drawptt = ImageDraw.Draw(pttimg)
-        drawptt.text((0, 0), ptt, 'white', font=font1, stroke_width=3, stroke_fill='#52495d')
+        drawptt.text((0, 0), ptt, 'white', font=font1,
+                     stroke_width=3, stroke_fill='#52495d')
     else:
         return await msg.finish('发生错误：potential 必须为 ≥0.00 且 ≤99.99 的数字。')
     pttimg_width, pttimg_height = pttimg.size

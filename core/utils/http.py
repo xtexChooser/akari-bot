@@ -7,10 +7,11 @@ from typing import Union
 import aiohttp
 import filetype as ft
 from aiofile import async_open
-from tenacity import retry, wait_fixed, stop_after_attempt
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from config import Config
 from core.logger import Logger
+
 from .cache import random_cache_path
 
 

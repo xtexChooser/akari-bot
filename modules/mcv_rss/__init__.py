@@ -10,7 +10,7 @@ from config import Config
 from core.component import on_schedule
 from core.elements import FetchTarget, IntervalTrigger
 from core.logger import Logger
-from core.utils import get_stored_list, update_stored_list, get_url
+from core.utils import get_stored_list, get_url, update_stored_list
 
 
 async def get_article(version):
@@ -35,7 +35,8 @@ async def get_article(version):
                                                                               match_release_candidate.group(1)) \
                + f'-release-candidate-{match_release_candidate.group(2)}'
     if not link:
-        link = 'https://www.minecraft.net/en-us/article/minecraft-java-edition-' + re.sub("\.", "-", version)
+        link = 'https://www.minecraft.net/en-us/article/minecraft-java-edition-' + \
+            re.sub("\.", "-", version)
     webrender = Config('web_render')
     if not webrender:
         return
@@ -61,7 +62,8 @@ trigger_times = 60 if not Config('slower_schedule') else 180
 
 @on_schedule('mcv_rss',
              developers=['OasisAkari', 'Dianliang233'],
-             recommend_modules=['mcv_jira_rss', 'mcbv_jira_rss', 'mcdv_jira_rss'],
+             recommend_modules=['mcv_jira_rss',
+                                'mcbv_jira_rss', 'mcdv_jira_rss'],
              trigger=IntervalTrigger(seconds=trigger_times),
              desc='开启后当Minecraft启动器更新时将会自动推送消息。', alias='mcvrss')
 async def mcv_rss(bot: FetchTarget):

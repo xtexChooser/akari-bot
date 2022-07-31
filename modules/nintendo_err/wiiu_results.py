@@ -1,4 +1,4 @@
-from .types import Module, ResultInfo, ConsoleErrorInfo, ConsoleErrorField
+from .types import ConsoleErrorField, ConsoleErrorInfo, Module, ResultInfo
 
 """
 This file contains all currently known Wii U result and error codes.
@@ -3320,7 +3320,8 @@ def is_valid(error: str):
 def construct_result(ret, mod, summary, level, desc, is_legacy):
     module = (legacy_modules if is_legacy else modules).get(mod, Module(''))
     common = (legacy_modules if is_legacy else modules)[0]
-    ret.add_field(ConsoleErrorField('Module', message_str=module.name, supplementary_value=mod))
+    ret.add_field(ConsoleErrorField(
+        'Module', message_str=module.name, supplementary_value=mod))
     if is_legacy:
         ret.extra_description = "Legacy result"
     if is_legacy and summary is not None:
@@ -3332,12 +3333,14 @@ def construct_result(ret, mod, summary, level, desc, is_legacy):
     if description is None:
         description = common.get_error(desc)
         if description is None:
-            ret.add_field(ConsoleErrorField('Description', supplementary_value=desc))
+            ret.add_field(ConsoleErrorField(
+                'Description', supplementary_value=desc))
         else:
             ret.add_field(
                 ConsoleErrorField('Description', message_str=description.description, supplementary_value=desc))
     else:
-        ret.add_field(ConsoleErrorField('Description', message_str=description.description, supplementary_value=desc))
+        ret.add_field(ConsoleErrorField(
+            'Description', message_str=description.description, supplementary_value=desc))
 
     return ret
 

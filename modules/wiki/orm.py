@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, TIMESTAMP, text
+from sqlalchemy import TIMESTAMP, Column, String, Text, text
 from sqlalchemy.dialects.mysql import LONGTEXT
 
 from database.orm import Session
@@ -15,14 +15,16 @@ class WikiTargetSetInfo(Base):
     targetId = Column(String(512), primary_key=True)
     link = Column(LONGTEXT if session.bind.dialect.name == 'mysql' else Text)
     iws = Column(LONGTEXT if session.bind.dialect.name == 'mysql' else Text)
-    headers = Column(LONGTEXT if session.bind.dialect.name == 'mysql' else Text)
+    headers = Column(LONGTEXT if session.bind.dialect.name ==
+                     'mysql' else Text)
     prefix = Column(LONGTEXT if session.bind.dialect.name == 'mysql' else Text)
 
 
 class WikiInfo(Base):
     __tablename__ = table_prefix + 'WikiInfo'
     apiLink = Column(String(512), primary_key=True)
-    siteInfo = Column(LONGTEXT if session.bind.dialect.name == 'mysql' else Text)
+    siteInfo = Column(
+        LONGTEXT if session.bind.dialect.name == 'mysql' else Text)
     timestamp = Column(TIMESTAMP, default=text('CURRENT_TIMESTAMP'))
 
 

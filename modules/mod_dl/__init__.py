@@ -101,7 +101,8 @@ async def main(msg: MessageSession):
             elif name.lower().find('forge') != -1:
                 mod_type = 'forge'
             if status not in infos[mod_type]:
-                infos[mod_type][status] = {'url': mod.get('href'), 'depends': len(depends), 'name': name}
+                infos[mod_type][status] = {'url': mod.get(
+                    'href'), 'depends': len(depends), 'name': name}
         send_ = []
         for x in infos:
             for y in infos[x]:
@@ -109,7 +110,7 @@ async def main(msg: MessageSession):
                              f'下载链接：{infos[x][y]["url"]}\n'
                              f'文件名：{infos[x][y]["name"]}\n' +
                              (f'此mod共有{str(infos[x][y]["depends"])}个依赖，请确认是否已经下载：\n{url_3}' if infos[x][y][
-                                                                                                   "depends"] > 0 else ''))
+                                 "depends"] > 0 else ''))
         await msg.finish('\n'.join(send_))
 
     except ValueError:  # 404 ...

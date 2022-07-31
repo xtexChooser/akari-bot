@@ -5,7 +5,7 @@ import ujson as json
 from tenacity import retry, stop_after_attempt
 
 from config import Config
-from core.elements.message import MessageSession, FetchTarget, FetchedSession
+from core.elements.message import FetchedSession, FetchTarget, MessageSession
 from core.elements.temp import EnabledModulesCache, SenderInfoCache
 from database.orm import Session
 from database.tables import *
@@ -46,7 +46,8 @@ class BotDBUtil:
             else:
                 self.targetId = msg
             self.need_insert = False
-            self.enable_modules_list = EnabledModulesCache.get_cache(self.targetId) if cache else False
+            self.enable_modules_list = EnabledModulesCache.get_cache(
+                self.targetId) if cache else False
             if not self.enable_modules_list:
                 query = self.query_EnabledModules
                 if query is None:
@@ -56,7 +57,8 @@ class BotDBUtil:
                     query_ = query.enabledModules
                     self.enable_modules_list = json.loads(query_)
                 if cache:
-                    EnabledModulesCache.add_cache(self.targetId, self.enable_modules_list)
+                    EnabledModulesCache.add_cache(
+                        self.targetId, self.enable_modules_list)
 
         @property
         @auto_rollback_error
@@ -89,7 +91,8 @@ class BotDBUtil:
             session.commit()
             session.expire_all()
             if cache:
-                EnabledModulesCache.add_cache(self.targetId, self.enable_modules_list)
+                EnabledModulesCache.add_cache(
+                    self.targetId, self.enable_modules_list)
             return True
 
         @retry(stop=stop_after_attempt(3))
@@ -103,18 +106,21 @@ class BotDBUtil:
                     if x in self.enable_modules_list:
                         self.enable_modules_list.remove(x)
             if not self.need_insert:
-                self.query_EnabledModules.enabledModules = json.dumps(self.enable_modules_list)
+                self.query_EnabledModules.enabledModules = json.dumps(
+                    self.enable_modules_list)
                 session.commit()
                 session.expire_all()
                 if cache:
-                    EnabledModulesCache.add_cache(self.targetId, self.enable_modules_list)
+                    EnabledModulesCache.add_cache(
+                        self.targetId, self.enable_modules_list)
             return True
 
         @staticmethod
         @retry(stop=stop_after_attempt(3))
         @auto_rollback_error
         def get_enabled_this(module_name):
-            query = session.query(EnabledModules).filter(EnabledModules.enabledModules.like(f'%{module_name}%'))
+            query = session.query(EnabledModules).filter(
+                EnabledModules.enabledModules.like(f'%{module_name}%'))
             targetIds = []
             for x in query:
                 enabled_list = json.loads(x.enabledModules)
@@ -127,7 +133,8 @@ class BotDBUtil:
         @auto_rollback_error
         def __init__(self, senderId):
             self.senderId = senderId
-            query_cache = SenderInfoCache.get_cache(self.senderId) if cache else False
+            query_cache = SenderInfoCache.get_cache(
+                self.senderId) if cache else False
             if query_cache:
                 self.query = Dict2Object(query_cache)
             else:
@@ -135,9 +142,11 @@ class BotDBUtil:
                 if self.query is None:
                     session.add_all([SenderInfo(id=senderId)])
                     session.commit()
-                    self.query = session.query(SenderInfo).filter_by(id=senderId).first()
+                    self.query = session.query(
+                        SenderInfo).filter_by(id=senderId).first()
                 if cache:
-                    SenderInfoCache.add_cache(self.senderId, self.query.__dict__)
+                    SenderInfoCache.add_cache(
+                        self.senderId, self.query.__dict__)
 
         @property
         @retry(stop=stop_after_attempt(3))
@@ -159,7 +168,8 @@ class BotDBUtil:
         @retry(stop=stop_after_attempt(3))
         @auto_rollback_error
         def check_TargetAdmin(self, targetId):
-            query = session.query(TargetAdmin).filter_by(senderId=self.senderId, targetId=targetId).first()
+            query = session.query(TargetAdmin).filter_by(
+                senderId=self.senderId, targetId=targetId).first()
             if query is not None:
                 return query
             return False
@@ -168,7 +178,8 @@ class BotDBUtil:
         @auto_rollback_error
         def add_TargetAdmin(self, targetId):
             if not self.check_TargetAdmin(targetId):
-                session.add_all([TargetAdmin(senderId=self.senderId, targetId=targetId)])
+                session.add_all(
+                    [TargetAdmin(senderId=self.senderId, targetId=targetId)])
                 session.commit()
             return True
 
@@ -205,7 +216,8 @@ class BotDBUtil:
             if not self.need_insert:
                 session.delete(self.query)
                 session.commit()
-            session.add_all([CommandTriggerTime(targetId=self.msg.target.senderId, commandName=self.name)])
+            session.add_all(
+                [CommandTriggerTime(targetId=self.msg.target.senderId, commandName=self.name)])
             session.commit()
 
     @staticmethod
@@ -213,7 +225,8 @@ class BotDBUtil:
     @auto_rollback_error
     def isGroupInAllowList(targetId):
         session.expire_all()
-        query = session.query(GroupAllowList).filter_by(targetId=targetId).first()
+        query = session.query(GroupAllowList).filter_by(
+            targetId=targetId).first()
         if query is not None:
             return True
         return False
@@ -224,7 +237,8 @@ class BotDBUtil:
         def __init__(self, msg: MessageSession):
             self.msg = msg
             self.targetId = msg.target.targetId
-            self.query = session.query(MuteList).filter_by(targetId=self.targetId).first()
+            self.query = session.query(MuteList).filter_by(
+                targetId=self.targetId).first()
 
         @retry(stop=stop_after_attempt(3))
         @auto_rollback_error
@@ -248,12 +262,14 @@ class BotDBUtil:
 
     class Data:
         def __init__(self, msg: Union[MessageSession, FetchTarget]):
-            self.targetName = msg.target.clientName if isinstance(msg, MessageSession) else msg.name
+            self.targetName = msg.target.clientName if isinstance(
+                msg, MessageSession) else msg.name
 
         @retry(stop=stop_after_attempt(3))
         @auto_rollback_error
         def add(self, name, value: str):
-            session.add(StoredData(name=f'{self.targetName}|{name}', value=value))
+            session.add(StoredData(
+                name=f'{self.targetName}|{name}', value=value))
             session.commit()
 
         @retry(stop=stop_after_attempt(3))
@@ -274,21 +290,25 @@ class BotDBUtil:
 
     class Options:
         def __init__(self, msg: Union[MessageSession, FetchTarget, str]):
-            self.targetId = msg.target.targetId if isinstance(msg, (MessageSession, FetchTarget)) else msg
+            self.targetId = msg.target.targetId if isinstance(
+                msg, (MessageSession, FetchTarget)) else msg
 
         @retry(stop=stop_after_attempt(3))
         @auto_rollback_error
         def edit(self, k, v):
-            get_ = session.query(TargetOptions).filter_by(targetId=self.targetId).first()
+            get_ = session.query(TargetOptions).filter_by(
+                targetId=self.targetId).first()
             if get_ is None:
-                session.add_all([TargetOptions(targetId=self.targetId, options=json.dumps({k: v}))])
+                session.add_all(
+                    [TargetOptions(targetId=self.targetId, options=json.dumps({k: v}))])
             else:
                 get_.options = json.dumps({**json.loads(get_.options), k: v})
             session.commit()
 
         @retry(stop=stop_after_attempt(3))
         def get(self, k=None):
-            query = session.query(TargetOptions).filter_by(targetId=self.targetId).first()
+            query = session.query(TargetOptions).filter_by(
+                targetId=self.targetId).first()
             if query is None and k is None:
                 return {}
             elif query is None and k is not None:
@@ -322,14 +342,16 @@ class BotDBUtil:
 
         @staticmethod
         def get_data_by_times(new, old, module_name=None):
-            filter_ = [AnalyticsData.timestamp <= new, AnalyticsData.timestamp >= old]
+            filter_ = [AnalyticsData.timestamp <=
+                       new, AnalyticsData.timestamp >= old]
             if module_name is not None:
                 filter_.append(AnalyticsData.moduleName == module_name)
             return session.query(AnalyticsData).filter(*filter_).all()
 
         @staticmethod
         def get_count_by_times(new, old, module_name=None):
-            filter_ = [AnalyticsData.timestamp < new, AnalyticsData.timestamp > old]
+            filter_ = [AnalyticsData.timestamp <
+                       new, AnalyticsData.timestamp > old]
             if module_name is not None:
                 filter_.append(AnalyticsData.moduleName == module_name)
             return session.query(AnalyticsData).filter(*filter_).count()
@@ -346,7 +368,8 @@ class BotDBUtil:
 
             :return: True = yes, False = no
             """
-            query = session.query(UnfriendlyActionsTable).filter_by(targetId=self.targetId).all()
+            query = session.query(UnfriendlyActionsTable).filter_by(
+                targetId=self.targetId).all()
             unfriendly_list = []
             for records in query:
                 if datetime.datetime.now().timestamp() - records.timestamp.timestamp() < 432000:

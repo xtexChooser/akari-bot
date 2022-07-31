@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, Boolean, text
+from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, Text, text
 from sqlalchemy.dialects.mysql import LONGTEXT
 
 from config import Config
@@ -28,7 +28,8 @@ class TargetOptions(Base):
     """对象设置的参数"""
     __tablename__ = "TargetOptions"
     targetId = Column(String(512), primary_key=True)
-    options = Column(LONGTEXT if Config('db_path').startswith('mysql') else Text)
+    options = Column(LONGTEXT if Config(
+        'db_path').startswith('mysql') else Text)
 
 
 class StoredData(Base):
@@ -73,7 +74,8 @@ class AnalyticsData(Base):
     moduleType = Column(String(512))
     targetId = Column(String(512))
     senderId = Column(String(512))
-    command = Column(LONGTEXT if Config('db_path').startswith('mysql') else Text)
+    command = Column(LONGTEXT if Config(
+        'db_path').startswith('mysql') else Text)
     timestamp = Column(TIMESTAMP, default=text('CURRENT_TIMESTAMP'))
 
 

@@ -3,7 +3,8 @@ from typing import Union
 from tenacity import retry, stop_after_attempt
 
 from core.elements import MessageSession
-from database import session, auto_rollback_error
+from database import auto_rollback_error, session
+
 from .orm import ArcBindInfo
 
 
@@ -12,11 +13,14 @@ class ArcBindInfoManager:
     @auto_rollback_error
     def __init__(self, msg: MessageSession):
         self.targetId = msg.target.senderId
-        self.query = session.query(ArcBindInfo).filter_by(targetId=self.targetId).first()
+        self.query = session.query(ArcBindInfo).filter_by(
+            targetId=self.targetId).first()
         if self.query is None:
-            session.add_all([ArcBindInfo(targetId=self.targetId, username='', friendcode='')])
+            session.add_all(
+                [ArcBindInfo(targetId=self.targetId, username='', friendcode='')])
             session.commit()
-            self.query = session.query(ArcBindInfo).filter_by(targetId=self.targetId).first()
+            self.query = session.query(ArcBindInfo).filter_by(
+                targetId=self.targetId).first()
 
     @retry(stop=stop_after_attempt(3), reraise=True)
     @auto_rollback_error

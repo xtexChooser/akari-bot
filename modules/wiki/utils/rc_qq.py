@@ -2,8 +2,8 @@ import urllib.parse
 
 from config import Config
 from core.dirty_check import check
-from modules.wiki.utils.UTC8 import UTC8
 from modules.wiki.utils.action_cn import action
+from modules.wiki.utils.UTC8 import UTC8
 from modules.wiki.wikilib import WikiLib
 
 

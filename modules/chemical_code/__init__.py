@@ -5,15 +5,15 @@ import re
 import traceback
 from datetime import datetime
 
-from PIL import Image as PILImage
 from bs4 import BeautifulSoup
+from PIL import Image as PILImage
 from tenacity import retry, stop_after_attempt
 
 from core.builtins.message import MessageSession
 from core.component import on_command
 from core.elements import Image, Plain
 from core.logger import Logger
-from core.utils import get_url, download_to_cache, random_cache_path
+from core.utils import download_to_cache, get_url, random_cache_path
 
 csr_link = 'https://www.chemspider.com'  # ChemSpider 的链接
 special_id = ["22398", "140526", "4509317", "4509318", "4510681", "4510778", "4512975", "4514248", "4514266", "4514293",
@@ -23,14 +23,16 @@ special_id = ["22398", "140526", "4509317", "4509318", "4510681", "4510778", "45
 
 
 @retry(stop=stop_after_attempt(3), reraise=True)
-async def search_csr(id=None):  # 根据 ChemSpider 的 ID 查询 ChemSpider 的链接，留空（将会使用缺省值 None）则随机查询
+# 根据 ChemSpider 的 ID 查询 ChemSpider 的链接，留空（将会使用缺省值 None）则随机查询
+async def search_csr(id=None):
     if id is not None:  # 如果传入了 ID，则使用 ID 查询
         answer_id = id
     else:
         answer_id = random.randint(1, 114974229)  # 否则随机查询一个题目
     answer_id = str(answer_id)
     Logger.info("ChemSpider ID: " + answer_id)
-    get = await get_url(csr_link + '/Search.aspx?q=' + answer_id, 200, fmt='text')  # 在 ChemSpider 上搜索此化学式或 ID
+    # 在 ChemSpider 上搜索此化学式或 ID
+    get = await get_url(csr_link + '/Search.aspx?q=' + answer_id, 200, fmt='text')
     # Logger.info(get)
     soup = BeautifulSoup(get, 'html.parser')  # 解析 HTML
     name = soup.find('span',
@@ -67,11 +69,13 @@ async def _(msg: MessageSession):
 
 @cc.handle('stop {停止当前的游戏。}')
 async def s(msg: MessageSession):
-    state = play_state.get(msg.target.targetId, False)  # 尝试获取 play_state 中是否有此对象的游戏状态
+    # 尝试获取 play_state 中是否有此对象的游戏状态
+    state = play_state.get(msg.target.targetId, False)
     if state:  # 若有
         if state['active']:  # 检查是否为活跃状态
             play_state[msg.target.targetId]['active'] = False  # 标记为非活跃状态
-            await msg.sendMessage(f'已停止，正确答案是 {state["answer"]}', quote=False)  # 发送存储于 play_state 中的答案
+            # 发送存储于 play_state 中的答案
+            await msg.sendMessage(f'已停止，正确答案是 {state["answer"]}', quote=False)
         else:
             await msg.sendMessage('当前无活跃状态的游戏。')
     else:
@@ -87,11 +91,13 @@ async def chemical_code_by_id(msg: MessageSession):
         await msg.finish('请输入纯数字ID！')
 
 
-async def chemical_code(msg: MessageSession, id=None, captcha_mode=False):  # 要求传入消息会话和 ChemSpider ID，ID 留空将会使用缺省值 None
+# 要求传入消息会话和 ChemSpider ID，ID 留空将会使用缺省值 None
+async def chemical_code(msg: MessageSession, id=None, captcha_mode=False):
     if msg.target.targetId in play_state and play_state[msg.target.targetId][
-        'active']:  # 检查对象（群组或私聊）是否在 play_state 中有记录及是否为活跃状态
+            'active']:  # 检查对象（群组或私聊）是否在 play_state 中有记录及是否为活跃状态
         await msg.finish('当前有一局游戏正在进行中。')
-    play_state.update({msg.target.targetId: {'active': True}})  # 若无，则创建一个新的记录并标记为活跃状态
+    # 若无，则创建一个新的记录并标记为活跃状态
+    play_state.update({msg.target.targetId: {'active': True}})
     try:
         csr = await search_csr(id)  # 尝试获取 ChemSpider ID 对应的化学式列表
     except Exception as e:  # 意外情况
@@ -99,12 +105,14 @@ async def chemical_code(msg: MessageSession, id=None, captcha_mode=False):  # �
         play_state[msg.target.targetId]['active'] = False  # 将对象标记为非活跃状态
         return await msg.finish('发生错误：拉取题目失败，请重新发起游戏。')
     # print(csr)
-    play_state[msg.target.targetId]['answer'] = csr['name']  # 将正确答案标记于 play_state 中存储的对象中
+    # 将正确答案标记于 play_state 中存储的对象中
+    play_state[msg.target.targetId]['answer'] = csr['name']
     Logger.info(f'Answer: {csr["name"]}')  # 在日志中输出正确答案
     Logger.info(f'Image: {csr["image"]}')  # 在日志中输出图片链接
     download = False
     if csr["id"] in special_id:  # 如果正确答案在 special_id 中
-        file_path = os.path.abspath(f'./assets/chemicalcode/special_id/{csr["id"]}.png')
+        file_path = os.path.abspath(
+            f'./assets/chemicalcode/special_id/{csr["id"]}.png')
         Logger.info(f'File path: {file_path}')  # 在日志中输出文件路径
         exists_file = os.path.exists(file_path)  # 尝试获取图片文件是否存在
         if exists_file:
@@ -131,7 +139,8 @@ async def chemical_code(msg: MessageSession, id=None, captcha_mode=False):  # �
                 return await ans(wait, answer)  # 进行下一轮检查
             else:
                 await wait.sendMessage('回答正确。')
-                play_state[msg.target.targetId]['active'] = False  # 将对象标记为非活跃状态
+                # 将对象标记为非活跃状态
+                play_state[msg.target.targetId]['active'] = False
 
     async def timer(start):  # 计时器函数
         if play_state[msg.target.targetId]['active']:  # 检查对象是否为活跃状态
@@ -147,7 +156,8 @@ async def chemical_code(msg: MessageSession, id=None, captcha_mode=False):  # �
                                Plain(f'请在{set_timeout}分钟内发送这个化合物的分子式。（除C、H外使用字母表顺序，如：CHBrClF）')])
         time_start = datetime.now().timestamp()  # 记录开始时间
 
-        await asyncio.gather(ans(msg, csr['name']), timer(time_start))  # 同时启动回答函数和计时器函数
+        # 同时启动回答函数和计时器函数
+        await asyncio.gather(ans(msg, csr['name']), timer(time_start))
     else:
         result = await msg.waitNextMessage([Image(newpath), Plain('请发送这个化合物的分子式。（除C、H外使用字母表顺序，如：CHBrClF）')])
         if play_state[msg.target.targetId]['active']:  # 检查对象是否为活跃状态

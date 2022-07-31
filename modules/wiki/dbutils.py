@@ -7,8 +7,9 @@ import ujson as json
 from tenacity import retry, stop_after_attempt
 
 from core.elements import MessageSession
-from database import session, auto_rollback_error
-from .orm import WikiTargetSetInfo, WikiInfo, WikiAllowList, WikiBlockList
+from database import auto_rollback_error, session
+
+from .orm import WikiAllowList, WikiBlockList, WikiInfo, WikiTargetSetInfo
 
 
 class WikiTargetInfo:
@@ -19,14 +20,18 @@ class WikiTargetInfo:
             if msg.target.targetFrom != 'QQ|Guild':
                 targetId = msg.target.targetId
             else:
-                targetId = re.match(r'(QQ\|Guild\|.*?)\|.*', msg.target.targetId).group(1)
+                targetId = re.match(r'(QQ\|Guild\|.*?)\|.*',
+                                    msg.target.targetId).group(1)
         else:
             targetId = msg
-        self.query = session.query(WikiTargetSetInfo).filter_by(targetId=targetId).first()
+        self.query = session.query(WikiTargetSetInfo).filter_by(
+            targetId=targetId).first()
         if self.query is None:
-            session.add_all([WikiTargetSetInfo(targetId=targetId, iws='{}', headers='{}')])
+            session.add_all(
+                [WikiTargetSetInfo(targetId=targetId, iws='{}', headers='{}')])
             session.commit()
-            self.query = session.query(WikiTargetSetInfo).filter_by(targetId=targetId).first()
+            self.query = session.query(WikiTargetSetInfo).filter_by(
+                targetId=targetId).first()
 
     @retry(stop=stop_after_attempt(3), reraise=True)
     @auto_rollback_error
@@ -85,7 +90,8 @@ class WikiTargetInfo:
             q = self.query.headers
             headers = json.loads(q)
         else:
-            headers = {'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6'}
+            headers = {
+                'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6'}
         return headers
 
     @retry(stop=stop_after_attempt(3), reraise=True)
@@ -111,7 +117,8 @@ class WikiSiteInfo:
     @auto_rollback_error
     def __init__(self, api_link):
         self.api_link = api_link
-        self.query = session.query(WikiInfo).filter_by(apiLink=api_link).first()
+        self.query = session.query(WikiInfo).filter_by(
+            apiLink=api_link).first()
 
     def get(self):
         if self.query is not None:
@@ -122,7 +129,8 @@ class WikiSiteInfo:
     @auto_rollback_error
     def update(self, info: dict):
         if self.query is None:
-            session.add_all([WikiInfo(apiLink=self.api_link, siteInfo=json.dumps(info))])
+            session.add_all(
+                [WikiInfo(apiLink=self.api_link, siteInfo=json.dumps(info))])
         else:
             self.query.siteInfo = json.dumps(info)
             self.query.timestamp = datetime.now()
@@ -165,7 +173,8 @@ class Audit:
     def remove_from_AllowList(self) -> bool:
         if not self.inAllowList:
             return False
-        session.delete(session.query(WikiAllowList).filter_by(apiLink=self.api_link).first())
+        session.delete(session.query(WikiAllowList).filter_by(
+            apiLink=self.api_link).first())
         session.commit()
         session.expire_all()
         return True
@@ -185,7 +194,8 @@ class Audit:
     def remove_from_BlockList(self) -> bool:
         if not self.inBlockList:
             return False
-        session.delete(session.query(WikiBlockList).filter_by(apiLink=self.api_link).first())
+        session.delete(session.query(WikiBlockList).filter_by(
+            apiLink=self.api_link).first())
         session.commit()
         session.expire_all()
         return True

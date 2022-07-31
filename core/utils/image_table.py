@@ -10,6 +10,7 @@ from tabulate import tabulate
 
 from config import Config
 from core.logger import Logger
+
 from .cache import random_cache_path
 
 web_render = Config('web_render')
@@ -39,7 +40,8 @@ async def image_table_render(table: Union[ImageTable, List[ImageTable]], save_so
             w = len(tbl.headers) * 500
             if w > max_width:
                 max_width = w
-            tblst.append(re.sub(r'<table>|</table>', '', tabulate(d, tbl.headers, tablefmt='unsafehtml')))
+            tblst.append(re.sub(r'<table>|</table>', '',
+                         tabulate(d, tbl.headers, tablefmt='unsafehtml')))
         tblst = '<table>' + '\n'.join(tblst) + '</table>'
         css = """
         <style>table {

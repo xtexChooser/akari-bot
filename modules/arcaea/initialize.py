@@ -4,7 +4,7 @@ import re
 import shutil
 import zipfile
 
-from PIL import Image, ImageFilter, ImageEnhance, ImageDraw
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
 
 async def arcb30init():
@@ -93,7 +93,8 @@ async def arcb30init():
     ratings = ['0', '1', '2', '3', '4', '5', '6', '7', 'off']
     os.mkdir(assets + f'/ptt/')
     for rating in ratings:
-        shutil.copy(cache + f'/assets/img/rating_{rating}.png', assets + f'/ptt/rating_{rating}.png')
+        shutil.copy(
+            cache + f'/assets/img/rating_{rating}.png', assets + f'/ptt/rating_{rating}.png')
 
     worldimg = f'{cache}/assets/img/world'
     worldimglist = os.listdir(worldimg)
@@ -102,21 +103,25 @@ async def arcb30init():
     os.mkdir(world_official)
     for x in worldimglist:
         if x.find('_') == -1:
-            shutil.copy(cache + f'/assets/img/world/{x}', assets + f'/world/{x}')
+            shutil.copy(
+                cache + f'/assets/img/world/{x}', assets + f'/world/{x}')
             imgw = Image.open(cache + f'/assets/img/world/{x}')
             imgw1 = imgw.filter(ImageFilter.GaussianBlur(radius=40))
             imgw1.save(world_official + x)
 
     coordinate = {'left_top': [1070, 25], 'right_top': [1070, 25], 'right_bottom': [1070, 959],
                   'left_bottom': [134, 959]}
-    rotate = Rotate(Image.open(cache + '/assets/img/scenery/bg_triangle.png'), coordinate)
+    rotate = Rotate(Image.open(
+        cache + '/assets/img/scenery/bg_triangle.png'), coordinate)
     rotate.run().convert('RGBA').save(assets + '/triangle.png')
-    cardoverlay = Image.open(os.path.abspath(f'{cache}/assets/layouts/mainmenu/card/card_overlay.png'))
+    cardoverlay = Image.open(os.path.abspath(
+        f'{cache}/assets/layouts/mainmenu/card/card_overlay.png'))
     cropoverlay = cardoverlay.crop((56, 307, 971, 377))
     cropoverlay.save(os.path.abspath(f'{assets}/card_overlay.png'))
     difficult = ['0', '1', '2', '3']
     for ds in difficult:
-        d = Image.open(os.path.abspath(f'{cache}/assets/img/cutoff_dia_{ds}.png'))
+        d = Image.open(os.path.abspath(
+            f'{cache}/assets/img/cutoff_dia_{ds}.png'))
         cd = d.crop((0, 0, 47, 47))
         cd = cd.rotate(180).transpose(Image.FLIP_LEFT_RIGHT)
         cd.save(os.path.abspath(f'{assets}/{ds}.png'))
@@ -128,7 +133,8 @@ class Rotate(object):
     def __init__(self, image: Image.Image, coordinate):
         self.image = image.convert('RGBA')
         self.coordinate = coordinate
-        self.xy = [tuple(self.coordinate[k]) for k in ['left_top', 'right_top', 'right_bottom', 'left_bottom']]
+        self.xy = [tuple(self.coordinate[k])
+                   for k in ['left_top', 'right_top', 'right_bottom', 'left_bottom']]
         self._mask = None
         self.image.putalpha(self.mask)
 

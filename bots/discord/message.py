@@ -8,8 +8,10 @@ import discord
 from bots.discord.client import client
 from config import Config
 from core.builtins.message import MessageSession as MS
-from core.elements import Plain, Image, MsgInfo, Session, FetchTarget as FT, \
-    FetchedSession as FS, FinishedSession as FinS
+from core.elements import FetchedSession as FS
+from core.elements import FetchTarget as FT
+from core.elements import FinishedSession as FinS
+from core.elements import Image, MsgInfo, Plain, Session
 from core.elements.message.chain import MessageChain
 from core.elements.message.internal import Embed
 from core.logger import Logger
@@ -41,7 +43,8 @@ async def convert_embed(embed: Embed):
             embeds.set_footer(text=embed.footer)
         if embed.fields is not None:
             for field in embed.fields:
-                embeds.add_field(name=field.name, value=field.value, inline=field.inline)
+                embeds.add_field(name=field.name, value=field.value,
+                                 inline=field.inline)
         return embeds, files
 
 
@@ -78,20 +81,22 @@ class MessageSession(MS):
             if isinstance(x, Plain):
                 send_ = await self.session.target.send(x.text,
                                                        reference=self.session.message if quote and count == 0
-                                                                                         and self.session.message else None)
+                                                       and self.session.message else None)
                 Logger.info(f'[Bot] -> [{self.target.targetId}]: {x.text}')
             elif isinstance(x, Image):
                 send_ = await self.session.target.send(file=discord.File(await x.get()),
                                                        reference=self.session.message if quote and count == 0
-                                                                                         and self.session.message else None)
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: Image: {str(x.__dict__)}')
+                                                       and self.session.message else None)
+                Logger.info(
+                    f'[Bot] -> [{self.target.targetId}]: Image: {str(x.__dict__)}')
             elif isinstance(x, Embed):
                 embeds, files = await convert_embed(x)
                 send_ = await self.session.target.send(embed=embeds,
                                                        reference=self.session.message if quote and count == 0
-                                                                                         and self.session.message else None,
+                                                       and self.session.message else None,
                                                        files=files)
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: Embed: {str(x.__dict__)}')
+                Logger.info(
+                    f'[Bot] -> [{self.target.targetId}]: Embed: {str(x.__dict__)}')
             else:
                 send_ = False
             if send_:
@@ -105,15 +110,15 @@ class MessageSession(MS):
 
     async def checkPermission(self):
         if self.session.message.channel.permissions_for(self.session.message.author).administrator \
-            or isinstance(self.session.message.channel, discord.DMChannel) \
-            or self.target.senderInfo.query.isSuperUser \
-            or self.target.senderInfo.check_TargetAdmin(self.target.targetId):
+                or isinstance(self.session.message.channel, discord.DMChannel) \
+                or self.target.senderInfo.query.isSuperUser \
+                or self.target.senderInfo.check_TargetAdmin(self.target.targetId):
             return True
         return False
 
     async def checkNativePermission(self):
         if self.session.message.channel.permissions_for(self.session.message.author).administrator \
-            or isinstance(self.session.message.channel, discord.DMChannel):
+                or isinstance(self.session.message.channel, discord.DMChannel):
             return True
         return False
 
@@ -170,7 +175,8 @@ class FetchTarget(FT):
 
     @staticmethod
     async def fetch_target(targetId) -> Union[FetchedSession, bool]:
-        matchChannel = re.match(r'^(Discord\|(?:DM\||)Channel)\|(.*)', targetId)
+        matchChannel = re.match(
+            r'^(Discord\|(?:DM\||)Channel)\|(.*)', targetId)
         if matchChannel:
             return FetchedSession(matchChannel.group(1), matchChannel.group(2))
         else:
@@ -206,7 +212,8 @@ class FetchTarget(FT):
                         send = await fetch.sendDirectMessage(message)
                         send_list.append(send)
                         if enable_analytics:
-                            BotDBUtil.Analytics(fetch).add('', module_name, 'schedule')
+                            BotDBUtil.Analytics(fetch).add(
+                                '', module_name, 'schedule')
                     except Exception:
                         Logger.error(traceback.format_exc())
         return send_list

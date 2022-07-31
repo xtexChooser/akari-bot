@@ -3,7 +3,8 @@ from typing import Union
 from tenacity import retry, stop_after_attempt
 
 from core.elements import MessageSession
-from database import session, auto_rollback_error
+from database import auto_rollback_error, session
+
 from .orm import CytoidBindInfo
 
 
@@ -12,11 +13,14 @@ class CytoidBindInfoManager:
     @auto_rollback_error
     def __init__(self, msg: MessageSession):
         self.targetId = msg.target.senderId
-        self.query = session.query(CytoidBindInfo).filter_by(targetId=self.targetId).first()
+        self.query = session.query(CytoidBindInfo).filter_by(
+            targetId=self.targetId).first()
         if self.query is None:
-            session.add_all([CytoidBindInfo(targetId=self.targetId, username='')])
+            session.add_all(
+                [CytoidBindInfo(targetId=self.targetId, username='')])
             session.commit()
-            self.query = session.query(CytoidBindInfo).filter_by(targetId=self.targetId).first()
+            self.query = session.query(CytoidBindInfo).filter_by(
+                targetId=self.targetId).first()
 
     @retry(stop=stop_after_attempt(3), reraise=True)
     @auto_rollback_error

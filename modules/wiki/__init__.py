@@ -8,19 +8,21 @@ import ujson as json
 
 from core.builtins.message import MessageSession
 from core.component import on_command, on_regex
-from core.elements import Plain, Image, Voice, Url
+from core.elements import Image, Plain, Url, Voice
 from core.exceptions import AbuseWarning
 from core.utils import download_to_cache
-from core.utils.image_table import image_table_render, ImageTable
+from core.utils.image_table import ImageTable, image_table_render
 from database import BotDBUtil
-from .dbutils import WikiTargetInfo, Audit
+
+from .dbutils import Audit, WikiTargetInfo
 from .getinfobox import get_pic
 from .utils.ab import ab
 from .utils.ab_qq import ab_qq
 from .utils.newbie import newbie
 from .utils.rc import rc
 from .utils.rc_qq import rc_qq
-from .wikilib import WikiLib, WhatAreUDoingError, PageInfo, InvalidWikiError, QueryInfo
+from .wikilib import (InvalidWikiError, PageInfo, QueryInfo,
+                      WhatAreUDoingError, WikiLib)
 
 wiki = on_command('wiki',
                   alias={'wiki_start_site': 'wiki set',
@@ -407,7 +409,7 @@ async def search_pages(session: MessageSession, title: Union[str, list, tuple], 
                                 if len(interwiki_split) == 2:
                                     get_link = f'https://{interwiki_split[1]}.fandom.com/api.php'
                                     find = interwiki_split[0] + \
-                                           ':' + match_interwiki.group(2)
+                                        ':' + match_interwiki.group(2)
                                     iw = 'w:c:' + interwiki_split[0]
                                 else:
                                     get_link = f'https://{match_interwiki.group(1)}.fandom.com/api.php'
@@ -425,7 +427,8 @@ async def search_pages(session: MessageSession, title: Union[str, list, tuple], 
     wait_msg_list = []
     for q in query_task:
         current_task = query_task[q]
-        ready_for_query_pages = current_task['query'] if 'query' in current_task else []
+        ready_for_query_pages = current_task['query'] if 'query' in current_task else [
+        ]
         iw_prefix = (current_task['iw_prefix'] +
                      ':') if current_task['iw_prefix'] != '' else ''
         tasks = []
@@ -511,7 +514,7 @@ async def query_pages(session: Union[MessageSession, QueryInfo], title: Union[st
                                     if len(interwiki_split) == 2:
                                         get_link = f'https://{interwiki_split[1]}.fandom.com/api.php'
                                         find = interwiki_split[0] + \
-                                               ':' + match_interwiki.group(2)
+                                            ':' + match_interwiki.group(2)
                                         iw = 'w:c:' + interwiki_split[0]
                                     else:
                                         get_link = f'https://{match_interwiki.group(1)}.fandom.com/api.php'
@@ -543,8 +546,10 @@ async def query_pages(session: Union[MessageSession, QueryInfo], title: Union[st
         msg_list.append(Plain(preset_message))
     for q in query_task:
         current_task = query_task[q]
-        ready_for_query_pages = current_task['query'] if 'query' in current_task else []
-        ready_for_query_ids = current_task['queryid'] if 'queryid' in current_task else []
+        ready_for_query_pages = current_task['query'] if 'query' in current_task else [
+        ]
+        ready_for_query_ids = current_task['queryid'] if 'queryid' in current_task else [
+        ]
         iw_prefix = (current_task['iw_prefix'] +
                      ':') if current_task['iw_prefix'] != '' else ''
         try:

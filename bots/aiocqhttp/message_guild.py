@@ -7,7 +7,9 @@ from aiocqhttp import MessageSegment
 
 from bots.aiocqhttp.client import bot
 from core.builtins.message import MessageSession as MS
-from core.elements import Plain, Image, ExecutionLockList, FinishedSession as FinS
+from core.elements import ExecutionLockList
+from core.elements import FinishedSession as FinS
+from core.elements import Image, Plain
 from core.elements.message.chain import MessageChain
 from core.logger import Logger
 
@@ -39,7 +41,8 @@ class MessageSession(MS):
         count = 0
         for x in msgchain.asSendable(embed=False):
             if isinstance(x, Plain):
-                msg = msg + MessageSegment.text(('\n' if count != 0 else '') + x.text)
+                msg = msg + \
+                    MessageSegment.text(('\n' if count != 0 else '') + x.text)
             elif isinstance(x, Image):
                 msg = msg + MessageSegment.image(Path(await x.get()).as_uri())
             # elif isinstance(x, Voice):

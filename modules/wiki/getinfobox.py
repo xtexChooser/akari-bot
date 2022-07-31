@@ -62,12 +62,14 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
         open_file.write('<head>\n')
         for x in soup.find_all(rel='stylesheet'):
             if x.has_attr('href'):
-                x.attrs['href'] = re.sub(';', '&', urljoin(link, x.get('href')))
+                x.attrs['href'] = re.sub(
+                    ';', '&', urljoin(link, x.get('href')))
             open_file.write(str(x))
 
         for x in soup.find_all():
             if x.has_attr('href'):
-                x.attrs['href'] = re.sub(';', '&', urljoin(link, x.get('href')))
+                x.attrs['href'] = re.sub(
+                    ';', '&', urljoin(link, x.get('href')))
         open_file.write('</head>')
 
         for x in soup.find_all('style'):
@@ -82,7 +84,8 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                     Logger.info('Found diff...')
                     for x in soup.find_all('body'):
                         if x.has_attr('class'):
-                            open_file.write(f'<body class="{" ".join(x.get("class"))}">')
+                            open_file.write(
+                                f'<body class="{" ".join(x.get("class"))}">')
 
                     for x in soup.find_all('div'):
                         if x.has_attr('id'):
@@ -92,7 +95,8 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                                     if isinstance(x.attrs[f], str):
                                         fl.append(f'{f}="{x.attrs[f]}"')
                                     elif isinstance(x.attrs[f], list):
-                                        fl.append(f'{f}="{" ".join(x.attrs[f])}"')
+                                        fl.append(
+                                            f'{f}="{" ".join(x.attrs[f])}"')
                                 open_file.write(f'<div {" ".join(fl)}>')
                     open_file.write('<div class="mw-parser-output">')
 
@@ -128,7 +132,8 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                         if x.has_attr('srcset'):
                             x.attrs['srcset'] = join_url(link, x.get('srcset'))
                         if x.has_attr('style'):
-                            x.attrs['style'] = re.sub(r'url\(/(.*)\)', 'url(' + link + '\\1)', x.get('style'))
+                            x.attrs['style'] = re.sub(
+                                r'url\(/(.*)\)', 'url(' + link + '\\1)', x.get('style'))
 
                     for x in find_infobox.find_all(class_='lazyload'):
                         if x.has_attr('class') and x.has_attr('data-src'):
@@ -145,7 +150,8 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
         else:
             for x in soup.find_all('body'):
                 if x.has_attr('class'):
-                    open_file.write(f'<body class="{" ".join(x.get("class"))}">')
+                    open_file.write(
+                        f'<body class="{" ".join(x.get("class"))}">')
 
             for x in soup.find_all('div'):
                 if x.has_attr('id'):
@@ -214,7 +220,8 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                 if x.has_attr('srcset'):
                     x.attrs['srcset'] = join_url(link, x.get('srcset'))
                 if x.has_attr('style'):
-                    x.attrs['style'] = re.sub(r'url\(/(.*)\)', 'url(' + link + '\\1)', x.get('style'))
+                    x.attrs['style'] = re.sub(
+                        r'url\(/(.*)\)', 'url(' + link + '\\1)', x.get('style'))
 
             for x in soup.find_all(class_='lazyload'):
                 if x.has_attr('class') and x.has_attr('data-src'):

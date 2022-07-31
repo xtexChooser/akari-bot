@@ -2,11 +2,13 @@ import re
 import traceback
 from typing import List, Union
 
-from bots.aiogram.client import dp, bot
+from bots.aiogram.client import bot, dp
 from config import Config
 from core.builtins.message import MessageSession as MS
-from core.elements import Plain, Image, MsgInfo, Session, Voice, FetchTarget as FT, FetchedSession as FS, \
-    FinishedSession as FinS
+from core.elements import FetchedSession as FS
+from core.elements import FetchTarget as FT
+from core.elements import FinishedSession as FinS
+from core.elements import Image, MsgInfo, Plain, Session, Voice
 from core.elements.message.chain import MessageChain
 from core.logger import Logger
 from database import BotDBUtil
@@ -47,21 +49,23 @@ class MessageSession(MS):
             if isinstance(x, Plain):
                 send_ = await bot.send_message(self.session.target, x.text,
                                                reply_to_message_id=self.session.message.message_id if quote
-                                                                                                      and count == 0 and self.session.message else None)
+                                               and count == 0 and self.session.message else None)
                 Logger.info(f'[Bot] -> [{self.target.targetId}]: {x.text}')
             elif isinstance(x, Image):
                 with open(await x.get(), 'rb') as image:
                     send_ = await bot.send_photo(self.session.target, image,
                                                  reply_to_message_id=self.session.message.message_id if quote
-                                                                                                        and count == 0
-                                                                                                        and self.session.message else None)
-                    Logger.info(f'[Bot] -> [{self.target.targetId}]: Image: {str(x.__dict__)}')
+                                                 and count == 0
+                                                 and self.session.message else None)
+                    Logger.info(
+                        f'[Bot] -> [{self.target.targetId}]: Image: {str(x.__dict__)}')
             elif isinstance(x, Voice):
                 with open(x.path, 'rb') as voice:
                     send_ = await bot.send_audio(self.session.target, voice,
                                                  reply_to_message_id=self.session.message.message_id if quote
-                                                                                                        and count == 0 and self.session.message else None)
-                    Logger.info(f'[Bot] -> [{self.target.targetId}]: Voice: {str(x.__dict__)}')
+                                                 and count == 0 and self.session.message else None)
+                    Logger.info(
+                        f'[Bot] -> [{self.target.targetId}]: Voice: {str(x.__dict__)}')
             else:
                 send_ = False
             if send_:
@@ -74,7 +78,7 @@ class MessageSession(MS):
 
     async def checkPermission(self):
         if self.session.message.chat.type == 'private' or self.target.senderInfo.check_TargetAdmin(
-            self.target.targetId) or self.target.senderInfo.query.isSuperUser:
+                self.target.targetId) or self.target.senderInfo.query.isSuperUser:
             return True
         admins = [member.user.id for member in await dp.bot.get_chat_administrators(self.session.message.chat.id)]
         if self.session.sender in admins:
@@ -164,7 +168,8 @@ class FetchTarget(FT):
                         send = await fetch.sendDirectMessage(message)
                         send_list.append(send)
                         if enable_analytics:
-                            BotDBUtil.Analytics(fetch).add('', module_name, 'schedule')
+                            BotDBUtil.Analytics(fetch).add(
+                                '', module_name, 'schedule')
                     except Exception:
                         Logger.error(traceback.format_exc())
         return send_list

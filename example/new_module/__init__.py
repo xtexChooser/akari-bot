@@ -1,6 +1,6 @@
 from core.builtins.message import MessageSession
 from core.component import on_command
-from core.elements import Plain, Image
+from core.elements import Image, Plain
 
 test = on_command('test')
 

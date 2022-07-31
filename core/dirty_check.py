@@ -10,7 +10,7 @@ import json
 import time
 
 import aiohttp
-from tenacity import retry, wait_fixed, stop_after_attempt
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from config import Config
 from core.elements import EnableDirtyWordCheck
@@ -38,7 +38,8 @@ def parse_data(result: dict):
             for itemDetail in itemResult['details']:
                 if 'contexts' in itemDetail:
                     for itemContext in itemDetail["contexts"]:
-                        content = content.replace(itemContext['context'], '<吃掉了>')
+                        content = content.replace(
+                            itemContext['context'], '<吃掉了>')
                         status = False
                 else:
                     content = "<全部吃掉了>"
@@ -49,7 +50,7 @@ def parse_data(result: dict):
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
 async def check(*text) -> list:
     '''检查字符串是否合规
-    
+
     :param text: 字符串（List/Union）。
     :returns: 经过审核后的字符串。不合规部分会被替换为'<吃掉了>'，全部不合规则是'<全部吃掉了>'，结构为[{'审核后的字符串': 处理结果（True/False，默认为True）}]
     '''
@@ -68,7 +69,8 @@ async def check(*text) -> list:
     count = 0
     for t in text:
         if t == '':
-            query_list.update({count: {t: {'content': t, 'status': True, 'original': t}}})
+            query_list.update(
+                {count: {t: {'content': t, 'status': True, 'original': t}}})
         else:
             query_list.update({count: {t: False}})
         count += 1
@@ -104,7 +106,8 @@ async def check(*text) -> list:
         GMT_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
         date = datetime.datetime.utcnow().strftime(GMT_FORMAT)
         nonce = 'LittleC is god forever {}'.format(time.time())
-        contentMd5 = base64.b64encode(hashlib.md5(json.dumps(body).encode('utf-8')).digest()).decode('utf-8')
+        contentMd5 = base64.b64encode(hashlib.md5(
+            json.dumps(body).encode('utf-8')).digest()).decode('utf-8')
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -122,12 +125,14 @@ async def check(*text) -> list:
             'x-acs-signature-method': 'HMAC-SHA1'
         }
         sorted_header = {k: tmp[k] for k in sorted(tmp)}
-        step1 = '\n'.join(list(map(lambda x: "{}:{}".format(x, sorted_header[x]), list(sorted_header.keys()))))
+        step1 = '\n'.join(list(map(lambda x: "{}:{}".format(
+            x, sorted_header[x]), list(sorted_header.keys()))))
         step2 = url
         step3 = "POST\napplication/json\n{contentMd5}\napplication/json\n{date}\n{step1}\n{step2}".format(
             contentMd5=contentMd5,
             date=headers['Date'], step1=step1, step2=step2)
-        sign = "acs {}:{}".format(accessKeyId, hash_hmac(accessKeySecret, step3, hashlib.sha1))
+        sign = "acs {}:{}".format(accessKeyId, hash_hmac(
+            accessKeySecret, step3, hashlib.sha1))
         headers['Authorization'] = sign
         # 'Authorization': "acs {}:{}".format(accessKeyId, sign)
         async with aiohttp.ClientSession(headers=headers) as session:

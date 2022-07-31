@@ -1,8 +1,8 @@
 import re
 
 from .ctr_results import modules as ctr_results_modules
-from .types import Module, ResultInfo, ConsoleErrorInfo, ConsoleErrorField, \
-    BANNED_FIELD, WARNING_COLOR, UNKNOWN_CATEGORY_DESCRIPTION
+from .types import (BANNED_FIELD, UNKNOWN_CATEGORY_DESCRIPTION, WARNING_COLOR,
+                    ConsoleErrorField, ConsoleErrorInfo, Module, ResultInfo)
 
 """
 This file contains all currently known 2DS/3DS support codes.
@@ -248,23 +248,27 @@ def is_valid(error: str):
 
 def construct_result(ret, mod, desc):
     module = ctr_results_modules.get(mod, Module(''))
-    ret.add_field(ConsoleErrorField('模组', message_str=module.name, supplementary_value=mod))
+    ret.add_field(ConsoleErrorField(
+        '模组', message_str=module.name, supplementary_value=mod))
     description = module.get_error(desc)
     if description is None or not description.description:
         description = ctr_results_modules[0].get_error(desc)
         if description is None or not description.description:
             ret.add_field(ConsoleErrorField('描述', supplementary_value=desc))
         else:
-            ret.add_field(ConsoleErrorField('描述', message_str=description.description, supplementary_value=desc))
+            ret.add_field(ConsoleErrorField(
+                '描述', message_str=description.description, supplementary_value=desc))
     else:
-        ret.add_field(ConsoleErrorField('描述', message_str=description.description, supplementary_value=desc))
+        ret.add_field(ConsoleErrorField(
+            '描述', message_str=description.description, supplementary_value=desc))
 
     return ret
 
 
 def construct_result_range(ret, mod, range_desc):
     module = ctr_results_modules.get(mod, Module(''))
-    ret.add_field(ConsoleErrorField('模组', message_str=module.name, supplementary_value=mod))
+    ret.add_field(ConsoleErrorField(
+        '模组', message_str=module.name, supplementary_value=mod))
     found_descs = []
     unknown_descs = []
     for desc in range_desc:
@@ -284,9 +288,11 @@ def construct_result_range(ret, mod, range_desc):
                 ConsoleErrorField('描述', message_str=description.description, supplementary_value=desc).message)
 
     if found_descs:
-        ret.add_field(ConsoleErrorField('可能已知描述', message_str='\n'.join(found_descs)))
+        ret.add_field(ConsoleErrorField(
+            '可能已知描述', message_str='\n'.join(found_descs)))
     if unknown_descs:
-        ret.add_field(ConsoleErrorField('可能未知描述', message_str=', '.join(unknown_descs)))
+        ret.add_field(ConsoleErrorField(
+            '可能未知描述', message_str=', '.join(unknown_descs)))
 
     return ret
 
@@ -299,9 +305,11 @@ def construct_support(ret, mod, desc):
         ret.add_field(ConsoleErrorField('分类', supplementary_value=mod))
     description = category.get_error(desc)
     if description is not None and description.description:
-        ret.add_field(ConsoleErrorField('描述', message_str=description.description))
+        ret.add_field(ConsoleErrorField(
+            '描述', message_str=description.description))
         if description.support_url:
-            ret.add_field(ConsoleErrorField('更多描述', message_str=description.support_url))
+            ret.add_field(ConsoleErrorField(
+                '更多描述', message_str=description.support_url))
         if description.is_ban:
             ret.add_field(BANNED_FIELD)
             ret.color = WARNING_COLOR
@@ -332,28 +340,35 @@ def nim_handler(ret, description):
 
     elif 2000 <= description < 3024:
         description -= 2000
-        return construct_result(ret, 52, description)  # nim result module, not support category
+        # nim result module, not support category
+        return construct_result(ret, 52, description)
 
     elif 4200 <= description < 4400:
         description -= 4200
-        construct_result(ret, 40, description)  # http result module, not support category
+        # http result module, not support category
+        construct_result(ret, 40, description)
         if description == 199:
-            ret.add_field(ConsoleErrorField('扩展信息', message_str='或者超过199的http描述会被NIM截断为199。'))
+            ret.add_field(ConsoleErrorField(
+                '扩展信息', message_str='或者超过199的http描述会被NIM截断为199。'))
 
     elif 4400 <= description < 5000:
         description -= 4400
         ret.add_field(ConsoleErrorField('分类', message_str='nim'))
         if description < 100:
-            ret.add_field(ConsoleErrorField('HTTP状态码', message_str=f'{description + 100}'))
+            ret.add_field(ConsoleErrorField(
+                'HTTP状态码', message_str=f'{description + 100}'))
         elif 100 <= description < 500:
-            ret.add_field(ConsoleErrorField('HTTP状态码', message_str=f'{description + 100}或{description}由于NIM中的编程错误。'))
+            ret.add_field(ConsoleErrorField(
+                'HTTP状态码', message_str=f'{description + 100}或{description}由于NIM中的编程错误。'))
         else:
-            ret.add_field(ConsoleErrorField('HTTP状态码', message_str=f'{description}'))
+            ret.add_field(ConsoleErrorField(
+                'HTTP状态码', message_str=f'{description}'))
 
     elif 5000 <= description < 7000:
         description -= 5000
         ret.add_field(ConsoleErrorField('分类', message_str='nim'))
-        ret.add_field(ConsoleErrorField('描述', message_str=f'NIM活动时SOAP消息返回了状态码{description}'))
+        ret.add_field(ConsoleErrorField(
+            '描述', message_str=f'NIM活动时SOAP消息返回了状态码{description}'))
 
     # >= 7000 range is compacted
     elif description >= 7000:

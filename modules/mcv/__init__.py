@@ -1,6 +1,7 @@
 from core.builtins.message import MessageSession
 from core.component import on_command
-from .mcv import mcv, mcbv, mcdv, mcev
+
+from .mcv import mcbv, mcdv, mcev, mcv
 
 m = on_command(
     bind_prefix='mcv',

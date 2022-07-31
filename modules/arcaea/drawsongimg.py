@@ -67,10 +67,12 @@ def dsimg(img, rank, name, difficulty, score, ptt, realptt, pure, far, lost, pla
     drawtext.text((20, 50), f'{score}  [{scoretype}]', '#ffffff', font=font2)
     drawtext.text((20, 80), f'Potential: {ptt}', '#ffffff', font=font2)
     drawtext.text((120, 115), f'P {str(pure)}', '#ffffff', font=font2)
-    drawtext.text((120, 145), f'F {str(far)} L {str(lost)}', '#ffffff', font=font2)
+    drawtext.text(
+        (120, 145), f'F {str(far)} L {str(lost)}', '#ffffff', font=font2)
     songimg_width = songimg.size[0]
     playtime_width = font2.getsize(playtime)[0]
-    drawtext.text((songimg_width - playtime_width - 13, 160), playtime, '#ffffff', font=font2)
+    drawtext.text((songimg_width - playtime_width - 13, 160),
+                  playtime, '#ffffff', font=font2)
     if __name__ == '__main__':
         songimg.show()
     else:

@@ -2,7 +2,8 @@ import re
 
 from core.builtins.message import MessageSession
 from core.component import on_command, on_regex
-from core.elements import Plain, Image as BImage
+from core.elements import Image as BImage
+from core.elements import Plain
 from modules.maimai.libraries.image import *
 from modules.maimai.libraries.maimai_best_40 import generate
 from modules.maimai.libraries.maimai_best_50 import generate50
@@ -14,7 +15,8 @@ total_list = TotalList()
 
 def song_txt(music: Music):
     return [Plain(f"{music.id}. {music.title}\n"),
-            BImage(f"https://www.diving-fish.com/covers/{get_cover_len4_id(music.id)}.png", ),
+            BImage(
+                f"https://www.diving-fish.com/covers/{get_cover_len4_id(music.id)}.png", ),
             Plain(f"\n{'/'.join(music.level)}")]
 
 
@@ -27,11 +29,13 @@ async def inner_level_q(ds1, ds2=None):
         music_data = (await total_list.get()).filter(ds=ds1)
     for music in sorted(music_data, key=lambda i: int(i['id'])):
         for i in music.diff:
-            result_set.append((music['id'], music['title'], music['ds'][i], diff_label[i], music['level'][i]))
+            result_set.append((music['id'], music['title'],
+                              music['ds'][i], diff_label[i], music['level'][i]))
     return result_set
 
 
-mai = on_command('maimai', developers=['mai-bot', 'OasisAkari'], alias=['mai'], desc='有关maimai相关的工具，移植自mai-bot。')
+mai = on_command('maimai', developers=[
+                 'mai-bot', 'OasisAkari'], alias=['mai'], desc='有关maimai相关的工具，移植自mai-bot。')
 
 
 @mai.handle(['inner <rating> {根据定数查询对应歌曲}',
@@ -123,7 +127,8 @@ async def _(message: MessageSession):
     if groups[0] != "":
         try:
             level_index = level_labels.index(groups[0])
-            level_name = ['Basic', 'Advanced', 'Expert', 'Master', 'Re: MASTER']
+            level_name = ['Basic', 'Advanced',
+                          'Expert', 'Master', 'Re: MASTER']
             name = groups[1]
             music = (await total_list.get()).by_id(name)
             chart = music['charts'][level_index]
@@ -164,7 +169,8 @@ BREAK: {chart['notes'][4]}
             await message.finish("未找到该乐曲")
 
 
-wm_list = ['拼机', '推分', '越级', '下埋', '夜勤', '练底力', '练手法', '打旧框', '干饭', '抓绝赞', '收歌']
+wm_list = ['拼机', '推分', '越级', '下埋', '夜勤',
+           '练底力', '练手法', '打旧框', '干饭', '抓绝赞', '收歌']
 
 
 @mai.handle('today {查看今天的舞萌运势}')
@@ -216,7 +222,8 @@ BREAK\t5/12.5/25(外加200落)'''
         try:
             grp = re.match(r, arg1).groups()
             level_labels = ['绿', '黄', '红', '紫', '白']
-            level_labels2 = ['Basic', 'Advanced', 'Expert', 'Master', 'Re:MASTER']
+            level_labels2 = ['Basic', 'Advanced',
+                             'Expert', 'Master', 'Re:MASTER']
             level_index = level_labels.index(grp[0])
             chart_id = grp[2]
             line = float(arg1)

@@ -3,6 +3,7 @@ import re
 from core.builtins.message import MessageSession
 from core.component import on_command
 from modules.wiki.dbutils import WikiTargetInfo
+
 from .user import get_user_info
 
 usr = on_command('user', alias=['u'],

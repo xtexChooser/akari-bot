@@ -8,7 +8,7 @@ from core.elements.message.internal import Embed, EmbedField
 
 def removeIneffectiveText(prefix: str, lst: list) -> list:
     '''删除命令首尾的空格和换行以及重复命令。
-    
+
     :param prefix: 机器人的命令前缀。
     :param lst: 字符串（List/Union）。
     :returns: 净化后的字符串。'''
@@ -27,7 +27,8 @@ def removeIneffectiveText(prefix: str, lst: list) -> list:
                 if len(split_list) > 0:
                     spl0 = split_list[0]
                     if spl0.startswith(prefix) and spl0 != '':
-                        split_list[0] = re.sub(r'^' + prefix, '', split_list[0])
+                        split_list[0] = re.sub(
+                            r'^' + prefix, '', split_list[0])
             list_cache.append(x.join(split_list))
         lst = list_cache
     duplicated_list = []  # 移除重复命令
@@ -81,7 +82,8 @@ def convertDiscordEmbed(embed: Union[DiscordEmbed, dict]) -> Embed:
         if 'fields' in embed:
             fields = []
             for field_value in embed['fields']:
-                fields.append(EmbedField(field_value['name'], field_value['value'], field_value['inline']))
+                fields.append(EmbedField(
+                    field_value['name'], field_value['value'], field_value['inline']))
             embed_.fields = fields
     return embed_
 
@@ -119,4 +121,5 @@ def split_multi_arguments(lst: list):
         return list(set(new_lst))
 
 
-__all__ = ['removeDuplicateSpace', 'removeIneffectiveText', 'convertDiscordEmbed', "split_multi_arguments"]
+__all__ = ['removeDuplicateSpace', 'removeIneffectiveText',
+           'convertDiscordEmbed', "split_multi_arguments"]

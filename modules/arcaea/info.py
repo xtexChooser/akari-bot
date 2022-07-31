@@ -3,7 +3,7 @@ import traceback
 from datetime import datetime
 
 from config import Config
-from core.elements import Plain, Image
+from core.elements import Image, Plain
 from core.utils import get_url
 from modules.arcaea.errcode import errcode
 

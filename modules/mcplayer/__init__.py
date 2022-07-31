@@ -1,6 +1,7 @@
 from core.builtins.message import MessageSession
 from core.component import on_command
-from core.elements import Plain, Image, Url
+from core.elements import Image, Plain, Url
+
 from .mojang_api import *
 
 mcplayer = on_command(
@@ -28,7 +29,8 @@ async def main(msg: MessageSession):
         skin = sac['skin']
         cape = sac['cape']
         namemc = 'https://namemc.com/profile/' + name
-        chain = [Plain(f'{name}（{uuid}）\nNameMC：{Url(namemc)}'), Image(render), Image(skin)]
+        chain = [Plain(f'{name}（{uuid}）\nNameMC：{Url(namemc)}'),
+                 Image(render), Image(skin)]
         if cape:
             chain.append(Image(cape))
     except ValueError:

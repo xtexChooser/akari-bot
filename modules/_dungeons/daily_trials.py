@@ -6,7 +6,7 @@ import os
 import re
 import traceback
 import uuid
-from urllib.parse import urlparse, parse_qs, urlencode, unquote
+from urllib.parse import parse_qs, unquote, urlencode, urlparse
 
 import aiohttp
 import ujson as json
@@ -258,7 +258,8 @@ async def json_render(json_data: dict):
     if not web_render:
         return False
     try:
-        html = '<div class="json_output">' + json.dumps(json_data, indent=4) + '</div>'
+        html = '<div class="json_output">' + \
+            json.dumps(json_data, indent=4) + '</div>'
         css = """
        <style>.json_output {
                 white-space: pre;

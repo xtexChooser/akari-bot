@@ -4,7 +4,8 @@ import re
 import traceback
 from typing import Dict, Union
 
-from core.elements import Command, Schedule, RegexCommand, StartUp, PrivateAssets
+from core.elements import (Command, PrivateAssets, RegexCommand, Schedule,
+                           StartUp)
 from core.logger import Logger
 
 load_dir_path = os.path.abspath('./modules/')
@@ -34,7 +35,8 @@ def load_modules():
     loadercache = os.path.abspath(PrivateAssets.path + '/.cache_loader')
     openloadercache = open(loadercache, 'w')
     if err_prompt:
-        err_prompt = re.sub(r'  File \"<frozen importlib.*?>\", .*?\n', '', '\n'.join(err_prompt))
+        err_prompt = re.sub(r'  File \"<frozen importlib.*?>\", .*?\n',
+                            '', '\n'.join(err_prompt))
         openloadercache.write(err_prompt)
     else:
         openloadercache.write('')
@@ -58,7 +60,7 @@ class ModulesManager:
 
     @staticmethod
     def return_modules_list_as_dict(targetFrom: str = None) -> \
-        Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
+            Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
         if targetFrom is not None:
             returns = {}
             for m in ModulesManager.modules:
@@ -107,7 +109,7 @@ class ModulesManager:
     @staticmethod
     def return_specified_type_modules(module_type: [Command, RegexCommand, Schedule, StartUp],
                                       targetFrom: str = None) \
-        -> Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
+            -> Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
         d = {}
         modules = ModulesManager.return_modules_list_as_dict()
         for m in modules:

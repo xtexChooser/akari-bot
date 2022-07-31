@@ -1,12 +1,12 @@
 import os
 
-from aiogram import types, executor
+from aiogram import executor, types
 
 from bots.aiogram.client import dp
-from bots.aiogram.message import MessageSession, FetchTarget
-from core.elements import MsgInfo, Session, PrivateAssets, Url
+from bots.aiogram.message import FetchTarget, MessageSession
+from core.elements import MsgInfo, PrivateAssets, Session, Url
 from core.parser.message import parser
-from core.utils import init, load_prompt, init_async
+from core.utils import init, init_async, load_prompt
 from core.utils.tasks import MessageTaskManager
 
 PrivateAssets.set(os.path.abspath(os.path.dirname(__file__) + '/assets'))

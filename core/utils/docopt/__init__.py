@@ -26,7 +26,7 @@ Contributors (roughly in chronological order):
 import inspect
 import re
 import sys
-from typing import Any, List, Optional, Tuple, Type, Union, Dict, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 __version__ = "0.7.2modded"
 
@@ -170,7 +170,7 @@ class LeafPattern(Pattern):
         return [self] if not types or type(self) in types else []
 
     def match(self, left: List["LeafPattern"], collected: List["Pattern"] = None) -> Tuple[
-        bool, List["LeafPattern"], List["Pattern"]]:
+            bool, List["LeafPattern"], List["Pattern"]]:
         collected = [] if collected is None else collected
         increment: Optional[Any] = None
         pos, match = self.single_match(left)
@@ -391,24 +391,30 @@ def parse_longer(tokens: Tokens, options: List[Option], argv: bool = False, more
     """longer ::= '--' chars [ ( ' ' | '=' ) chars ] ;"""
     current_token = tokens.move()
     if current_token is None or not current_token.startswith("--"):
-        raise tokens.error(f"parse_longer got what appears to be an invalid token: {current_token}")  # pragma: no cover
+        raise tokens.error(
+            f"parse_longer got what appears to be an invalid token: {current_token}")  # pragma: no cover
     longer, maybe_eq, maybe_value = current_token.partition("=")
     if maybe_eq == maybe_value == "":
         value = None
     else:
         value = maybe_value
     similar = [o for o in options if o.longer and longer == o.longer]
-    start_collision = len([o for o in options if o.longer and longer in o.longer and o.longer.startswith(longer)]) > 1
+    start_collision = len(
+        [o for o in options if o.longer and longer in o.longer and o.longer.startswith(longer)]) > 1
     if argv and not len(similar) and not start_collision:
-        similar = [o for o in options if o.longer and longer in o.longer and o.longer.startswith(longer)]
+        similar = [
+            o for o in options if o.longer and longer in o.longer and o.longer.startswith(longer)]
     # try advanced matching
     if more_magic and not similar:
-        corrected = [(longer, o) for o in options if o.longer and levenshtein_norm(longer, o.longer) < 0.25]
+        corrected = [(longer, o) for o in options if o.longer and levenshtein_norm(
+            longer, o.longer) < 0.25]
         if corrected:
-            print(f"NB: Corrected {corrected[0][0]} to {corrected[0][1].longer}")
+            print(
+                f"NB: Corrected {corrected[0][0]} to {corrected[0][1].longer}")
         similar = [correct for (original, correct) in corrected]
     if len(similar) > 1:
-        raise tokens.error(f"{longer} is not a unique prefix: {similar}?")  # pragma: no cover
+        raise tokens.error(
+            f"{longer} is not a unique prefix: {similar}?")  # pragma: no cover
     elif len(similar) < 1:
         argcount = 1 if maybe_eq == "=" else 0
         o = Option(None, longer, argcount)
@@ -416,7 +422,8 @@ def parse_longer(tokens: Tokens, options: List[Option], argv: bool = False, more
         if tokens.error is DocoptExit:
             o = Option(None, longer, argcount, value if argcount else True)
     else:
-        o = Option(similar[0].short, similar[0].longer, similar[0].argcount, similar[0].value)
+        o = Option(similar[0].short, similar[0].longer,
+                   similar[0].argcount, similar[0].value)
         if o.argcount == 0:
             if value is not None:
                 raise tokens.error("%s must not have an argument" % o.longer)
@@ -434,12 +441,14 @@ def parse_shorts(tokens: Tokens, options: List[Option], more_magic: bool = False
     """shorts ::= '-' ( chars )* [ [ ' ' ] chars ] ;"""
     token = tokens.move()
     if token is None or not token.startswith("-") or token.startswith("--"):
-        raise ValueError(f"parse_shorts got what appears to be an invalid token: {token}")  # pragma: no cover
+        raise ValueError(
+            f"parse_shorts got what appears to be an invalid token: {token}")  # pragma: no cover
     left = token.lstrip("-")
     parsed: List[Pattern] = []
     while left != "":
         short, left = "-" + left[0], left[1:]
-        transformations: Dict[Union[None, str], Callable[[str], str]] = {None: lambda x: x}
+        transformations: Dict[Union[None, str],
+                              Callable[[str], str]] = {None: lambda x: x}
         if more_magic:
             transformations["lowercase"] = lambda x: x.lower()
             transformations["uppercase"] = lambda x: x.upper()
@@ -447,22 +456,27 @@ def parse_shorts(tokens: Tokens, options: List[Option], more_magic: bool = False
         similar: List[Option] = []
         de_abbreviated = False
         for transform_name, transform in transformations.items():
-            transformed = list(set([transform(o.short) for o in options if o.short]))
+            transformed = list(set([transform(o.short)
+                               for o in options if o.short]))
             no_collisions = len(
                 [o for o in options if o.short and transformed.count(transform(o.short)) == 1])  # == len(transformed)
             if no_collisions:
-                similar = [o for o in options if o.short and transform(o.short) == transform(short)]
+                similar = [o for o in options if o.short and transform(
+                    o.short) == transform(short)]
                 if similar:
                     if transform_name:
-                        print(f"NB: Corrected {short} to {similar[0].short} via {transform_name}")
+                        print(
+                            f"NB: Corrected {short} to {similar[0].short} via {transform_name}")
                     break
             # if transformations do not resolve, try abbreviations of 'longer' forms iff such resolves uniquely (ie if no two longer forms begin with the same letter)
             if not similar and more_magic:
                 abbreviated = [transform(o.longer[1:3]) for o in options if o.longer and not o.short] + [
                     transform(o.short) for o in options if o.short and not o.longer
                 ]
-                nonredundantly_abbreviated_options = [o for o in options if o.longer and abbreviated.count(short) == 1]
-                no_collisions = len(nonredundantly_abbreviated_options) == len(abbreviated)
+                nonredundantly_abbreviated_options = [
+                    o for o in options if o.longer and abbreviated.count(short) == 1]
+                no_collisions = len(
+                    nonredundantly_abbreviated_options) == len(abbreviated)
                 if no_collisions:
                     for o in options:
                         if not o.short and o.longer and transform(short) == transform(o.longer[1:3]):
@@ -474,7 +488,8 @@ def parse_shorts(tokens: Tokens, options: List[Option], more_magic: bool = False
                     de_abbreviated = True
                     break
         if len(similar) > 1:
-            raise tokens.error("%s is specified ambiguously %d times" % (short, len(similar)))
+            raise tokens.error("%s is specified ambiguously %d times" %
+                               (short, len(similar)))
         elif len(similar) < 1:
             o = Option(short, None, 0)
             options.append(o)
@@ -485,7 +500,8 @@ def parse_shorts(tokens: Tokens, options: List[Option], more_magic: bool = False
                 option_short_value = None
             else:
                 option_short_value = transform(short)
-            o = Option(option_short_value, similar[0].longer, similar[0].argcount, similar[0].value)
+            o = Option(option_short_value,
+                       similar[0].longer, similar[0].argcount, similar[0].value)
             value = None
             current_token = tokens.current()
             if o.argcount != 0:
@@ -572,7 +588,7 @@ def parse_atom(tokens: Tokens, options: List[Option]) -> List[Pattern]:
 
 
 def parse_argv(tokens: Tokens, options: List[Option], options_first: bool = False, more_magic: bool = False) -> List[
-    Pattern]:
+        Pattern]:
     """Parse command-line argument vector.
 
     If options_first:
@@ -595,7 +611,8 @@ def parse_argv(tokens: Tokens, options: List[Option], options_first: bool = Fals
         if current_token == "--":
             return parsed + [Argument(None, v) for v in tokens]
         elif current_token.startswith("--"):
-            parsed += parse_longer(tokens, options, argv=True, more_magic=more_magic)
+            parsed += parse_longer(tokens, options,
+                                   argv=True, more_magic=more_magic)
         elif current_token.startswith("-") and current_token != "-" and not isanumber(current_token):
             parsed += parse_shorts(tokens, options, more_magic=more_magic)
         elif options_first:
@@ -625,8 +642,10 @@ def parse_defaults(docstring: str) -> List[Option]:
 
 
 def parse_section(name: str, source: str) -> List[str]:
-    pattern = re.compile("^([^\n]*" + name + "[^\n]*\n?(?:[ \t].*?(?:\n|$))*)", re.IGNORECASE | re.MULTILINE)
-    r = [s.strip() for s in pattern.findall(source) if s.strip().lower() != name.lower()]
+    pattern = re.compile(
+        "^([^\n]*" + name + "[^\n]*\n?(?:[ \t].*?(?:\n|$))*)", re.IGNORECASE | re.MULTILINE)
+    r = [s.strip() for s in pattern.findall(source)
+         if s.strip().lower() != name.lower()]
     return r
 
 
@@ -731,7 +750,8 @@ def docopt(
             output_value_assigned = True
     usage_sections = parse_section("usage:", docstring)
     if len(usage_sections) == 0:
-        raise DocoptLanguageError('"usage:" section (case-insensitive) not found. Perhaps missing indentation?')
+        raise DocoptLanguageError(
+            '"usage:" section (case-insensitive) not found. Perhaps missing indentation?')
     if len(usage_sections) > 1:
         raise DocoptLanguageError('More than one "usage:" (case-insensitive).')
     options_pattern = re.compile(r"\n\s*?options:", re.IGNORECASE)
@@ -744,12 +764,15 @@ def docopt(
     pattern_options = set(pattern.flat(Option))
     for options_shortcut in pattern.flat(OptionsShortcut):
         doc_options = parse_defaults(docstring)
-        options_shortcut.children = [opt for opt in doc_options if opt not in pattern_options]
-    parsed_arg_vector = parse_argv(Tokens(argv), list(options), options_first, more_magic)
+        options_shortcut.children = [
+            opt for opt in doc_options if opt not in pattern_options]
+    parsed_arg_vector = parse_argv(
+        Tokens(argv), list(options), options_first, more_magic)
     extras(default_help, version, parsed_arg_vector, docstring)
     matched, left, collected = pattern.fix().match(parsed_arg_vector)
     if matched and left == []:
-        output_obj = ParsedOptions((a.name, a.value) for a in (pattern.flat() + collected))
+        output_obj = ParsedOptions((a.name, a.value)
+                                   for a in (pattern.flat() + collected))
         target_parent_frame = parent_frame or magic_parent_frame or doc_parent_frame
         if more_magic and target_parent_frame and not output_value_assigned:
             if not target_parent_frame.f_globals.get("arguments"):
@@ -761,5 +784,6 @@ def docopt(
             argvs1 = argvs[0: argv_length - 1]
             argvs1.append(' '.join(argvs[-2:]))
             return docopt(docstring, argvs1, default_help, version, options_first)
-        raise DocoptExit(f"Warning: found unmatched (duplicate?) arguments {left}")
+        raise DocoptExit(
+            f"Warning: found unmatched (duplicate?) arguments {left}")
     raise DocoptExit(collected=collected, left=left)

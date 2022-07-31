@@ -1,6 +1,7 @@
 from core.builtins.message import MessageSession
 from core.component import on_command
 from core.elements import Image, Plain
+
 from .screenshot import get_pic
 
 dict_module = on_command('dictionary', alias=["dict"],

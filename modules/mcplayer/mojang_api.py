@@ -1,7 +1,7 @@
 import ujson as json
 from PIL import Image
 
-from core.utils import get_url, download_to_cache
+from core.utils import download_to_cache, get_url
 
 
 async def uuid_to_name(uuid):

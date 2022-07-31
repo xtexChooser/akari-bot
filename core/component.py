@@ -62,7 +62,8 @@ class Bind:
 
         def handle(self):
             def decorator(function):
-                ModulesManager.bind_to_module(self.bind_prefix, ScheduleMeta(function=function))
+                ModulesManager.bind_to_module(
+                    self.bind_prefix, ScheduleMeta(function=function))
                 return function
 
             return decorator

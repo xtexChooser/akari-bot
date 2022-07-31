@@ -6,6 +6,7 @@ import aiohttp
 import ujson as json
 
 from config import Config
+
 from .drawb30img import drawb30
 from .drawsongimg import dsimg
 from .errcode import errcode
@@ -38,7 +39,8 @@ async def getb30(usercode, official=False):
                 run_lst = []
                 songsinfo = {}
                 for x in loadjson["content"]["best30_list"]:
-                    songsinfo[x['song_id'] + str(x['difficulty'])] = loadjson["content"]["best30_songinfo"][d]
+                    songsinfo[x['song_id'] + str(x['difficulty'])
+                              ] = loadjson["content"]["best30_songinfo"][d]
                     d = d + 1
 
                     async def draw_jacket(x, d):
@@ -51,12 +53,15 @@ async def getb30(usercode, official=False):
                             difficulty = 'FTR'
                         elif x['difficulty'] == 3:
                             difficulty = 'BYD'
-                        trackname = songsinfo[x['song_id'] + str(x['difficulty'])]['name_en']
-                        tracknames[x['song_id'] + difficulty] = trackname + f' ({difficulty})'
+                        trackname = songsinfo[x['song_id'] +
+                                              str(x['difficulty'])]['name_en']
+                        tracknames[x['song_id'] + difficulty] = trackname + \
+                            f' ({difficulty})'
                         imgpath = f'{assets_path}/b30background_img{"_official" if official else ""}/{x["song_id"]}_{str(x["difficulty"])}.jpg'
                         if not os.path.exists(imgpath):
                             imgpath = f'{assets_path}/b30background_img{"_official" if official else ""}/{x["song_id"]}.jpg'
-                        realptt = songsinfo[x['song_id'] + str(x['difficulty'])]['rating']
+                        realptt = songsinfo[x['song_id'] +
+                                            str(x['difficulty'])]['rating']
                         realptts[x['song_id'] + difficulty] = realptt
                         ptt = x['rating']
                         ptts[x['song_id'] + difficulty] = ptt
@@ -89,7 +94,8 @@ async def getb30(usercode, official=False):
                 username = loadjson["content"]['account_info']['name']
                 ptt = int(loadjson["content"]['account_info']['rating']) / 100
                 character = loadjson["content"]['account_info']['character']
-                filename = drawb30(username, b30, r10, ptt, character, newdir, official=official)
+                filename = drawb30(username, b30, r10, ptt,
+                                   character, newdir, official=official)
                 filelist = os.listdir(newdir)
                 for x in filelist:
                     os.remove(f'{newdir}/{x}')

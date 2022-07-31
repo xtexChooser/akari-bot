@@ -1,5 +1,4 @@
 import random
-import random
 import traceback
 from datetime import datetime, timedelta
 from urllib.parse import quote
@@ -10,7 +9,7 @@ from config import Config
 from core.component import on_schedule
 from core.elements import FetchTarget, IntervalTrigger, Url
 from core.logger import Logger
-from core.utils import get_url, get_stored_list, update_stored_list
+from core.utils import get_stored_list, get_url, update_stored_list
 
 
 class Article:
@@ -41,7 +40,8 @@ class Article:
 
 @on_schedule('minecraft_news', developers=['_LittleC_', 'OasisAkari', 'Dianliang233'],
              recommend_modules=['feedback_news'],
-             trigger=IntervalTrigger(seconds=60 if not Config('slower_schedule') else 180),
+             trigger=IntervalTrigger(
+                 seconds=60 if not Config('slower_schedule') else 180),
              desc='开启后将会自动推送来自Minecraft官网的新闻。', alias='minecraftnews')
 async def start_check_news(bot: FetchTarget):
     baseurl = 'https://www.minecraft.net'
@@ -64,7 +64,8 @@ async def start_check_news(bot: FetchTarget):
             link = baseurl + o_article['article_url']
             articletext = f'Minecraft官网发布了新的文章：\n{title}\n  {desc}\n{str(Url(link))}'
             if title not in alist:
-                publish_date = datetime.strptime(o_article['publish_date'], '%d %B %Y %H:%M:%S %Z')
+                publish_date = datetime.strptime(
+                    o_article['publish_date'], '%d %B %Y %H:%M:%S %Z')
                 now = datetime.now()
                 if now - publish_date < timedelta(days=2):
                     await bot.post_message('minecraft_news', articletext)

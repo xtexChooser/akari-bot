@@ -2,7 +2,8 @@ from datetime import datetime
 
 from config import Config
 from core.component import on_command
-from core.elements import MessageSession, Image
+from core.elements import Image, MessageSession
+
 from .daily_trials import fetch_daily_trials, json_render
 
 dun = on_command('dungeons_trials', alias=['dungeons', 'dungeon', 'dungeonstrials', 'dungeontrials', 'dungeon_trials'],

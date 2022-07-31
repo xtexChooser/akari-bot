@@ -8,24 +8,15 @@ from textwrap import wrap
 from typing import Dict, List, Optional, Tuple, Union
 
 from core.elements import Url
+
 from . import config
 from .elements import AnchorElement, ListElement
 from .typing import OutCallback
-from .utils import (
-    dumb_css_parser,
-    element_style,
-    escape_md,
-    escape_md_section,
-    google_fixed_width_font,
-    google_has_height,
-    google_list_style,
-    google_text_emphasis,
-    hn,
-    list_numbering_start,
-    pad_tables_in_text,
-    skipwrap,
-    unifiable_n,
-)
+from .utils import (dumb_css_parser, element_style, escape_md,
+                    escape_md_section, google_fixed_width_font,
+                    google_has_height, google_list_style, google_text_emphasis,
+                    hn, list_numbering_start, pad_tables_in_text, skipwrap,
+                    unifiable_n)
 
 __version__ = (2020, 1, 16)
 
@@ -392,7 +383,8 @@ class HTML2Text(html.parser.HTMLParser):
 
         def no_preceding_space(self: HTML2Text) -> bool:
             return bool(
-                self.preceding_data and re.match(r"[^\s]", self.preceding_data[-1])
+                self.preceding_data and re.match(
+                    r"[^\s]", self.preceding_data[-1])
             )
 
         if tag in ["em", "i", "u"] and not self.ignore_emphasis:
@@ -494,7 +486,8 @@ class HTML2Text(html.parser.HTMLParser):
                                 a_props = self.a[i]
                             else:
                                 self.acount += 1
-                                a_props = AnchorElement(a, self.acount, self.outcount)
+                                a_props = AnchorElement(
+                                    a, self.acount, self.outcount)
                                 self.a.append(a_props)
                             self.o("][" + str(a_props.count) + "]")
 
@@ -508,7 +501,8 @@ class HTML2Text(html.parser.HTMLParser):
                 # If we have images_with_size, write raw html including width,
                 # height, and alt attributes
                 if self.images_as_html or (
-                    self.images_with_size and ("width" in attrs or "height" in attrs)
+                    self.images_with_size and (
+                        "width" in attrs or "height" in attrs)
                 ):
                     self.o("<img src='" + attrs["src"] + "' ")
                     if "width" in attrs:
@@ -555,7 +549,8 @@ class HTML2Text(html.parser.HTMLParser):
                             a_props = self.a[i]
                         else:
                             self.acount += 1
-                            a_props = AnchorElement(attrs, self.acount, self.outcount)
+                            a_props = AnchorElement(
+                                attrs, self.acount, self.outcount)
                             self.a.append(a_props)
                         self.o("[" + str(a_props.count) + "]")
 
@@ -875,7 +870,8 @@ class HTML2Text(html.parser.HTMLParser):
         """
         nest_count = 0
         if "margin-left" in style:
-            nest_count = int(style["margin-left"][:-2]) // self.google_list_indent
+            nest_count = int(style["margin-left"][:-2]
+                             ) // self.google_list_indent
 
         return nest_count
 

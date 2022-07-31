@@ -14,8 +14,10 @@ from bots.aiocqhttp.client import bot
 from bots.aiocqhttp.message_guild import MessageSession as MessageSessionGuild
 from config import Config
 from core.builtins.message import MessageSession as MS
-from core.elements import Plain, Image, MsgInfo, Session, Voice, FetchTarget as FT, \
-    FetchedSession as FS, FinishedSession as FinS
+from core.elements import FetchedSession as FS
+from core.elements import FetchTarget as FT
+from core.elements import FinishedSession as FinS
+from core.elements import Image, MsgInfo, Plain, Session, Voice
 from core.elements.message.chain import MessageChain
 from core.logger import Logger
 from database import BotDBUtil
@@ -59,7 +61,8 @@ class MessageSession(MS):
         count = 0
         for x in msgchain.asSendable(embed=False):
             if isinstance(x, Plain):
-                msg = msg + MessageSegment.text(('\n' if count != 0 else '') + x.text)
+                msg = msg + \
+                    MessageSegment.text(('\n' if count != 0 else '') + x.text)
             elif isinstance(x, Image):
                 msg = msg + MessageSegment.image(Path(await x.get()).as_uri())
             elif isinstance(x, Voice):
@@ -71,7 +74,9 @@ class MessageSession(MS):
                 send = await bot.send_group_msg(group_id=self.session.target, message=msg)
             except aiocqhttp.exceptions.ActionFailed:
                 anti_autofilter_word_list = ['（ffk）', '（阻止风向控制）', '（房蜂控）']
-                msg = msg + MessageSegment.text(random.choice(anti_autofilter_word_list))
+                msg = msg + \
+                    MessageSegment.text(random.choice(
+                        anti_autofilter_word_list))
                 send = await bot.send_group_msg(group_id=self.session.target, message=msg)
         else:
             send = await bot.send_private_msg(user_id=self.session.target, message=msg)
@@ -79,8 +84,8 @@ class MessageSession(MS):
 
     async def checkPermission(self):
         if self.target.targetFrom == 'QQ' \
-            or self.target.senderInfo.check_TargetAdmin(self.target.targetId) \
-            or self.target.senderInfo.query.isSuperUser:
+                or self.target.senderInfo.check_TargetAdmin(self.target.targetId) \
+                or self.target.senderInfo.query.isSuperUser:
             return True
         get_member_info = await bot.call_action('get_group_member_info', group_id=self.session.target,
                                                 user_id=self.session.sender)
@@ -127,7 +132,8 @@ class MessageSession(MS):
                 if self.msg.session.sender in last_send_typing_time:
                     if datetime.datetime.now().timestamp() - last_send_typing_time[self.msg.session.sender] <= 3600:
                         return
-                last_send_typing_time[self.msg.session.sender] = datetime.datetime.now().timestamp()
+                last_send_typing_time[self.msg.session.sender] = datetime.datetime.now(
+                ).timestamp()
                 await bot.send_group_msg(group_id=self.msg.session.target,
                                          message=f'[CQ:poke,qq={self.msg.session.sender}]')
 
@@ -177,7 +183,8 @@ class FetchTarget(FT):
             get_channel_list = await bot.call_action('get_guild_channel_list', guild_id=g['guild_id'])
             for channel in get_channel_list:
                 if channel['channel_type'] == 1:
-                    guild_list.append(f"{str(g['guild_id'])}|{str(channel['channel_id'])}")
+                    guild_list.append(
+                        f"{str(g['guild_id'])}|{str(channel['channel_id'])}")
         for f in friend_list_raw:
             friend_list.append(f)
         for x in targetList:
@@ -225,7 +232,8 @@ class FetchTarget(FT):
                                                              no_cache=True)
                     for channel in get_channel_list:
                         if channel['channel_type'] == 1:
-                            guild_list.append(f"{str(g['guild_id'])}|{str(channel['channel_id'])}")
+                            guild_list.append(
+                                f"{str(g['guild_id'])}|{str(channel['channel_id'])}")
                 except Exception:
                     traceback.print_exc()
                     continue
@@ -246,7 +254,8 @@ class FetchTarget(FT):
                         print(fetch)
                         send = await fetch.sendDirectMessage(message)
                         if enable_analytics:
-                            BotDBUtil.Analytics(fetch).add('', module_name, 'schedule')
+                            BotDBUtil.Analytics(fetch).add(
+                                '', module_name, 'schedule')
                         send_list.append(send)
                         await asyncio.sleep(0.5)
                     except Exception:

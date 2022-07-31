@@ -1,4 +1,4 @@
-from typing import Callable, Union, Dict, List
+from typing import Callable, Dict, List, Union
 
 from apscheduler.triggers.combining import AndTrigger, OrTrigger
 from apscheduler.triggers.cron import CronTrigger
@@ -87,7 +87,8 @@ class Schedule:
                  available_for: Union[str, list, tuple] = '*',
                  exclude_from: Union[str, list, tuple] = ''):
         self.function: Callable = function
-        self.trigger: [AndTrigger, OrTrigger, DateTrigger, CronTrigger, IntervalTrigger] = trigger
+        self.trigger: [AndTrigger, OrTrigger, DateTrigger,
+                       CronTrigger, IntervalTrigger] = trigger
         self.bind_prefix: str = bind_prefix
         self.desc: str = desc
         if isinstance(alias, str):

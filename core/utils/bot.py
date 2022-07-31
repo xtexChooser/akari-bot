@@ -7,9 +7,9 @@ from os.path import abspath
 
 import ujson as json
 
-from core.elements import PrivateAssets, StartUp, Schedule, Secret
+from core.elements import PrivateAssets, Schedule, Secret, StartUp
 from core.exceptions import ConfigFileNotFound
-from core.loader import load_modules, ModulesManager
+from core.loader import ModulesManager, load_modules
 from core.logger import Logger
 from core.scheduler import Scheduler
 from core.utils.http import get_url
@@ -47,7 +47,8 @@ async def init_async(ft) -> None:
                               max_instance=1)
     await asyncio.gather(*gather_list)
     Scheduler.start()
-    logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
+    logging.getLogger('apscheduler.executors.default').setLevel(
+        logging.WARNING)
     await load_secret()
 
 
@@ -80,7 +81,8 @@ async def load_secret():
 
 
 async def load_prompt(bot) -> None:
-    author_cache = os.path.abspath(PrivateAssets.path + '/cache_restart_author')
+    author_cache = os.path.abspath(
+        PrivateAssets.path + '/cache_restart_author')
     loader_cache = os.path.abspath(PrivateAssets.path + '/.cache_loader')
     if os.path.exists(author_cache):
         open_author_cache = open(author_cache, 'r')

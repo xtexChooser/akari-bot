@@ -1,4 +1,4 @@
-from .types import Module, ResultInfo, ConsoleErrorInfo, ConsoleErrorField
+from .types import ConsoleErrorField, ConsoleErrorInfo, Module, ResultInfo
 
 """
 This file contains all currently known 2DS/3DS result and error codes (hexadecimal).
@@ -331,19 +331,24 @@ def hexinfo(error: str):
 
 def construct_result(ret, mod, summary, level, desc):
     module = modules.get(mod, Module(''))
-    ret.add_field(ConsoleErrorField('Module', message_str=module.name, supplementary_value=mod))
-    ret.add_field(ConsoleErrorField('Summary', message_str=summaries.get(summary, ''), supplementary_value=summary))
-    ret.add_field(ConsoleErrorField('Level', message_str=levels.get(level, ''), supplementary_value=level))
+    ret.add_field(ConsoleErrorField(
+        'Module', message_str=module.name, supplementary_value=mod))
+    ret.add_field(ConsoleErrorField('Summary', message_str=summaries.get(
+        summary, ''), supplementary_value=summary))
+    ret.add_field(ConsoleErrorField('Level', message_str=levels.get(
+        level, ''), supplementary_value=level))
     description = module.get_error(desc)
     if description is None:
         description = common.get_error(desc)
         if description is None:
-            ret.add_field(ConsoleErrorField('Description', supplementary_value=desc))
+            ret.add_field(ConsoleErrorField(
+                'Description', supplementary_value=desc))
         else:
             ret.add_field(
                 ConsoleErrorField('Description', message_str=description.description, supplementary_value=desc))
     else:
-        ret.add_field(ConsoleErrorField('Description', message_str=description.description, supplementary_value=desc))
+        ret.add_field(ConsoleErrorField(
+            'Description', message_str=description.description, supplementary_value=desc))
 
     return ret
 

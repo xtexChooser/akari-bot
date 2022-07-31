@@ -4,7 +4,8 @@ import discord
 from core.builtins.message import MessageSession
 from core.component import on_command
 from core.utils.message import convertDiscordEmbed
-from . import switch, wiiu_support, wiiu_results, ctr_support, ctr_results
+
+from . import ctr_results, ctr_support, switch, wiiu_results, wiiu_support
 
 
 class Results:
@@ -110,7 +111,8 @@ async def result(msg: MessageSession):
         if ret.extra_description:
             embed.description = ret.extra_description
         for field in ret:
-            embed.add_field(name=field.field_name, value=field.message, inline=False)
+            embed.add_field(name=field.field_name,
+                            value=field.message, inline=False)
         await msg.finish(convertDiscordEmbed(embed))
     else:
         await msg.finish(f'你输入的代码是无效的，或者此功能不支持你使用的主机。')

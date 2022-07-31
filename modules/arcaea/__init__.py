@@ -4,8 +4,9 @@ import traceback
 from config import Config
 from core.builtins.message import MessageSession
 from core.component import on_command
-from core.elements import Plain, Image
+from core.elements import Image, Plain
 from core.utils import get_url
+
 from .dbutils import ArcBindInfoManager
 from .getb30 import getb30
 from .getb30_official import getb30_official
@@ -117,12 +118,14 @@ async def _(msg: MessageSession):
     code: str = msg.parsed_msg['<friendcode/username>']
     getcode = await get_userinfo(code)
     if getcode:
-        bind = ArcBindInfoManager(msg).set_bind_info(username=getcode[0], friendcode=getcode[1])
+        bind = ArcBindInfoManager(msg).set_bind_info(
+            username=getcode[0], friendcode=getcode[1])
         if bind:
             await msg.finish(f'绑定成功：{getcode[0]}({getcode[1]})')
     else:
         if code.isdigit():
-            bind = ArcBindInfoManager(msg).set_bind_info(username='', friendcode=code)
+            bind = ArcBindInfoManager(msg).set_bind_info(
+                username='', friendcode=code)
             if bind:
                 await msg.finish('绑定成功，但是无法获取用户信息。请自行检查命令是否可用。')
         else:

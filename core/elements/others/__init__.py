@@ -31,4 +31,5 @@ class Secret:
         Secret.list.append(secret)
 
 
-__all__ = ["confirm_command", "command_prefix", "EnableDirtyWordCheck", "PrivateAssets", "Secret"]
+__all__ = ["confirm_command", "command_prefix",
+           "EnableDirtyWordCheck", "PrivateAssets", "Secret"]

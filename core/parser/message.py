@@ -7,14 +7,17 @@ from aiocqhttp.exceptions import ActionFailed
 
 from config import Config
 from core.builtins.message import MessageSession
-from core.elements import Command, command_prefix, ExecutionLockList, RegexCommand, ErrorMessage
-from core.exceptions import AbuseWarning, FinishedException, InvalidCommandFormatError, InvalidHelpDocTypeError, \
-    WaitCancelException
+from core.elements import (Command, ErrorMessage, ExecutionLockList,
+                           RegexCommand, command_prefix)
+from core.exceptions import (AbuseWarning, FinishedException,
+                             InvalidCommandFormatError,
+                             InvalidHelpDocTypeError, WaitCancelException)
 from core.loader import ModulesManager
 from core.logger import Logger
 from core.parser.command import CommandParser
 from core.tos import warn_target
-from core.utils import removeIneffectiveText, removeDuplicateSpace, split_multi_arguments
+from core.utils import (removeDuplicateSpace, removeIneffectiveText,
+                        split_multi_arguments)
 from database import BotDBUtil
 
 enable_tos = Config('enable_tos')
@@ -43,7 +46,8 @@ async def msg_counter(msg: MessageSession, command: str):
         if same['count'] > 10:
             raise AbuseWarning('一段时间内使用相同命令的次数过多')
     all_ = counter_all.get(msg.target.senderId)
-    if all_ is None or datetime.now().timestamp() - all_['ts'] > 300:  # 检查是否滥用（重复使用同一命令）
+    # 检查是否滥用（重复使用同一命令）
+    if all_ is None or datetime.now().timestamp() - all_['ts'] > 300:
         counter_all[msg.target.senderId] = {'count': 1,
                                             'ts': datetime.now().timestamp()}
     else:
@@ -75,7 +79,8 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
     for m in msg.enabled_modules:
         if m in modules:
             enabled_modules.append(m)
-    match_close_module: list = difflib.get_close_matches(command_first_word, enabled_modules, 1, 0.6)
+    match_close_module: list = difflib.get_close_matches(
+        command_first_word, enabled_modules, 1, 0.6)
     if match_close_module:
         module = modules[match_close_module[0]]
         none_doc = True  # 检查模块绑定的命令是否有文档
@@ -89,7 +94,8 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
             for func in get_submodules:
                 help_doc = func.help_doc
                 for h_ in help_doc:
-                    match_detail_help = re.match('(.*){.*}$', h_, re.M | re.S)  # 去掉帮助简介
+                    match_detail_help = re.match(
+                        '(.*){.*}$', h_, re.M | re.S)  # 去掉帮助简介
                     if match_detail_help:
                         h_ = match_detail_help.group(1).strip()
                     split_len = len(h_.split(' '))  # 计算命令模板的空格数
@@ -97,14 +103,16 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
                         docs[split_len] = []
                     for s in split_multi_arguments([h_]):
                         docs[split_len].append(s)
-                        split_options = list(filter(None, re.split(r'(\[.*?])', s)))
+                        split_options = list(
+                            filter(None, re.split(r'(\[.*?])', s)))
                         if len(split_options) > 1:
                             without_options = list(
                                 filter(None, ''.join([x for x in split_options if not x.startswith('[')]).split(' ')))
                             len_without_options = len(without_options)
                             if len_without_options not in docs:
                                 docs[len_without_options] = []
-                            docs[len_without_options].append(' '.join(without_options))
+                            docs[len_without_options].append(
+                                ' '.join(without_options))
             if len_command_split - 1 > len(docs):  # 如果空格数远大于命令模板的空格数
                 select_docs = docs[max(docs)]
             else:
@@ -113,7 +121,8 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
                                                                   1, 0.3)  # 进一步匹配命令
             if match_close_command:
                 match_split = match_close_command[0]
-                m_split_options = filter(None, re.split(r'(\[.*?])', match_split))  # 切割可选参数
+                m_split_options = filter(None, re.split(
+                    r'(\[.*?])', match_split))  # 切割可选参数
                 old_command_split = command_split.copy()
                 del old_command_split[0]
                 new_command_split = [match_close_module[0]]
@@ -124,10 +133,15 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
                             match_close_options = difflib.get_close_matches(m_split[0][1:], old_command_split, 1,
                                                                             0.3)  # 进一步匹配可选参数
                             if match_close_options:
-                                position = old_command_split.index(match_close_options[0])  # 定位可选参数的位置
-                                new_command_split.append(m_split[0][1:])  # 将可选参数插入到新命令列表中
-                                new_command_split += old_command_split[position + 1: position + len(m_split)]
-                                del old_command_split[position: position + len(m_split)]  # 删除原命令列表中的可选参数
+                                position = old_command_split.index(
+                                    match_close_options[0])  # 定位可选参数的位置
+                                new_command_split.append(
+                                    m_split[0][1:])  # 将可选参数插入到新命令列表中
+                                new_command_split += old_command_split[position + 1: position + len(
+                                    m_split)]
+                                # 删除原命令列表中的可选参数
+                                del old_command_split[position: position +
+                                                      len(m_split)]
                         else:
                             if m_split[0][1] == '<':
                                 new_command_split.append(old_command_split[0])
@@ -139,7 +153,8 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
                         for mm in m__:
                             if len(old_command_split) > 0:
                                 if mm.startswith('<'):
-                                    new_command_split.append(old_command_split[0])
+                                    new_command_split.append(
+                                        old_command_split[0])
                                     del old_command_split[0]
                                 else:
                                     match_close_args = difflib.get_close_matches(old_command_split[0], [mm], 1,
@@ -148,7 +163,8 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
                                         new_command_split.append(mm)
                                         del old_command_split[0]
                                     else:
-                                        new_command_split.append(old_command_split[0])
+                                        new_command_split.append(
+                                            old_command_split[0])
                                         del old_command_split[0]
                             else:
                                 new_command_split.append(mm)
@@ -168,7 +184,8 @@ async def typo_check(msg: MessageSession, display_prefix, modules, command_first
                         wait_confirm = await msg.waitConfirm(
                             f'您是否想要输入{display_prefix}{new_command_display}？')
                         if wait_confirm:
-                            command_split = [match_close_module[0]] + command_split[1:]
+                            command_split = [
+                                match_close_module[0]] + command_split[1:]
                             command_first_word = match_close_module[0]
                             msg.trigger_msg = ' '.join(command_split)
                             return msg, command_first_word, command_split
@@ -199,15 +216,18 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
     identify_str = f'[{msg.target.senderId}{f" ({msg.target.targetId})" if msg.target.targetFrom != msg.target.senderFrom else ""}]'
     # Logger.info(f'{identify_str} -> [Bot]: {display}')
     try:
-        modules = ModulesManager.return_modules_list_as_dict(msg.target.targetFrom)
+        modules = ModulesManager.return_modules_list_as_dict(
+            msg.target.targetFrom)
         modulesAliases = ModulesManager.return_modules_alias_map()
-        modulesRegex = ModulesManager.return_specified_type_modules(RegexCommand, targetFrom=msg.target.targetFrom)
+        modulesRegex = ModulesManager.return_specified_type_modules(
+            RegexCommand, targetFrom=msg.target.targetFrom)
 
         display = removeDuplicateSpace(msg.asDisplay())  # 将消息转换为一般显示形式
         if len(display) == 0:
             return
         msg.trigger_msg = display
-        msg.target.senderInfo = senderInfo = BotDBUtil.SenderInfo(msg.target.senderId)
+        msg.target.senderInfo = senderInfo = BotDBUtil.SenderInfo(
+            msg.target.senderId)
         if senderInfo.query.isInBlockList and not senderInfo.query.isInAllowList:
             return ExecutionLockList.remove(msg)
         msg.prefixes = command_prefix.copy()  # 复制一份作为基础命令前缀
@@ -220,7 +240,8 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
         get_custom_prefix = msg.options.get('command_prefix')  # 获取自定义命令前缀
         if get_custom_prefix is not None:
             msg.prefixes = get_custom_prefix + msg.prefixes  # 混合
-        msg.enabled_modules = BotDBUtil.Module(msg).check_target_enabled_module_list()
+        msg.enabled_modules = BotDBUtil.Module(
+            msg).check_target_enabled_module_list()
 
         disable_prefix = False
         if prefix is not None:  # 如果上游指定了命令前缀，则使用指定的命令前缀
@@ -248,7 +269,8 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
             else:
                 command = display[len(display_prefix):]
 
-            command_list = removeIneffectiveText(display_prefix, command.split('&&'))  # 并行命令处理
+            command_list = removeIneffectiveText(
+                display_prefix, command.split('&&'))  # 并行命令处理
 
             if len(command_list) > 5 and not senderInfo.query.isSuperUser:
                 return await msg.sendMessage('你不是本机器人的超级管理员，最多只能并排执行5个命令。')
@@ -270,7 +292,8 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
                             alias_list.append(alias)
                     if alias_list:
                         max_ = max(alias_list, key=len)
-                        command = command.replace(max_, modulesAliases[max_], 1)
+                        command = command.replace(
+                            max_, modulesAliases[max_], 1)
                 command_split: list = command.split(' ')  # 切割消息
                 msg.trigger_msg = command  # 触发该命令的消息，去除消息前缀
                 command_first_word = command_split[0].lower()
@@ -338,11 +361,14 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
                         if not none_doc:  # 如果有，送入命令解析
                             async def execute_submodule(msg: MessageSession, command_first_word, command_split):
                                 try:
-                                    command_parser = CommandParser(module, msg=msg, command_prefixes=msg.prefixes)
+                                    command_parser = CommandParser(
+                                        module, msg=msg, command_prefixes=msg.prefixes)
                                     try:
-                                        parsed_msg = command_parser.parse(msg.trigger_msg)  # 解析命令对应的子模块
+                                        parsed_msg = command_parser.parse(
+                                            msg.trigger_msg)  # 解析命令对应的子模块
                                         submodule = parsed_msg[0]
-                                        msg.parsed_msg = parsed_msg[1]  # 使用命令模板解析后的消息
+                                        # 使用命令模板解析后的消息
+                                        msg.parsed_msg = parsed_msg[1]
 
                                         if submodule.required_superuser:
                                             if not msg.checkSuperUser():
@@ -356,10 +382,12 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
 
                                         if not senderInfo.query.disable_typing:
                                             async with msg.Typing(msg):
-                                                await parsed_msg[0].function(msg)  # 将msg传入下游模块
+                                                # 将msg传入下游模块
+                                                await parsed_msg[0].function(msg)
                                         else:
                                             await parsed_msg[0].function(msg)
-                                        raise FinishedException(msg.sent)  # if not using msg.finish
+                                        # if not using msg.finish
+                                        raise FinishedException(msg.sent)
                                     except InvalidCommandFormatError:
                                         await msg.sendMessage('语法错误。\n' + command_parser.return_formatted_help_doc())
                                         if msg.options.get('typo_check', True):  # 判断是否开启错字检查
@@ -385,22 +413,26 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
                                 if func.help_doc is None:
                                     if not senderInfo.query.disable_typing:
                                         async with msg.Typing(msg):
-                                            await func.function(msg)  # 将msg传入下游模块
+                                            # 将msg传入下游模块
+                                            await func.function(msg)
                                     else:
                                         await func.function(msg)
-                                    raise FinishedException(msg.sent)  # if not using msg.finish
+                                    # if not using msg.finish
+                                    raise FinishedException(msg.sent)
                     except ActionFailed:
                         ExecutionLockList.remove(msg)
                         await msg.sendMessage('消息发送失败，可能被风控，请稍后再试。')
                         continue
 
                     except FinishedException as e:
-                        Logger.info(f'Successfully finished session from {identify_str}, returns: {str(e)}')
+                        Logger.info(
+                            f'Successfully finished session from {identify_str}, returns: {str(e)}')
                         if msg.target.targetFrom != 'QQ|Guild' or command_first_word != 'module' and enable_tos:
                             await msg_counter(msg, msg.trigger_msg)
                         ExecutionLockList.remove(msg)
                         if enable_analytics:
-                            BotDBUtil.Analytics(msg).add(msg.trigger_msg, command_first_word, 'normal')
+                            BotDBUtil.Analytics(msg).add(
+                                msg.trigger_msg, command_first_word, 'normal')
                         continue
 
                     except Exception as e:
@@ -431,11 +463,13 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
                         msg.matched_msg = False
                         matched = False
                         if rfunc.mode.upper() in ['M', 'MATCH']:
-                            msg.matched_msg = re.match(rfunc.pattern, display, flags=rfunc.flags)
+                            msg.matched_msg = re.match(
+                                rfunc.pattern, display, flags=rfunc.flags)
                             if msg.matched_msg is not None:
                                 matched = True
                         elif rfunc.mode.upper() in ['A', 'FINDALL']:
-                            msg.matched_msg = re.findall(rfunc.pattern, display, flags=rfunc.flags)
+                            msg.matched_msg = re.findall(
+                                rfunc.pattern, display, flags=rfunc.flags)
                             if msg.matched_msg:
                                 matched = True
 
@@ -457,7 +491,8 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
                                     await rfunc.function(msg)  # 将msg传入下游模块
                             else:
                                 await rfunc.function(msg)  # 将msg传入下游模块
-                            raise FinishedException(msg.sent)  # if not using msg.finish
+                            # if not using msg.finish
+                            raise FinishedException(msg.sent)
 
             except ActionFailed:
                 ExecutionLockList.remove(msg)
@@ -470,7 +505,8 @@ async def parser(msg: MessageSession, require_enable_modules: bool = True, prefi
                 ExecutionLockList.remove(msg)
 
                 if enable_analytics:
-                    BotDBUtil.Analytics(msg).add(msg.trigger_msg, regex, 'regex')
+                    BotDBUtil.Analytics(msg).add(
+                        msg.trigger_msg, regex, 'regex')
 
                 if enable_tos:
                     await msg_counter(msg, msg.trigger_msg)

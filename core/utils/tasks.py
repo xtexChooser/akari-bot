@@ -16,7 +16,8 @@ class MessageTaskManager:
             if sender in MessageTaskManager._list[session.target.targetId]:
                 if MessageTaskManager._list[session.target.targetId][sender]['active']:
                     MessageTaskManager._list[session.target.targetId][sender]['active'] = False
-                    MessageTaskManager._list[session.target.targetId][sender]['flag'].set()
+                    MessageTaskManager._list[session.target.targetId][sender]['flag'].set(
+                    )
 
         MessageTaskManager._list.update(
             {session.target.targetId: {sender: {'flag': flag, 'active': True,
@@ -41,7 +42,8 @@ class MessageTaskManager:
                 if MessageTaskManager._list[target][sender]['active']:
                     if datetime.now().timestamp() - MessageTaskManager._list[target][sender]['ts'] > 3600:
                         MessageTaskManager._list[target][sender]['active'] = False
-                        MessageTaskManager._list[target][sender]['flag'].set()  # no result = cancel
+                        # no result = cancel
+                        MessageTaskManager._list[target][sender]['flag'].set()
         if session.target.targetId in MessageTaskManager._list:
             sender = None
             if session.target.senderId in MessageTaskManager._list[session.target.targetId]:

@@ -1,6 +1,6 @@
 from core.builtins.message import MessageSession
 from core.component import on_command
-from modules.github import repo, user, search
+from modules.github import repo, search, user
 
 github = on_command('github', alias=['gh'], developers=['Dianliang233'])
 

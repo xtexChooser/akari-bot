@@ -4,6 +4,7 @@ from core.builtins.message import MessageSession
 from core.component import on_command
 from core.dirty_check import check
 from database import BotDBUtil
+
 from .server import server
 
 s = on_command('server', alias='s', developers=['_LittleC_', 'OasisAkari'])

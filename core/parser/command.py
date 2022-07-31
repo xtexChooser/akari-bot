@@ -3,9 +3,10 @@ import shlex
 import traceback
 from typing import Union
 
-from core.elements import Command, Schedule, StartUp, RegexCommand, MessageSession
+from core.elements import (Command, MessageSession, RegexCommand, Schedule,
+                           StartUp)
 from core.exceptions import InvalidCommandFormatError, InvalidHelpDocTypeError
-from core.utils.docopt import docopt, DocoptExit
+from core.utils.docopt import DocoptExit, docopt
 
 
 class CommandParser:
@@ -31,7 +32,8 @@ class CommandParser:
                     help_doc_list = help_doc_list + match.help_doc
                 if match.options_desc is not None:
                     for m in match.options_desc:
-                        self.options_desc.append(f'{m}  {match.options_desc[m]}')
+                        self.options_desc.append(
+                            f'{m}  {match.options_desc[m]}')
             if not none_doc:
                 args = help_doc_list
             else:
@@ -100,14 +102,15 @@ class CommandParser:
             else:
                 if len(split_command) == 1:
                     for match in (self.origin_template.match_list.set if self.msg is None else
-                    self.origin_template.match_list.get(self.msg.target.targetFrom)):
+                                  self.origin_template.match_list.get(self.msg.target.targetFrom)):
                         if match.help_doc is None:
                             return match, None
                     raise InvalidCommandFormatError
                 else:
-                    base_match = docopt(self.args, argvs=split_command[1:], default_help=False)
+                    base_match = docopt(
+                        self.args, argvs=split_command[1:], default_help=False)
                     for match in (self.origin_template.match_list.set if self.msg is None else
-                    self.origin_template.match_list.get(self.msg.target.targetFrom)):
+                                  self.origin_template.match_list.get(self.msg.target.targetFrom)):
                         if match.help_doc is None:
                             continue
                         try:
@@ -126,7 +129,6 @@ class CommandParser:
                                 correct = False
                         if correct:
                             return match, get_parse
-
 
         except DocoptExit:
             traceback.print_exc()

@@ -12,16 +12,18 @@ if not Config('db_path'):
 
 import asyncio
 import traceback
-import aioconsole
-
 from datetime import datetime
 
+import aioconsole
+
 from bot import init_bot
-from core.elements import MsgInfo, AutoSession, PrivateAssets, EnableDirtyWordCheck, Plain
-from core.console.template import Template as MessageSession, FetchTarget
+from core.console.template import FetchTarget
+from core.console.template import Template as MessageSession
+from core.elements import (AutoSession, EnableDirtyWordCheck, MsgInfo, Plain,
+                           PrivateAssets)
+from core.logger import Logger
 from core.parser.message import parser
 from core.utils import init, init_async
-from core.logger import Logger
 
 EnableDirtyWordCheck.status = True
 PrivateAssets.set(os.path.abspath(os.path.dirname(__file__) + '/assets'))
@@ -79,11 +81,13 @@ async def autotest():
             elif sub.startswith('!!results'):
                 results = json.loads(sub.replace('!!results=', '', 1))
             elif sub.startswith('!!interactions'):
-                interactions = json.loads(sub.replace('!!interactions=', '', 1))
+                interactions = json.loads(
+                    sub.replace('!!interactions=', '', 1))
             else:
                 cmds += '\n' + sub
             Logger.info(cmds)
-        returns = (await send_command(cmds, interactions=interactions)).sent  # todo: 需要收集结果
+        # todo: 需要收集结果
+        returns = (await send_command(cmds, interactions=interactions)).sent
         included_texts = results.get('include_texts', [])
         excluded_texts = results.get('exclude_texts', [])
         if isinstance(included_texts, str):

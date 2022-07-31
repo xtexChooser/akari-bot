@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 import traceback
-from queue import Queue, Empty
+from queue import Empty, Queue
 from threading import Thread
 from time import sleep
 
@@ -11,7 +11,7 @@ import psutil
 from loguru import logger
 
 from config import Config
-from database import BotDBUtil, session, DBVersion
+from database import BotDBUtil, DBVersion, session
 
 encode = 'UTF-8'
 
@@ -104,7 +104,8 @@ def run_bot():
 
         for p in runlst:
             if p.poll() == 233:
-                logger.warning(f'{p.pid} exited with code 233, restart all bots.')
+                logger.warning(
+                    f'{p.pid} exited with code 233, restart all bots.')
                 pidlst.remove(p.pid)
                 raise RestartBot
         sleep(0.001)
@@ -122,7 +123,8 @@ if __name__ == '__main__':
         while True:
             try:
                 run_bot()
-                logger.error('All bots exited unexpectedly, please check the output')
+                logger.error(
+                    'All bots exited unexpectedly, please check the output')
                 break
             except RestartBot:
                 for x in pidlst:

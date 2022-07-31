@@ -15,7 +15,8 @@ from cpuinfo import get_cpu_info
 from config import Config
 from core.builtins.message import MessageSession
 from core.component import on_command
-from core.elements import Command, PrivateAssets, Image, Plain, ExecutionLockList
+from core.elements import (Command, ExecutionLockList, Image, Plain,
+                           PrivateAssets)
 from core.loader import ModulesManager
 from core.parser.command import CommandParser, InvalidHelpDocTypeError
 from core.parser.message import remove_temp_ban
@@ -27,7 +28,8 @@ from database import BotDBUtil
 
 module = on_command('module',
                     base=True,
-                    alias={'enable': 'module enable', 'disable': 'module disable'},
+                    alias={'enable': 'module enable',
+                           'disable': 'module disable'},
                     developers=['OasisAkari'],
                     required_admin=True
                     )
@@ -54,8 +56,10 @@ async def _(msg: MessageSession):
 
 async def config_modules(msg: MessageSession):
     alias = ModulesManager.return_modules_alias_map()
-    modules_ = ModulesManager.return_modules_list_as_dict(targetFrom=msg.target.targetFrom)
-    enabled_modules_list = BotDBUtil.Module(msg).check_target_enabled_module_list()
+    modules_ = ModulesManager.return_modules_list_as_dict(
+        targetFrom=msg.target.targetFrom)
+    enabled_modules_list = BotDBUtil.Module(
+        msg).check_target_enabled_module_list()
     wait_config = msg.parsed_msg['<module>']
     wait_config_list = []
     for module_ in wait_config:
@@ -75,7 +79,7 @@ async def config_modules(msg: MessageSession):
                 if function[0] == '_':
                     continue
                 if isinstance(modules_[function], Command) and (
-                    modules_[function].base or modules_[function].required_superuser):
+                        modules_[function].base or modules_[function].required_superuser):
                     continue
                 enable_list.append(function)
         else:
@@ -115,7 +119,8 @@ async def config_modules(msg: MessageSession):
                                          command_prefixes=msg.prefixes).return_formatted_help_doc()
                     recommend_modules_help_doc_list.append(f'模块{m}的帮助信息：')
                     if modules_[m].desc is not None:
-                        recommend_modules_help_doc_list.append(modules_[m].desc)
+                        recommend_modules_help_doc_list.append(
+                            modules_[m].desc)
                     recommend_modules_help_doc_list.append(hdoc)
                 except InvalidHelpDocTypeError:
                     pass
@@ -126,7 +131,7 @@ async def config_modules(msg: MessageSession):
                 if function[0] == '_':
                     continue
                 if isinstance(modules_[function], Command) and (
-                    modules_[function].base or modules_[function].required_superuser):
+                        modules_[function].base or modules_[function].required_superuser):
                     continue
                 disable_list.append(function)
         else:
@@ -183,7 +188,8 @@ hlp = on_command('help',
 
 @hlp.handle('<module> {查看一个模块的详细信息}')
 async def bot_help(msg: MessageSession):
-    module_list = ModulesManager.return_modules_list_as_dict(targetFrom=msg.target.targetFrom)
+    module_list = ModulesManager.return_modules_list_as_dict(
+        targetFrom=msg.target.targetFrom)
     developers = ModulesManager.return_modules_developers_map()
     alias = ModulesManager.return_modules_alias_map()
     if msg.parsed_msg is not None:
@@ -195,7 +201,8 @@ async def bot_help(msg: MessageSession):
             module_ = module_list[help_name]
             if module_.desc is not None:
                 msgs.append(module_.desc)
-            help_ = CommandParser(module_list[help_name], msg=msg, command_prefixes=msg.prefixes)
+            help_ = CommandParser(
+                module_list[help_name], msg=msg, command_prefixes=msg.prefixes)
             if help_.args is not None:
                 msgs.append(help_.return_formatted_help_doc())
         if msgs:
@@ -209,7 +216,8 @@ async def bot_help(msg: MessageSession):
             if help_name in developers:
                 dev_list = developers[help_name]
                 if isinstance(dev_list, (list, tuple)):
-                    devs = '、'.join(developers[help_name]) if developers[help_name] is not None else ''
+                    devs = '、'.join(
+                        developers[help_name]) if developers[help_name] is not None else ''
                 elif isinstance(dev_list, str):
                     devs = dev_list
                 else:
@@ -224,8 +232,10 @@ async def bot_help(msg: MessageSession):
 
 @hlp.handle()
 async def _(msg: MessageSession):
-    module_list = ModulesManager.return_modules_list_as_dict(targetFrom=msg.target.targetFrom)
-    target_enabled_list = BotDBUtil.Module(msg).check_target_enabled_module_list()
+    module_list = ModulesManager.return_modules_list_as_dict(
+        targetFrom=msg.target.targetFrom)
+    target_enabled_list = BotDBUtil.Module(
+        msg).check_target_enabled_module_list()
     developers = ModulesManager.return_modules_developers_map()
     legacy_help = True
     if web_render and msg.Feature.image:
@@ -236,7 +246,8 @@ async def _(msg: MessageSession):
             for x in module_list:
                 module_ = module_list[x]
                 appends = [module_.bind_prefix]
-                help_ = CommandParser(module_, msg=msg, command_prefixes=msg.prefixes)
+                help_ = CommandParser(
+                    module_, msg=msg, command_prefixes=msg.prefixes)
                 doc_ = []
                 if module_.desc is not None:
                     doc_.append(module_.desc)
@@ -244,18 +255,21 @@ async def _(msg: MessageSession):
                     doc_.append(help_.return_formatted_help_doc())
                 doc = '\n'.join(doc_)
                 appends.append(doc)
-                module_alias = ModulesManager.return_module_alias(module_.bind_prefix)
+                module_alias = ModulesManager.return_module_alias(
+                    module_.bind_prefix)
                 malias = []
                 for a in module_alias:
                     malias.append(f'{a} -> {module_alias[a]}')
                 appends.append('\n'.join(malias) if malias else '')
-                appends.append('、'.join(developers[x]) if developers.get(x) is not None else '')
+                appends.append('、'.join(developers[x]) if developers.get(
+                    x) is not None else '')
                 if isinstance(module_, Command) and module_.base:
                     essential.append(appends)
                 if x in target_enabled_list:
                     m.append(appends)
             if essential:
-                tables.append(ImageTable(essential, ['基础模块列表', '帮助信息', '命令别名', '作者']))
+                tables.append(ImageTable(
+                    essential, ['基础模块列表', '帮助信息', '命令别名', '作者']))
             if m:
                 tables.append(ImageTable(m, ['扩展模块列表', '帮助信息', '命令别名', '作者']))
             if tables:
@@ -294,7 +308,8 @@ async def _(msg: MessageSession):
 
 
 async def modules_help(msg: MessageSession):
-    module_list = ModulesManager.return_modules_list_as_dict(targetFrom=msg.target.targetFrom)
+    module_list = ModulesManager.return_modules_list_as_dict(
+        targetFrom=msg.target.targetFrom)
     developers = ModulesManager.return_modules_developers_map()
     legacy_help = True
     if web_render and msg.Feature.image:
@@ -316,12 +331,14 @@ async def modules_help(msg: MessageSession):
                     doc_.append(help_.return_formatted_help_doc())
                 doc = '\n'.join(doc_)
                 appends.append(doc)
-                module_alias = ModulesManager.return_module_alias(module_.bind_prefix)
+                module_alias = ModulesManager.return_module_alias(
+                    module_.bind_prefix)
                 malias = []
                 for a in module_alias:
                     malias.append(f'{a} -> {module_alias[a]}')
                 appends.append('\n'.join(malias) if malias else '')
-                appends.append('、'.join(developers[x]) if developers.get(x) is not None else '')
+                appends.append('、'.join(developers[x]) if developers.get(
+                    x) is not None else '')
                 m.append(appends)
             if m:
                 tables.append(ImageTable(m, ['扩展模块列表', '帮助信息', '命令别名', '作者']))
@@ -451,7 +468,8 @@ async def _(msg: MessageSession):
     result = "Pong!"
     if checkpermisson:
         timediff = str(datetime.now() - started_time)
-        Boot_Start = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(psutil.boot_time()))
+        Boot_Start = time.strftime(
+            "%Y-%m-%d %H:%M:%S", time.localtime(psutil.boot_time()))
         Cpu_usage = psutil.cpu_percent()
         RAM = int(psutil.virtual_memory().total / (1024 * 1024))
         RAM_percent = psutil.virtual_memory().percent
@@ -509,7 +527,8 @@ async def config_gu(msg: MessageSession):
                 await msg.finish("成功")
 
 
-su = on_command('superuser', alias=['su'], developers=['OasisAkari', 'Dianliang233'], required_superuser=True)
+su = on_command('superuser', alias=['su'], developers=[
+                'OasisAkari', 'Dianliang233'], required_superuser=True)
 
 
 @su.handle('add <user>')
@@ -529,7 +548,8 @@ async def del_su(message: MessageSession):
             await message.finish('操作成功：已将' + user + '移出超级用户。')
 
 
-whoami = on_command('whoami', developers=['Dianliang233'], desc='获取发送命令的账号在机器人内部的 ID', base=True)
+whoami = on_command('whoami', developers=[
+                    'Dianliang233'], desc='获取发送命令的账号在机器人内部的 ID', base=True)
 
 
 @whoami.handle()
@@ -567,8 +587,10 @@ async def _(msg: MessageSession):
             module_ = msg.parsed_msg['<name>']
         data_ = {}
         for d in range(30):
-            new = datetime.now().replace(hour=0, minute=0, second=0) + timedelta(days=1) - timedelta(days=30 - d - 1)
-            old = datetime.now().replace(hour=0, minute=0, second=0) + timedelta(days=1) - timedelta(days=30 - d)
+            new = datetime.now().replace(hour=0, minute=0, second=0) + \
+                timedelta(days=1) - timedelta(days=30 - d - 1)
+            old = datetime.now().replace(hour=0, minute=0, second=0) + \
+                timedelta(days=1) - timedelta(days=30 - d)
             get_ = BotDBUtil.Analytics.get_count_by_times(new, old, module_)
             data_[old.day] = get_
         data_x = []
@@ -581,11 +603,13 @@ async def _(msg: MessageSession):
         plt.plot(data_x[-1], data_y[-1], "-ro")
         plt.xlabel('Days')
         plt.ylabel('Counts')
-        plt.tick_params(axis='x', labelrotation=45, which='major', labelsize=10)
+        plt.tick_params(axis='x', labelrotation=45,
+                        which='major', labelsize=10)
 
         plt.gca().yaxis.get_major_locator().set_params(integer=True)
         for xitem, yitem in np.nditer([data_x, data_y]):
-            plt.annotate(yitem, (xitem, yitem), textcoords="offset points", xytext=(0, 10), ha="center")
+            plt.annotate(yitem, (xitem, yitem), textcoords="offset points",
+                         xytext=(0, 10), ha="center")
         path = random_cache_path() + '.png'
         plt.savefig(path)
         plt.close()
@@ -594,7 +618,8 @@ async def _(msg: MessageSession):
              Image(path)])
 
 
-ae = on_command('abuse', alias=['ae'], developers=['Dianliang233'], required_superuser=True)
+ae = on_command('abuse', alias=['ae'], developers=[
+                'Dianliang233'], required_superuser=True)
 
 
 @ae.handle('check <user>')
@@ -664,7 +689,8 @@ def restart():
 def write_version_cache(msg: MessageSession):
     update = os.path.abspath(PrivateAssets.path + '/cache_restart_author')
     write_version = open(update, 'w')
-    write_version.write(json.dumps({'From': msg.target.targetFrom, 'ID': msg.target.targetId}))
+    write_version.write(json.dumps(
+        {'From': msg.target.targetFrom, 'ID': msg.target.targetId}))
     write_version.close()
 
 
@@ -718,7 +744,8 @@ async def update_bot(msg: MessageSession):
         await msg.sendMessage(pull_repo())
 
 
-upds = on_command('update&restart', developers=['OasisAkari'], required_superuser=True)
+upds = on_command('update&restart', developers=[
+                  'OasisAkari'], required_superuser=True)
 
 
 @upds.handle()

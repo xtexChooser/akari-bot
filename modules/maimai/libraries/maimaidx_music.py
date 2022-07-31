@@ -1,6 +1,6 @@
 import random
 from copy import deepcopy
-from typing import Dict, List, Optional, Union, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from core.utils import get_url
 
@@ -122,10 +122,12 @@ class MusicList(List[Music]):
     def filter(self,
                *,
                level: Optional[Union[str, List[str]]] = ...,
-               ds: Optional[Union[float, List[float], Tuple[float, float]]] = ...,
+               ds: Optional[Union[float, List[float],
+                                  Tuple[float, float]]] = ...,
                title_search: Optional[str] = ...,
                genre: Optional[Union[str, List[str]]] = ...,
-               bpm: Optional[Union[float, List[float], Tuple[float, float]]] = ...,
+               bpm: Optional[Union[float, List[float],
+                                   Tuple[float, float]]] = ...,
                type: Optional[Union[str, List[str]]] = ...,
                diff: List[int] = ...,
                ):
@@ -163,6 +165,7 @@ class TotalList:
             for __i in range(len(total_list)):
                 total_list[__i] = Music(total_list[__i])
                 for __j in range(len(total_list[__i].charts)):
-                    total_list[__i].charts[__j] = Chart(total_list[__i].charts[__j])
+                    total_list[__i].charts[__j] = Chart(
+                        total_list[__i].charts[__j])
             self.total_list = total_list
         return self.total_list

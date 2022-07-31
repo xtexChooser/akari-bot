@@ -1,6 +1,6 @@
 import json
 
-from core.elements import Url, ErrorMessage
+from core.elements import ErrorMessage, Url
 from core.utils import get_url
 
 
@@ -27,8 +27,8 @@ async def bugtracker_get(mojiraId: str):
                 fields = load_json['fields']
                 if 'summary' in fields:
                     data["title"] = data["title"] + \
-                                    fields['summary'] + (
-                                        f' ({data["translation"]})' if data.get("translation", False) else '')
+                        fields['summary'] + (
+                        f' ({data["translation"]})' if data.get("translation", False) else '')
                 if 'issuetype' in fields:
                     data["type"] = fields['issuetype']['name']
                 if 'status' in fields:
@@ -37,7 +37,7 @@ async def bugtracker_get(mojiraId: str):
                     data["project"] = fields['project']['name']
                 if 'resolution' in fields:
                     data["resolution"] = fields['resolution']['name'] if fields[
-                                                                             'resolution'] is not None else 'Unresolved'
+                        'resolution'] is not None else 'Unresolved'
                 if 'versions' in load_json['fields']:
                     Versions = fields['versions']
                     verlist = []
@@ -55,7 +55,8 @@ async def bugtracker_get(mojiraId: str):
                                            fields['customfield_12200']['value']
                 if 'priority' in fields:
                     if fields['priority']:
-                        data["priority"] = "Priority: " + fields['priority']['name']
+                        data["priority"] = "Priority: " + \
+                            fields['priority']['name']
                 if 'fixVersions' in fields:
                     if data["status"] == 'Resolved':
                         if fields['fixVersions']:

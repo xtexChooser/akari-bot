@@ -6,10 +6,11 @@ import urllib.parse
 
 from bs4 import BeautifulSoup as bs
 
-from core.elements import Plain, Image
-from core.utils import get_url, download_to_cache
+from core.elements import Image, Plain
+from core.utils import download_to_cache, get_url
 from modules.wiki.utils.UTC8 import UTC8
 from modules.wiki.wikilib import WikiLib
+
 from .tpg import tpg
 
 
@@ -28,7 +29,8 @@ async def get_user_info(wikiurl, username, pic=False):
     if 'missing' in base_user_info:
         return [Plain('没有找到此用户。')]
     data['username'] = base_user_info['name']
-    data['url'] = re.sub(r'\$1', urllib.parse.quote('User:' + username), wiki.wiki_info.articlepath)
+    data['url'] = re.sub(r'\$1', urllib.parse.quote(
+        'User:' + username), wiki.wiki_info.articlepath)
     groups = {}
     get_groups = await wiki.get_json(action='query', meta='allmessages', amprefix='group-')
     for a in get_groups['query']['allmessages']:
@@ -44,12 +46,14 @@ async def get_user_info(wikiurl, username, pic=False):
             data['users_groups'].append(groups[x] if x in groups else x)
     data['global_users_groups'] = []
     if user_central_auth_data:
-        data['global_edit_count'] = str(user_central_auth_data['query']['globaluserinfo']['editcount'])
+        data['global_edit_count'] = str(
+            user_central_auth_data['query']['globaluserinfo']['editcount'])
         data['global_home'] = user_central_auth_data['query']['globaluserinfo']['home']
         for g in user_central_auth_data['query']['globaluserinfo']['groups']:
             data['global_users_groups'].append(groups[g] if g in groups else g)
     data['registration_time'] = base_user_info['registration']
-    data['registration_time'] = UTC8(data['registration_time'], 'full') if data['registration_time'] is not None else '未知'
+    data['registration_time'] = UTC8(
+        data['registration_time'], 'full') if data['registration_time'] is not None else '未知'
     data['edited_count'] = str(base_user_info['editcount'])
     data['gender'] = base_user_info['gender']
     if data['gender'] == 'female':
@@ -59,7 +63,6 @@ async def get_user_info(wikiurl, username, pic=False):
     elif data['gender'] == 'unknown':
         data['gender'] = '未知'
     # if one day LGBTers...
-
 
     try:
         gp_clawler = bs(await get_url(re.sub(r'\$1', 'UserProfile: ' + username, wiki.wiki_info.articlepath)), 'html.parser')
@@ -73,15 +76,18 @@ async def get_user_info(wikiurl, username, pic=False):
         data['global_rank'] = dd[6].text
         data['friends_count'] = dd[7].text
         data['wikipoints'] = gp_clawler.find('div', class_='score').text
-        data['url'] = re.sub(r'\$1', urllib.parse.quote('UserProfile:' + username), wiki.wiki_info.articlepath)
+        data['url'] = re.sub(r'\$1', urllib.parse.quote(
+            'UserProfile:' + username), wiki.wiki_info.articlepath)
     except Exception:
         traceback.print_exc()
     if 'blockedby' in base_user_info:
         data['blocked_by'] = base_user_info['blockedby']
         data['blocked_time'] = base_user_info['blockedtimestamp']
-        data['blocked_time'] = UTC8(data['blocked_time'], 'full') if data['blocked_time'] is not None else '未知'
+        data['blocked_time'] = UTC8(
+            data['blocked_time'], 'full') if data['blocked_time'] is not None else '未知'
         data['blocked_expires'] = base_user_info['blockedexpiry']
-        data['blocked_expires'] = UTC8(data['blocked_expires'], 'full') if data['blocked_expires'] is not None else '未知'
+        data['blocked_expires'] = UTC8(
+            data['blocked_expires'], 'full') if data['blocked_expires'] is not None else '未知'
         data['blocked_reason'] = base_user_info['blockedreason']
         data['blocked_reason'] = data['blocked_reason'] if data['blocked_reason'] is not None else '未知'
 
@@ -90,7 +96,8 @@ async def get_user_info(wikiurl, username, pic=False):
         icon_path = os.path.join(assets_path, 'favicon')
         if not os.path.exists(icon_path):
             os.makedirs(icon_path)
-        site_icon = os.path.join(icon_path, urllib.parse.urlparse(wiki.wiki_info.api).netloc)
+        site_icon = os.path.join(
+            icon_path, urllib.parse.urlparse(wiki.wiki_info.api).netloc)
         if not os.path.exists(site_icon):
             os.makedirs(site_icon)
         if 'Wiki.png' not in os.listdir(site_icon):
@@ -125,7 +132,6 @@ async def get_user_info(wikiurl, username, pic=False):
             blockreason=data['blocked_reason'] if 'blocked_reason' in data else '?',
             bantype=bantype)
         return [Plain(data['url']), Image(image)]
-
 
     else:
         msgs = []
@@ -180,7 +186,8 @@ async def get_user_info(wikiurl, username, pic=False):
         if blocked_by := data.get('blocked_by', False):
             msgs.append(data['user'] + '正在被封禁中！')
             msgs.append('被' + blocked_by + '封禁，' + ('时间从' + data['blocked_time'] if 'blocked_time' in data else '')
-                        + ('到' + data['blocked_expires'] if 'blocked_expires' in data else '')
+                        + ('到' + data['blocked_expires']
+                           if 'blocked_expires' in data else '')
                         + ('，理由：' + data['blocked_reason'] if 'blocked_reason' in data else ''))
 
         if url := data.get('url', False):
@@ -188,14 +195,3 @@ async def get_user_info(wikiurl, username, pic=False):
 
         if msgs:
             return [Plain('\n'.join(msgs))]
-
-
-
-
-
-
-
-
-
-
-

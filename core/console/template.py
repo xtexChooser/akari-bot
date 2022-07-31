@@ -3,8 +3,12 @@ from typing import List, Union
 from PIL import Image
 
 from core.builtins.message import MessageSession as MS
-from core.elements import Plain, Image as BImage, Session, MsgInfo, FetchTarget as FT, \
-    FetchedSession as FS, FinishedSession as FinS, AutoSession as AS
+from core.elements import AutoSession as AS
+from core.elements import FetchedSession as FS
+from core.elements import FetchTarget as FT
+from core.elements import FinishedSession as FinS
+from core.elements import Image as BImage
+from core.elements import MsgInfo, Plain, Session
 from core.elements.message.chain import MessageChain
 from core.elements.others import confirm_command
 from core.logger import Logger
