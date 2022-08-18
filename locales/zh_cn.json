@@ -1,4 +1,25 @@
 {
-    "example": "你好世界！",
-    "success": "成功。"
+    "global": {
+        "example": "你好世界！",
+        "success": "成功。",
+        "list_separator": "、",
+        "missing_web_render": "没有 WebRender，本模块无法运行。"
+    },
+    "arcaea": {
+        "official_fallback": "使用官方API获取失败，尝试使用非官方接口。",
+        "init": {
+            "success": "初始化成功。",
+            "missing_arcapk":"未找到arc.apk！"
+        },
+        "unbind": "取消绑定成功。",
+        "bind": {
+            "success": "绑定成功：$a（$b）",
+            "fail_to_fetch": "绑定成功，但是无法获取用户信息。请自行检查命令是否可用。",
+            "failure": "绑定失败，请尝试使用好友码绑定。"
+        },
+        "info": {
+            "friendcode_digit": "好友码必须是9位数字！",
+            "friendcode_invalid": "请输入正确的好友码！"
+        }
+    }
 }

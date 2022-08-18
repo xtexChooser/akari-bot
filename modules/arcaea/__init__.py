@@ -6,6 +6,7 @@ from core.builtins.message import MessageSession
 from core.component import on_command
 from core.elements import Plain, Image
 from core.utils import get_url
+from core.utils.i18n import get_target_locale
 from .dbutils import ArcBindInfoManager
 from .getb30 import getb30
 from .getb30_official import getb30_official
@@ -51,7 +52,7 @@ async def _(msg: MessageSession):
                 await msg.sendMessage(msgchain)
             except Exception:
                 traceback.print_exc()
-                await msg.sendMessage('使用官方API获取失败，尝试使用非官方接口。')
+                await msg.sendMessage(msg.t('arcaea.official_fallback'))
                 unofficial = True
         if unofficial:
             try:
@@ -81,9 +82,9 @@ async def _(msg: MessageSession):
             if len(friendcode) == 9:
                 query_code = friendcode
             else:
-                await msg.finish('好友码必须是9位数字！')
+                await msg.finish(msg.t('arcaea.info.friendcode_digit'))
         else:
-            await msg.finish('请输入正确的好友码！')
+            await msg.finish(msg.t('arcaea.info.friendcode_invalid'))
     else:
         get_friendcode_from_db = ArcBindInfoManager(msg).get_bind_friendcode()
         if get_friendcode_from_db is not None:
@@ -95,11 +96,11 @@ async def _(msg: MessageSession):
                 if resp['success']:
                     await msg.finish(resp['msg'])
                 else:
-                    await msg.sendMessage('使用官方API获取失败，尝试使用非官方接口。')
+                    await msg.sendMessage(msg.t('arcaea.official_fallback'))
                     unofficial = True
             except Exception:
                 traceback.print_exc()
-                await msg.sendMessage('使用官方API获取失败，尝试使用非官方接口。')
+                await msg.sendMessage(msg.t('arcaea.official_fallback'))
                 unofficial = True
         if unofficial:
             try:
@@ -119,38 +120,38 @@ async def _(msg: MessageSession):
     if getcode:
         bind = ArcBindInfoManager(msg).set_bind_info(username=getcode[0], friendcode=getcode[1])
         if bind:
-            await msg.finish(f'绑定成功：{getcode[0]}({getcode[1]})')
+            await msg.finish(msg.t('arcaea.bind.success', a=getcode[0], b=getcode[1]))
     else:
         if code.isdigit():
             bind = ArcBindInfoManager(msg).set_bind_info(username='', friendcode=code)
             if bind:
-                await msg.finish('绑定成功，但是无法获取用户信息。请自行检查命令是否可用。')
+                await msg.finish(msg.t('arcaea.bind.fail_to_fetch'))
         else:
-            await msg.finish('绑定失败，请尝试使用好友码绑定。')
+            await msg.finish(msg.t('arcaea.bind.failure'))
 
 
 @arc.handle('unbind {取消绑定用户}')
 async def _(msg: MessageSession):
     unbind = ArcBindInfoManager(msg).remove_bind_info()
     if unbind:
-        await msg.finish('取消绑定成功。')
+        await msg.finish(msg.t('arcaea.unbind'))
 
 
 @arc.handle('initialize', required_superuser=True)
 async def _(msg: MessageSession):
     assets_apk = os.path.abspath('./assets/arc.apk')
     if not os.path.exists(assets_apk):
-        await msg.finish('未找到arc.apk！')
+        await msg.finish(msg.t('arcaea.init.missing_arcapk'))
         return
     result = await arcb30init()
     if result:
-        await msg.finish('成功初始化！')
+        await msg.finish(msg.t('arcaea.init.success'))
 
 
 @arc.handle('download {获取最新版本的游戏apk}')
 async def _(msg: MessageSession):
     if not webrender:
-        await msg.finish(['未配置webrender，无法使用此命令。'])
+        await msg.finish([msg.t('global.missing_web_render')])
     resp = await get_url(webrender + 'source?url=https://webapi.lowiro.com/webapi/serve/static/bin/arcaea/apk/', 200,
                          fmt='json')
     if resp:
@@ -160,7 +161,7 @@ async def _(msg: MessageSession):
 @arc.handle('random {随机一首曲子}')
 async def _(msg: MessageSession):
     if not webrender:
-        await msg.finish(['未配置webrender，无法使用此命令。'])
+        await msg.finish([msg.t('global.missing_web_render')])
     resp = await get_url(webrender + 'source?url=https://webapi.lowiro.com/webapi/song/showcase/', 200, fmt='json')
     if resp:
         value = resp["value"][0]
@@ -174,7 +175,7 @@ async def _(msg: MessageSession):
 @arc.handle('rank free {查看当前免费包游玩排行}', 'rank paid {查看当前付费包游玩排行}')
 async def _(msg: MessageSession):
     if not webrender:
-        await msg.finish(['未配置webrender，无法使用此命令。'])
+        await msg.finish([msg.t('global.missing_web_render')])
     if msg.parsed_msg.get('free', False):
         resp = await get_url(webrender + 'source?url=https://webapi.lowiro.com/webapi/song/rank/free/', 200, fmt='json')
     else:
