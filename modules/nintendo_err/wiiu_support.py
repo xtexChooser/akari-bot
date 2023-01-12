@@ -7,36 +7,29 @@ from .types import Module, ResultInfo, ConsoleErrorInfo, ConsoleErrorField, \
 This file contains all currently known Wii U result and error codes.
 There may be inaccuracies here; we'll do our best to correct them
 when we find out more about them.
-
 A "support" code, in contrast to a result code, is a human-readable string like
 102-2811. They're meant to be more user-friendly than result codes, which are
 typically integer values.
-
 Note: the "modules" presented here are more like "categories". However, this difference
 isn't enough to justify creating a different class with the same logic, so we'll just
 refer to them as "modules" from now on.
-
 To add a module so the code understands it, simply add a new module number
 to the 'modules' dictionary, with a Module variable as the value. If the module
 has no known error codes, simply add a dummy Module instead (see the dict for
 more info). See the various module variables for a more in-depth example
  on how to make one.
-
 Once you've added a module, or you want to add a new result code to an existing
 module, add a new description value (for Switch it's the final set of 4 digits after any dashes)
 as the key, and a ResultInfo variable with a text description of the error or result.
 You can also add a second string to the ResultInfo to designate a support URL if
 one exists. Not all results or errors have support webpages.
-
 Simple example of adding a module with a sample result code:
 test = Module('test', {
     5: ResultInfo('test', 'https://example.com')
 })
-
 modules = {
     9999: test
 }
-
 Sources used to compile this list of results:
 https://github.com/Kinnay/NintendoClients/wiki/Wii-U-Error-Codes
 """
@@ -426,6 +419,8 @@ unknown2 = Module('unknown (browser?)', {
     1037: ResultInfo(
         'Incorrect permissions for the default index.html file which prevents the Internet Browser from reading it.',
         '[To fix it, follow these steps.](https://wiiu.hacks.guide/#/fix-errcode-112-1037)'),
+    1035: ResultInfo('SSL handshake failed due to cipher mismatch.'),
+    1209: ResultInfo('Internet Browser is unable to load a file(?).')
 })
 
 olv = Module('olv (miiverse)', {
@@ -451,6 +446,7 @@ syserr = Module('system error', {
     103: ResultInfo('The MLC system memory is corrupted.'),
     104: ResultInfo('The SLC system memory is corrupted.'),
     105: ResultInfo('The USB storage is corrupted.'),
+    2706: ResultInfo('Error when reading from USB storage device'),
     2713: ResultInfo('The USB Storage device has been disconnected.')
 })
 
@@ -465,7 +461,7 @@ modules = {
     102: act,
     103: Module('ac (internet connection)'),
     104: Module('boss(spotpass)'),
-    105: Module('nim (title installation'),
+    105: Module('nim (title installation)'),
     106: nex,
     107: eshop_api,
     111: eshop_web,

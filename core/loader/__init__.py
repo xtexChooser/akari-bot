@@ -16,11 +16,14 @@ def load_modules():
     dir_list = os.listdir(load_dir_path)
     for file_name in dir_list:
         try:
-            file_path = f'{load_dir_path}/{file_name}'
+            file_path = os.path.join(load_dir_path, file_name)
             fun_file = None
             if os.path.isdir(file_path):
                 if file_name[0] != '_':
                     fun_file = file_name
+            elif os.path.isfile(file_path):
+                if file_name[0] != '_' and file_name.endswith('.py'):
+                    fun_file = file_name[:-3]
             if fun_file is not None:
                 Logger.info(f'Loading modules.{fun_file}...')
                 modules = 'modules.' + fun_file
@@ -28,15 +31,16 @@ def load_modules():
                 Logger.info(f'Succeeded loaded modules.{fun_file}!')
         except:
             tb = traceback.format_exc()
-            Logger.info(f'Failed to load modules.{fun_file}: \n{tb}')
-            err_prompt.append(str(tb))
+            errmsg = f'Failed to load modules.{fun_file}: \n{tb}'
+            Logger.error(errmsg)
+            err_prompt.append(errmsg)
     loadercache = os.path.abspath(PrivateAssets.path + '/.cache_loader')
     openloadercache = open(loadercache, 'w')
     if err_prompt:
-        err_prompt = re.sub('  File "<frozen importlib.*?>", .*?\n', '', '\n'.join(err_prompt))
-        openloadercache.write('加载模块中发生了以下错误，对应模块未加载：\n' + err_prompt)
+        err_prompt = re.sub(r'  File \"<frozen importlib.*?>\", .*?\n', '', '\n'.join(err_prompt))
+        openloadercache.write(err_prompt)
     else:
-        openloadercache.write('所有模块已正确加载。')
+        openloadercache.write('')
     openloadercache.close()
 
 
@@ -56,8 +60,8 @@ class ModulesManager:
             ModulesManager.modules[bind_prefix].match_list.add(meta)
 
     @staticmethod
-    def return_modules_list_as_dict(targetFrom: str = None) ->\
-            Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
+    def return_modules_list_as_dict(targetFrom: str = None) -> \
+        Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
         if targetFrom is not None:
             returns = {}
             for m in ModulesManager.modules:
@@ -106,7 +110,7 @@ class ModulesManager:
     @staticmethod
     def return_specified_type_modules(module_type: [Command, RegexCommand, Schedule, StartUp],
                                       targetFrom: str = None) \
-            -> Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
+        -> Dict[str, Union[Command, RegexCommand, Schedule, StartUp]]:
         d = {}
         modules = ModulesManager.return_modules_list_as_dict()
         for m in modules:

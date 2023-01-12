@@ -20,6 +20,7 @@ class FinishedSession(FinS):
 
 class Template(MS):
     session: Union[Session, AS]
+
     class Feature:
         image = True
         voice = False
@@ -27,19 +28,21 @@ class Template(MS):
         delete = True
         wait = True
 
-    async def sendMessage(self, msgchain, quote=True, disable_secret_check=False) -> FinishedSession:
-        Logger.info(msgchain)
+    async def sendMessage(self, msgchain, quote=True, disable_secret_check=False,
+                          allow_split_image=True) -> FinishedSession:
         msgchain = MessageChain(msgchain)
         self.sent.append(msgchain)
-        Logger.info(msgchain)
         msg_list = []
         for x in msgchain.asSendable(embed=False):
             if isinstance(x, Plain):
                 msg_list.append(x.text)
                 print(x.text)
+                Logger.info(f'[Bot] -> [{self.target.targetId}]: {x.text}')
             if isinstance(x, BImage):
-                img = Image.open(await x.get())
+                image_path = await x.get()
+                img = Image.open(image_path)
                 img.show()
+                Logger.info(f'[Bot] -> [{self.target.targetId}]: Image: {image_path}')
         return FinishedSession([0], ['There should be a callable here... hmm...'])
 
     async def waitConfirm(self, msgchain=None, quote=True, delete=True):
@@ -47,6 +50,7 @@ class Template(MS):
         if msgchain is not None:
             send = await self.sendMessage(msgchain)
             print("（发送“是”或符合确认条件的词语来确认）")
+        print(self.session.auto_interactions)
         if self.session.auto_interactions:
             c = self.session.auto_interactions[0]
             del self.session.auto_interactions[0]

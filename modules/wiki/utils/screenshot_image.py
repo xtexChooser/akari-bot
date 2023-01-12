@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup, Comment
 from config import Config
 from core.logger import Logger
 
-web_render = Config('web_render')
+web_render = Config('web_render_local')
 
 
 async def get_pic(link, page_link, headers, section=None, allow_special_page=False) -> Union[str, bool]:
@@ -36,6 +36,7 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
             os.remove(url)
         Logger.info('Downloaded raw.')
         open_file = open(url, 'a', encoding='utf-8')
+        timeless_fix = False
 
         def join_url(base, target):
             target = target.split(' ')
@@ -62,7 +63,10 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
         open_file.write('<head>\n')
         for x in soup.find_all(rel='stylesheet'):
             if x.has_attr('href'):
-                x.attrs['href'] = re.sub(';', '&', urljoin(link, x.get('href')))
+                get_herf = x.get('href')
+                if get_herf.find('timeless') != -1:
+                    timeless_fix = True
+                x.attrs['href'] = re.sub(';', '&', urljoin(link, get_herf))
             open_file.write(str(x))
 
         for x in soup.find_all():
@@ -76,8 +80,7 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
         if section is None:
             find_diff = None
             if allow_special_page:
-                diff = 'diff diff-contentalign-left'
-                find_diff = soup.find(class_=diff)
+                find_diff = soup.find('table', class_=re.compile('diff'))
                 if find_diff is not None:
                     Logger.info('Found diff...')
                     for x in soup.find_all('body'):
@@ -108,7 +111,7 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                     w = 2000
             if find_diff is None:
                 infoboxes = ['notaninfobox', 'portable-infobox', 'infobox', 'tpl-infobox', 'infoboxtable',
-                             'infotemplatebox', 'skin-infobox', 'arcaeabox']
+                             'infotemplatebox', 'skin-infobox', 'arcaeabox', 'moe-infobox']
                 find_infobox = None
                 for i in infoboxes:
                     find_infobox = soup.find(class_=i)
@@ -139,6 +142,9 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                         if x.has_attr('class') and x.has_attr('data-src'):
                             x.attrs['class'] = 'image'
                             x.attrs['src'] = x.attrs['data-src']
+
+                    open_file.write('<div class="mw-parser-output">')
+
                     open_file.write(str(find_infobox))
                     w = 500
                     open_file.write('</div>')
@@ -177,13 +183,19 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                 element.extract()
             selected = False
             x = None
-            for x in soup.find_all('h2'):
-                for y in x.find_all('span', id=section):
-                    if y != '':
-                        selected = True
-                        break
+            hx = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+            selected_hx = None
+            for h in hx:
                 if selected:
                     break
+                for x in soup.find_all(h):
+                    for y in x.find_all('span', id=section):
+                        if y != '':
+                            selected = True
+                            selected_hx = h
+                            break
+                    if selected:
+                        break
             if not selected:
                 Logger.info('Found nothing...')
                 return False
@@ -196,8 +208,11 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                 if b is None:
                     break
 
-                if b.name == 'h2':
+                if b.name == selected_hx:
                     break
+                if b.name in hx:
+                    if hx.index(selected_hx) >= hx.index(b.name):
+                        break
                 if b not in bl:
                     bl.append(str(b))
             open_file.write(''.join(bl))
@@ -242,6 +257,9 @@ async def get_pic(link, page_link, headers, section=None, allow_special_page=Fal
                 background-color: #cccccc;\
                 text-shadow: none;\
             }</style>')
+        if timeless_fix:
+            open_file.write('<style>body {\
+                            background: white!important}</style>')
         open_file.write('</html>')
         open_file.close()
         read_file = open(url, 'r', encoding='utf-8')

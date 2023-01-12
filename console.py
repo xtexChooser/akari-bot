@@ -10,11 +10,12 @@ if not Config('db_path'):
                          '(Also you can fill in the above example directly,'
                          ' bot will automatically create a SQLite database in the "./database/save.db")')
 
+from database import BotDBUtil, session
+from database.tables import DBVersion
+
 import asyncio
 import traceback
 import aioconsole
-
-from datetime import datetime
 
 from bot import init_bot
 from core.elements import MsgInfo, AutoSession, PrivateAssets, EnableDirtyWordCheck, Plain
@@ -22,6 +23,22 @@ from core.console.template import Template as MessageSession, FetchTarget
 from core.parser.message import parser
 from core.utils import init, init_async
 from core.logger import Logger
+
+
+query_dbver = session.query(DBVersion).first()
+if query_dbver is None:
+    session.add_all([DBVersion(value='2')])
+    session.commit()
+    query_dbver = session.query(DBVersion).first()
+
+if (current_ver := int(query_dbver.value)) < (target_ver := BotDBUtil.database_version):
+    print(f'Updating database from {current_ver} to {target_ver}...')
+    from database.update import update_database
+
+    update_database()
+    print('Database updated successfully! Please restart the program.')
+    sys.exit()
+
 
 EnableDirtyWordCheck.status = True
 PrivateAssets.set(os.path.abspath(os.path.dirname(__file__) + '/assets'))
@@ -35,8 +52,8 @@ async def console_scheduler():
 async def console_command():
     try:
         m = await aioconsole.ainput('> ')
+        asyncio.create_task(console_command())
         await send_command(m)
-        await console_command()
     except KeyboardInterrupt:
         print('Exited.')
         exit()
@@ -45,19 +62,17 @@ async def console_command():
 
 
 async def send_command(msg, interactions=None):
-    time = datetime.now()
     Logger.info('-------Start-------')
-    returns = await parser(MessageSession(target=MsgInfo(targetId='TEST|0',
+    returns = await parser(MessageSession(target=MsgInfo(targetId='TEST|Console|0',
                                                          senderId='TEST|0',
                                                          senderName='',
                                                          targetFrom='TEST|Console',
-                                                         senderFrom='TEST|Console', clientName='TEST', messageId=0, replyId=None),
-                                          session=AutoSession(message=msg, target='TEST|0', sender='TEST|0',
+                                                         senderFrom='TEST', clientName='TEST', messageId=0,
+                                                         replyId=None),
+                                          session=AutoSession(message=msg, target='TEST|Console|0', sender='TEST|0',
                                                               auto_interactions=interactions)))
-    print(returns)
+    # print(returns)
     Logger.info('----Process end----')
-    usage_time = datetime.now() - time
-    Logger.info('Usage time:' + str(usage_time))
     return returns
 
 

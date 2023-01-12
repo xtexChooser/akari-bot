@@ -1,20 +1,19 @@
 import asyncio
 import os
-import shutil
 import time
 import traceback
 import uuid
 from datetime import datetime, timedelta
 from os.path import abspath
-from config import Config
 
 import aiohttp
 import ujson as json
-from PIL import Image, ImageEnhance, ImageFont, ImageDraw, ImageFilter, ImageOps
+from PIL import Image, ImageEnhance, ImageFont, ImageDraw, ImageOps
 from aiofile import async_open
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 
+from config import Config
 from core.logger import Logger
 from core.utils import get_url
 
@@ -26,7 +25,7 @@ async def get_rating(uid, query_type):
         elif query_type == 'r30':
             query_type = 'recentRecords'
         Profile_url = 'http://services.cytoid.io/profile/' + uid
-        Profile_json = json.loads(await get_url(Profile_url))
+        Profile_json = json.loads(await get_url(Profile_url, 200))
         if 'statusCode' in Profile_json:
             if Profile_json['statusCode'] == 404:
                 return {'status': False, 'text': '发生错误：此用户不存在。'}
@@ -69,11 +68,17 @@ async def get_rating(uid, query_type):
           score
           accuracy
           rating
+          details {{
+            perfect
+            great
+            good
+            bad
+            miss
+          }}
         }}
         """)
 
         result = await client.execute_async(query)
-        print(result)
         workdir = os.path.abspath(Config("cache_path") + str(uuid.uuid4()))
         os.mkdir(workdir)
         bestRecords = result['profile'][query_type]
@@ -89,6 +94,7 @@ async def get_rating(uid, query_type):
             score = str(x['score'])
             acc = x['accuracy']
             rt = x['rating']
+            details = x['details']
             _date = datetime.strptime(x['date'], "%Y-%m-%dT%H:%M:%S.%fZ")
             local_time = _date + timedelta(hours=8)
             playtime = local_time.timestamp()
@@ -111,18 +117,24 @@ async def get_rating(uid, query_type):
                 havecover = True
             else:
                 havecover = False
-            songcards.append(make_songcard(workdir, thumbpath, chart_type, difficulty, chart_name, score, acc, rt, playtime, rank,
-                          havecover))
+            songcards.append(
+                make_songcard(thumbpath, chart_type, difficulty, chart_name, score, acc, rt, playtime, rank, details,
+                              havecover))
 
         for x in bestRecords:
             rank += 1
             resources.append(mkresources(x, rank))
 
         await asyncio.gather(*resources)
-        await asyncio.gather(*songcards)
+        cards_ = await asyncio.gather(*songcards)
+        cards_d = {}
+        for x in cards_:
+            for k in x:
+                cards_d[k] = x[k]
+        cards = [cards_d[x] for x in cards_d]
 
         # b30card
-        b30img = Image.new("RGBA", (1975, 1610), '#1e2129')
+        b30img = Image.new("RGBA", (1955, 1600), '#1e2129')
         avatar_path = await download_avatar_thumb(Avatar_img, ProfileId)
         if avatar_path:
             im = Image.open(avatar_path)
@@ -137,7 +149,7 @@ async def get_rating(uid, query_type):
                 output = ImageOps.fit(im, mask.size, centering=(0.5, 0.5))
                 output.putalpha(mask)
                 output.convert('RGBA')
-                b30img.alpha_composite(output, (1825, 25))
+                b30img.alpha_composite(output, (1825, 22))
             except:
                 traceback.print_exc()
 
@@ -145,7 +157,7 @@ async def get_rating(uid, query_type):
         drawtext = ImageDraw.Draw(b30img)
         get_name_width = font4.getsize(nick)[0]
         get_img_width = b30img.width
-        drawtext.text((get_img_width - get_name_width - 160, 30), nick, '#ffffff', font=font4)
+        drawtext.text((get_img_width - get_name_width - 150, 30), nick, '#ffffff', font=font4)
 
         font5 = ImageFont.truetype(os.path.abspath('./assets/Noto Sans CJK DemiLight.otf'), 20)
         level_text = f'等级 {ProfileLevel}'
@@ -172,9 +184,8 @@ async def get_rating(uid, query_type):
         fname = 1
         t = 0
         s = 0
-        while True:
+        for card in cards:
             try:
-                cardimg = Image.open(f'{workdir}/{str(fname)}.png')
                 w = 15 + 384 * i
                 h = 135
                 if s == 5:
@@ -183,12 +194,9 @@ async def get_rating(uid, query_type):
                 h = h + 240 * t
                 w = w - 384 * 5 * t
                 i += 1
-                # cardimg = await makeShadow(cardimg, 4, 9, [0, 3], 'rgba(0,0,0,0)', '#000000')
-                b30img.alpha_composite(cardimg, (w, h))
+                b30img.alpha_composite(card, (w, h))
                 fname += 1
                 s += 1
-            except FileNotFoundError:
-                break
             except Exception:
                 traceback.print_exc()
                 break
@@ -229,7 +237,7 @@ async def download_cover_thumb(uid):
 
 
 async def download_avatar_thumb(link, id):
-    Logger.info(f'Downloading avatar for {str(id)}')
+    Logger.debug(f'Downloading avatar for {str(id)}')
     try:
         d = abspath('./assets/cytoid-avatar/')
         if not os.path.exists(d):
@@ -249,7 +257,7 @@ async def download_avatar_thumb(link, id):
         return False
 
 
-async def make_songcard(workdir, coverpath, chart_type, difficulty, chart_name, score, acc, rt, playtime, rank,
+async def make_songcard(coverpath, chart_type, difficulty, chart_name, score, acc, rt, playtime, rank, details,
                         havecover=True):
     if havecover:
         try:
@@ -261,7 +269,25 @@ async def make_songcard(workdir, coverpath, chart_type, difficulty, chart_name, 
         img = Image.new('RGBA', (384, 240), 'black')
     img = img.convert('RGBA')
     downlight = ImageEnhance.Brightness(img)
-    img = downlight.enhance(0.5).resize((384, 240))
+    img_size = downlight.image.size
+    resize_multiplier = 384 / img_size[0]
+    img_h = int(img_size[1] * resize_multiplier)
+    if img_h < 240:
+        resize_multiplier = 240 / img_size[1]
+        resize_img_w = int(img_size[0] * resize_multiplier)
+        resize_img_h = int(img_size[1] * resize_multiplier)
+        crop_start_x = int((resize_img_w - 384) / 2)
+        crop_start_y = int((resize_img_h - 240) / 2)
+        img = downlight.enhance(0.5).resize((resize_img_w,
+                                             resize_img_h),
+                                            ).crop((crop_start_x, crop_start_y,
+                                                                   384 + crop_start_x, 240 + crop_start_y))
+    elif img_h > 240:
+        crop_start_y = int((img_h - 240) / 2)
+        img = downlight.enhance(0.5).resize((384, img_h))\
+            .crop((0, crop_start_y, 384, 240 + crop_start_y))
+    else:
+        img = downlight.enhance(0.5).resize((384, img_h))
     img_type = Image.open(f'./assets/cytoid/{chart_type}.png')
     img_type = img_type.convert('RGBA')
     img_type = img_type.resize((40, 40))
@@ -273,7 +299,9 @@ async def make_songcard(workdir, coverpath, chart_type, difficulty, chart_name, 
     drawtext = ImageDraw.Draw(img)
     drawtext.text((20, 130), score, '#ffffff', font=font3)
     drawtext.text((20, 155), chart_name, '#ffffff', font=font)
-    drawtext.text((20, 185), f'Accuracy: {acc}\nRating: {rt}', font=font2)
+    drawtext.text((20, 185),
+                  f'Acc: {round(acc, 4)}  Perfect: {details["perfect"]} Great: {details["great"]} Good: {details["good"]}'
+                  f'\nRating: {round(rt, 4)}  Bad: {details["bad"]} Miss: {details["miss"]}', font=font2)
     playtime = f'{playtime} #{rank}'
     playtime_width = font3.getsize(playtime)[0]
     songimg_width = 384
@@ -283,23 +311,5 @@ async def make_songcard(workdir, coverpath, chart_type, difficulty, chart_name, 
     draw_typetext = ImageDraw.Draw(type_text)
     draw_typetext.text(((32 - font3.getsize(type_)[0] - font.getoffset(type_)[0]) / 2, 0), type_, "#ffffff", font=font3)
     img.alpha_composite(type_text, (23, 29))
-    Logger.info('Image generated: ' + str(rank))
-    img.save(workdir + '/' + str(rank) + '.png')
-
-
-async def makeShadow(image, iterations, border, offset, backgroundColour, shadowColour):
-    fullWidth = image.size[0] + abs(offset[0]) + 2 * border
-    fullHeight = image.size[1] + abs(offset[1]) + 2 * border
-    shadow = Image.new(image.mode, (fullWidth, fullHeight), backgroundColour)
-    shadowLeft = border + max(offset[0], 0)
-    shadowTop = border + max(offset[1], 0)
-    shadow.paste(shadowColour,
-                 [shadowLeft, shadowTop,
-                  shadowLeft + image.size[0],
-                  shadowTop + image.size[1]])
-    for i in range(iterations):
-        shadow = shadow.filter(ImageFilter.BLUR)
-    imgLeft = border - min(offset[0], 0)
-    imgTop = border - min(offset[1], 0)
-    shadow.paste(image, (imgLeft, imgTop))
-    return shadow
+    Logger.debug('Image generated: ' + str(rank))
+    return {int(rank): img}

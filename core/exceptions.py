@@ -20,3 +20,11 @@ class FinishedException(BaseException):
 
 class WaitCancelException(BaseException):
     pass
+
+
+class InvalidTemplatePattern(Exception):
+    pass
+
+
+class NoReportException(Exception):
+    pass

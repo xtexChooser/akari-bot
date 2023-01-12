@@ -2,18 +2,15 @@ import os
 import shutil
 import subprocess
 import sys
-import traceback
 from queue import Queue, Empty
 from threading import Thread
 from time import sleep
 
 import psutil
+from loguru import logger
 
 from config import Config
 from database import BotDBUtil, session, DBVersion
-
-from loguru import logger
-
 
 encode = 'UTF-8'
 
@@ -54,8 +51,6 @@ def run_bot():
         with open(pid_cache, 'r') as f:
             pid_last = f.read().split('\n')
             running_pids = get_pid('python')
-            print(running_pids)
-            print(pid_last)
             for pid in pid_last:
                 if int(pid) in running_pids:
                     try:
@@ -96,9 +91,20 @@ def run_bot():
             pass
         else:
             try:
-                logger.info(line[:-1].decode(encode))
-            except Exception:
-                logger.error(traceback.format_exc())
+                logger.info(line.decode(encode)[:-1])
+            except UnicodeDecodeError:
+                encode_list = ['GBK']
+                for e in encode_list:
+                    try:
+                        logger.warning(f'Cannot decode string from UTF-8, decode with {e}: '
+                                       + line.decode(e)[:-1])
+                        break
+                    except Exception:
+                        if encode_list[-1] != e:
+                            logger.warning(f'Cannot decode string from {e}, '
+                                           f'attempting with {encode_list[encode_list.index(e) + 1]}.')
+                        else:
+                            logger.error(f'Cannot decode string from {e}, no more attempts.')
 
         # break when all processes are done.
         if all(p.poll() is not None for p in runlst):
@@ -116,14 +122,20 @@ if __name__ == '__main__':
     init_bot()
     logger.remove()
     logger.add(sys.stderr, format='{message}', level="INFO")
-    query_dbver = session.query(DBVersion).all()
-    if not query_dbver:
-        session.add_all([DBVersion(value=1)])
+    query_dbver = session.query(DBVersion).first()
+    if query_dbver is None:
+        session.add_all([DBVersion(value='2')])
         session.commit()
+        query_dbver = session.query(DBVersion).first()
+    if (current_ver := int(query_dbver.value)) < (target_ver := BotDBUtil.database_version):
+        logger.info(f'Updating database from {current_ver} to {target_ver}...')
+        from database.update import update_database
+        update_database()
+        logger.info('Database updated successfully!')
     try:
         while True:
             try:
-                run_bot()
+                run_bot()  # Process will block here so
                 logger.error('All bots exited unexpectedly, please check the output')
                 break
             except RestartBot:

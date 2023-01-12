@@ -15,7 +15,7 @@ from tenacity import retry, wait_fixed, stop_after_attempt
 from config import Config
 from core.elements import EnableDirtyWordCheck
 from core.logger import Logger
-from database.logging_message import DirtyWordCache
+from database.local import DirtyWordCache
 
 
 def hash_hmac(key, code, sha1):
@@ -30,7 +30,6 @@ def computeMD5hash(my_string):
 
 
 def parse_data(result: dict):
-    print(result)
     original_content = content = result['content']
     status = True
     for itemResult in result['results']:
@@ -84,9 +83,9 @@ async def check(*text) -> list:
             if not query_list[q][pq]:
                 if pq not in call_api_list:
                     call_api_list.update({pq: []})
-                print(call_api_list)
                 call_api_list[pq].append(q)
     call_api_list_ = [x for x in call_api_list]
+    Logger.debug(call_api_list_)
     if call_api_list_:
         body = {
             "scenes": [
@@ -103,7 +102,7 @@ async def check(*text) -> list:
 
         GMT_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
         date = datetime.datetime.utcnow().strftime(GMT_FORMAT)
-        nonce = 'LittleC is god forever {}'.format(time.time())
+        nonce = 'LittleC sb {}'.format(time.time())
         contentMd5 = base64.b64encode(hashlib.md5(json.dumps(body).encode('utf-8')).digest()).decode('utf-8')
         headers = {
             'Accept': 'application/json',
@@ -134,17 +133,16 @@ async def check(*text) -> list:
             async with session.post('{}{}'.format(root, url), data=json.dumps(body)) as resp:
                 if resp.status == 200:
                     result = await resp.json()
-                    print(result)
+                    Logger.debug(result)
                     for item in result['data']:
                         content = item['content']
                         for n in call_api_list[content]:
-                            print(n)
                             query_list.update({n: {content: parse_data(item)}})
                         DirtyWordCache(content).update(item)
                 else:
                     raise ValueError(await resp.text())
     results = []
-    print(query_list)
+    Logger.debug(query_list)
     for x in query_list:
         for y in query_list[x]:
             results.append(query_list[x][y])

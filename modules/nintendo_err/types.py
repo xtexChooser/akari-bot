@@ -1,3 +1,5 @@
+from typing import Optional
+
 from core.elements import Url
 
 
@@ -49,15 +51,10 @@ class ResultInfo:
 
 
 class ConsoleErrorField:
-    def __init__(self, name: str, *, message_str: str = '', supplementary_value: int = None):
-        self.field_name = name
+    def __init__(self, name: str, *, message_str: str = '', supplementary_value: Optional[int] = None):
 
-        try:
-            self.message = message_str
-        except KeyboardInterrupt:
-            raise
-        except:
-            self.message = ''
+        self.field_name = name
+        self.message = message_str
 
         if supplementary_value is None:
             return
@@ -74,8 +71,8 @@ class ConsoleErrorInfo:
     Holds the console name, the embed fields by an iteration of the parsed error or support code
     """
 
-    def __init__(self, error: str, console_name: str, color: int, extra_description: str = None,
-                 secondary_error: str = None):
+    def __init__(self, error: str, console_name: str, color: int, extra_description: Optional[str] = None,
+                 secondary_error: Optional[str] = None):
         self.error = error
         self.secondary_error = secondary_error
         self.console_name = console_name
@@ -100,12 +97,12 @@ class ConsoleErrorInfo:
 # Helper constants
 REPORT_DETAILS = '你应该向本模块的原仓库发起Issue来添加有关内容（请说英文）：' + str(Url('https://github.com/nh-server/Kurisu/issues'))
 
-UNKNOWN_MODULE = ResultInfo(f'无效或未知的模组。请问你正确输入错误代码了吗？{REPORT_DETAILS}')
+UNKNOWN_MODULE = ResultInfo(f'无效/未知的module。请问你正确输入错误代码了吗？{REPORT_DETAILS}')
 
-NO_RESULTS_FOUND = ResultInfo(f'我知道这个模组。但是我没有任何有关这个错误的记载。{REPORT_DETAILS}')
+NO_RESULTS_FOUND = ResultInfo(f'我知道这个module。但是我没有任何有关这个错误的记载。{REPORT_DETAILS}')
 
 BANNED_FIELD = ConsoleErrorField('致主机、账户或游戏被封禁者', message_str='我们不会提供解封服务，所以也请不要试图在这里获得谁的帮助。')
 
 WARNING_COLOR = 0xFFFF00
 
-UNKNOWN_CATEGORY_DESCRIPTION = ConsoleErrorField('描述', message_str=f'对应你的支持描述未知。{REPORT_DETAILS}')
+UNKNOWN_CATEGORY_DESCRIPTION = ConsoleErrorField('描述', message_str=f'对应你的报错描述未知。{REPORT_DETAILS}')

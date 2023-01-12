@@ -1,4 +1,5 @@
 [cfg]
+debug = False
 cache_path = ./cache/
 db_path = mysql+pymysql://
 db_cache = False
@@ -12,11 +13,15 @@ Check_accessKeySecret =
 qq_enable_dirty_check = True
 qq_enable_urlmanager = True
 web_render =
+web_render_local =
 botarcapi_url =
 botarcapi_agent =
 tg_token =
 slower_schedule = False
 enable_tos = False
+enable_analytics = True
+allow_request_private_ip = False
+enable_eval = True
 qqchannel_appid =
 qqchannel_token =
 qqchannel_secret =

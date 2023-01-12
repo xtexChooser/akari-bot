@@ -7,9 +7,11 @@ import traceback
 import uuid
 
 from config import Config
+from core.logger import Logger
 from core.utils import get_url
 from .drawb30img import drawb30
 from .drawsongimg import dsimg
+from .utils import autofix_b30_song_background
 
 assets_path = os.path.abspath('./assets/arcaea')
 
@@ -28,13 +30,20 @@ async def getb30_official(usercode):
         return {'text': f'获取失败。'}
     getuserinfo = getuserinfo_json['data']
     username = getuserinfo['display_name']
-    potential = getuserinfo['potential'] / 100
+    potential = getuserinfo['potential']
+    if potential is not None:
+        potential = int(potential) / 100
+    else:
+        potential = '--'
     getb30 = getb30_json['data']
     b30potential = []
     for x in getb30:
         b30potential.append(x['potential_value'])
     b30_avg = round(sum(b30potential) / len(b30potential), 4)
-    r10_avg = round((potential * 40 - b30_avg * 30) / 10, 4)
+    if potential is not None and isinstance(potential, (int, float)):
+        r10_avg = round((potential * 40 - b30_avg * 30) / 10, 4)
+    else:
+        r10_avg = '???'
     songsinfo = {}
     getinfos = []
     for x in getb30:
@@ -81,7 +90,6 @@ async def getb30_official(usercode):
             imgpath = f'{assets_path}/b30background_img_official/{x["song_id"]}_{str(x["difficulty"])}.jpg'
             if not os.path.exists(imgpath):
                 imgpath = f'{assets_path}/b30background_img_official/{x["song_id"]}.jpg'
-
             score = x['score']
             if not realptt:
                 realptt = x['potential_value']
@@ -98,6 +106,8 @@ async def getb30_official(usercode):
             scores[x['song_id'] + difficulty] = score
             if not os.path.exists(imgpath):
                 imgpath = f'{assets_path}/b30background_img_official/random.jpg'
+                asyncio.create_task(autofix_b30_song_background(x['song_id'],
+                                                                byd=False if x['difficulty'] != 3 else True))
             dsimg(os.path.abspath(imgpath), d, trackname, x['difficulty'], score, ptt, realptt,
                   x['pure_count'], x['far_count'], x['lost_count'], x['time_played'], newdir)
 
@@ -122,7 +132,7 @@ async def getb30_official(usercode):
         score = scores[last5['song_id'] + difficulty]
         last5list += f'[{last5rank}] {trackname}\n' \
                      f'[{last5rank}] {score} / {realptt / 10} -> {round(ptt, 4)}\n'
-    print(last5list)
+    Logger.debug(last5list)
     filename = drawb30(username, b30_avg, r10_avg, potential, 0, newdir, official=True)
     filelist = os.listdir(newdir)
     for x in filelist:

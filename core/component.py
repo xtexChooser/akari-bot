@@ -9,6 +9,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from core.elements import Command, RegexCommand, Schedule, StartUp
 from core.elements.module.component_meta import *
 from core.loader import ModulesManager
+from core.parser.args import parse_template
 
 
 class Bind:
@@ -23,35 +24,44 @@ class Bind:
                    required_admin: bool = False,
                    required_superuser: bool = False,
                    available_for: Union[str, list, tuple] = '*',
-                   exclude_from: Union[str, list, tuple] = ''):
+                   exclude_from: Union[str, list, tuple] = '',
+                   priority: int = 1):
             def decorator(function):
                 nonlocal help_doc
                 if isinstance(help_doc, str):
                     help_doc = [help_doc]
                 if help_docs:
                     help_doc += help_docs
+                if help_doc is None:
+                    help_doc = []
+
                 ModulesManager.bind_to_module(self.bind_prefix, CommandMeta(function=function,
-                                                                            help_doc=help_doc,
+                                                                            help_doc=parse_template(help_doc),
                                                                             options_desc=options_desc,
                                                                             required_admin=required_admin,
                                                                             required_superuser=required_superuser,
                                                                             available_for=available_for,
-                                                                            exclude_from=exclude_from))
+                                                                            exclude_from=exclude_from,
+                                                                            priority=priority))
                 return function
+
             return decorator
 
     class Regex:
         def __init__(self, bind_prefix):
             self.bind_prefix = bind_prefix
 
-        def handle(self, pattern: str, mode: str = "M", flags: re.RegexFlag = 0, show_typing: bool = True):
+        def handle(self, pattern: Union[str, re.Pattern], mode: str = "M", flags: re.RegexFlag = 0,
+                   show_typing: bool = True, logging: bool = True):
             def decorator(function):
                 ModulesManager.bind_to_module(self.bind_prefix, RegexMeta(function=function,
                                                                           pattern=pattern,
                                                                           mode=mode,
                                                                           flags=flags,
-                                                                          show_typing=show_typing))
+                                                                          show_typing=show_typing,
+                                                                          logging=logging))
                 return function
+
             return decorator
 
     class Schedule:
@@ -62,6 +72,7 @@ class Bind:
             def decorator(function):
                 ModulesManager.bind_to_module(self.bind_prefix, ScheduleMeta(function=function))
                 return function
+
             return decorator
 
 
@@ -147,6 +158,7 @@ def on_regex(
                           )
     ModulesManager.add_module(module)
     return Bind.Regex(bind_prefix)
+
 
 def on_schedule(
     bind_prefix: str,

@@ -1,13 +1,30 @@
 import asyncio
+from typing import List
 
 from core.elements import ExecutionLockList, Plain, confirm_command
 from core.elements.message import *
 from core.elements.message.chain import MessageChain
 from core.exceptions import WaitCancelException
 from core.utils import MessageTaskManager
+from core.utils.i18n import get_target_locale
+from database import BotDBUtil
 
 
 class MessageSession(MessageSession):
+    def __init__(self,
+                 target: MsgInfo,
+                 session: Session):
+        self.target = target
+        self.session = session
+        self.sent: List[MessageChain] = []
+        self.prefixes: List[str] = []
+        self.data = BotDBUtil.TargetInfo(self.target.targetId)
+        self.muted = self.data.is_muted
+        self.options = self.data.options
+        self.custom_admins = self.data.custom_admins
+        self.enabled_modules = self.data.enabled_modules
+        self.locale = self.data.locale
+
     async def waitConfirm(self, msgchain=None, quote=True, delete=True) -> bool:
         send = None
         ExecutionLockList.remove(self)
@@ -29,15 +46,18 @@ class MessageSession(MessageSession):
             raise WaitCancelException
 
     async def waitNextMessage(self, msgchain=None, quote=True, delete=False) -> MessageSession:
-        send = None
+        sent = None
         ExecutionLockList.remove(self)
         if msgchain is not None:
             msgchain = MessageChain(msgchain)
-            await self.sendMessage(msgchain, quote)
+            msgchain.append(Plain('（发送符合条件的词语来确认）'))
+            sent = await self.sendMessage(msgchain, quote)
         flag = asyncio.Event()
         MessageTaskManager.add_task(self, flag)
         await flag.wait()
         result = MessageTaskManager.get_result(self)
+        if delete and sent is not None:
+            await sent.delete()
         if result:
             return result
         else:
@@ -80,6 +100,9 @@ class MessageSession(MessageSession):
 
     def checkSuperUser(self):
         return True if self.target.senderInfo.query.isSuperUser else False
+
+    def t(self, *args, **kwargs) -> str:
+        return get_target_locale(self).t(*args, **kwargs)
 
 
 __all__ = ["MessageSession"]

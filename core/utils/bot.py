@@ -2,19 +2,17 @@ import asyncio
 import logging
 import os
 import traceback
+from configparser import ConfigParser
+from os.path import abspath
 
 import ujson as json
 
 from core.elements import PrivateAssets, StartUp, Schedule, Secret
-from core.loader import load_modules, ModulesManager
-from core.scheduler import Scheduler
 from core.exceptions import ConfigFileNotFound
+from core.loader import load_modules, ModulesManager
 from core.logger import Logger
+from core.scheduler import Scheduler
 from core.utils.http import get_url
-
-from configparser import ConfigParser
-from os.path import abspath
-
 
 bot_version = 'v4.0.0'
 
@@ -45,7 +43,8 @@ async def init_async(ft) -> None:
         if isinstance(Modules[x], StartUp):
             gather_list.append(asyncio.ensure_future(Modules[x].function(ft)))
         elif isinstance(Modules[x], Schedule):
-            Scheduler.add_job(func=Modules[x].function, trigger=Modules[x].trigger, args=[ft], misfire_grace_time=30, max_instance=1)
+            Scheduler.add_job(func=Modules[x].function, trigger=Modules[x].trigger, args=[ft], misfire_grace_time=30,
+                              max_instance=1)
     await asyncio.gather(*gather_list)
     Scheduler.start()
     logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
@@ -71,6 +70,7 @@ async def load_secret():
             ip = await get_url('https://api.ip.sb/ip', timeout=10)
             if ip:
                 Secret.add(ip.replace('\n', ''))
+
         Logger.info('Fetching IP information...')
         await asyncio.create_task(append_ip())
         Logger.info('Successfully fetched IP information.')
@@ -88,7 +88,10 @@ async def load_prompt(bot) -> None:
         open_loader_cache = open(loader_cache, 'r')
         m = await bot.fetch_target(author)
         if m:
-            await m.sendDirectMessage(open_loader_cache.read())
+            if (read := open_loader_cache.read()) != '':
+                await m.sendDirectMessage('加载模块中发生了以下错误，对应模块未加载：\n' + read)
+            else:
+                await m.sendDirectMessage('所有模块已正常加载。')
             open_loader_cache.close()
             open_author_cache.close()
             os.remove(author_cache)

@@ -1,9 +1,12 @@
+import asyncio
 import os
 import random
 import traceback
 import uuid
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+from .utils import autofix_character
 
 assets_path = os.path.abspath('./assets/arcaea')
 
@@ -15,9 +18,9 @@ def makeShadow(image, iterations, border, offset, backgroundColour, shadowColour
     shadowLeft = border + max(offset[0], 0)
     shadowTop = border + max(offset[1], 0)
     shadow.paste(shadowColour,
-                 [shadowLeft, shadowTop,
+                 (shadowLeft, shadowTop,
                   shadowLeft + image.size[0],
-                  shadowTop + image.size[1]])
+                  shadowTop + image.size[1]))
     for i in range(iterations):
         shadow = shadow.filter(ImageFilter.BLUR)
     imgLeft = border - min(offset[0], 0)
@@ -27,7 +30,7 @@ def makeShadow(image, iterations, border, offset, backgroundColour, shadowColour
 
 
 def drawb30(Username, b30, r10, ptt, character, path='', official=False):
-    # backgroud
+    # background
     if not official:
         bgimgpath = f'{assets_path}/world/'
     else:
@@ -38,8 +41,14 @@ def drawb30(Username, b30, r10, ptt, character, path='', official=False):
     bg = bg.resize((bg.size[0] * 2, bg.size[1] * 2))
     offset = random.randint(0, 1024)
     if not official:
+        if bg.width < 2489:
+            bgmut = 2489 / bg.width
+            bg = bg.resize((int(bg.width * bgmut), int(bg.height * bgmut)))
         b30img = bg.crop((0, offset, 2489, 1400 + offset))
     else:
+        if bg.width < 1975:
+            bgmut = 1975 / bg.width
+            bg = bg.resize((int(bg.width * bgmut), int(bg.height * bgmut)))
         b30img = bg.crop((0, offset, 1975, 1610 + offset))
 
     if not official:
@@ -47,11 +56,13 @@ def drawb30(Username, b30, r10, ptt, character, path='', official=False):
         tg = Image.open(f'{assets_path}/triangle.png')
         b30img.alpha_composite(tg.convert("RGBA"), (1580, 550))
         # character
-        try:
-            character = Image.open(f'{assets_path}/char/{str(character)}.png')
+        character_img_path = f'{assets_path}/char/{str(character)}.png'
+        if os.path.exists(character_img_path):
+            character = Image.open(character_img_path)
             b30img.alpha_composite(character.convert("RGBA"), (1660, 350))
-        except Exception:
-            pass
+        else:
+            asyncio.create_task(autofix_character(str(character)))
+
     # usercard overlay
     cardoverlay = Image.open(f'{assets_path}/card_overlay.png')
     if not official:
@@ -60,22 +71,24 @@ def drawb30(Username, b30, r10, ptt, character, path='', official=False):
         b30img.alpha_composite(makeShadow(cardoverlay.convert("RGBA"), 2, 3, [3, 3], 'rgba(0,0,0,0)', '#000000'),
                                (b30img.width - 500, 68))
     # ptt
-    if ptt >= 12.50:
-        pttimg = 6
-    elif ptt >= 12.00:
-        pttimg = 5
-    elif ptt >= 11.00:
-        pttimg = 4
-    elif ptt >= 10.00:
-        pttimg = 3
-    elif ptt >= 7.00:
-        pttimg = 2
-    elif ptt >= 3.50:
-        pttimg = 1
-    elif ptt >= 0:
-        pttimg = 0
-    else:
-        pttimg = 'off'
+    pttimg = 'off'
+    if ptt is not None and isinstance(ptt, (int, float)):
+        if ptt >= 13.00:
+            pttimg = 7
+        elif ptt >= 12.50:
+            pttimg = 6
+        elif ptt >= 12.00:
+            pttimg = 5
+        elif ptt >= 11.00:
+            pttimg = 4
+        elif ptt >= 10.00:
+            pttimg = 3
+        elif ptt >= 7.00:
+            pttimg = 2
+        elif ptt >= 3.50:
+            pttimg = 1
+        elif ptt >= 0:
+            pttimg = 0
     pttimg = Image.open(f'{assets_path}/ptt/rating_{str(pttimg)}.png')
     pttimg = pttimg.resize((75, 75))
     if not official:
@@ -83,23 +96,30 @@ def drawb30(Username, b30, r10, ptt, character, path='', official=False):
     else:
         b30img.alpha_composite(pttimg.convert("RGBA"), (b30img.width - 450, 67))
     ptttext = Image.new("RGBA", (200, 200))
+    ptttext_width, ptttext_height = ptttext.size
     font1 = ImageFont.truetype(f'{assets_path}/Fonts/Exo-SemiBold.ttf', 30)
     font2 = ImageFont.truetype(f'{assets_path}/Fonts/Exo-SemiBold.ttf', 21)
-    rawptt = str(ptt).split('.')
-    ptt1 = rawptt[0]
-    ptt2 = rawptt[1]
-    if len(ptt2) < 2:
-        ptt2 += '0'
-    ptttext_width, ptttext_height = ptttext.size
-    font1_width, font1_height = font1.getsize(ptt1 + '.')
-    font2_width, font2_height = font2.getsize(ptt2)
-    print(font1_width, font1_height)
-    print(font2_width, font2_height)
-    pttimg = Image.new("RGBA", (font1_width + font2_width + 4, font1_height + 4))
-    drawptt = ImageDraw.Draw(pttimg)
-    drawptt.text((0, 0), ptt1 + '.', 'white', font=font1, stroke_width=2, stroke_fill='#52495d')
-    print(int(int(font1_height) - int(font2_height)))
-    drawptt.text((font1_width, 9), ptt2, 'white', font=font2, stroke_width=2, stroke_fill='#52495d')
+    if ptt is not None and isinstance(ptt, (int, float)):
+        rawptt = str(ptt).split('.')
+        ptt1 = rawptt[0]
+        ptt2 = rawptt[1]
+        if len(ptt2) < 2:
+            ptt2 += '0'
+        font1_width, font1_height = font1.getsize(ptt1 + '.')
+        font2_width, font2_height = font2.getsize(ptt2)
+        pttimg = Image.new("RGBA", (font1_width + font2_width + 4, font1_height + 4))
+        drawptt = ImageDraw.Draw(pttimg)
+        stroke_color = '#52495d'
+        if int(ptt1) >= 13:
+            stroke_color = '#81122F'
+        drawptt.text((0, 0), ptt1 + '.', 'white', font=font1, stroke_width=2, stroke_fill=stroke_color)
+        drawptt.text((font1_width, 9), ptt2, 'white', font=font2, stroke_width=2, stroke_fill=stroke_color)
+    else:
+        font1_width, font1_height = font1.getsize('--')
+        pttimg = Image.new("RGBA", (font1_width, font1_height))
+        drawptt = ImageDraw.Draw(pttimg)
+        drawptt.text((0, 0), '--', 'white', font=font1, stroke_width=2, stroke_fill='#52495d')
+
     pttimg_width, pttimg_height = pttimg.size
     ptttext.alpha_composite(pttimg,
                             (int((ptttext_width - pttimg_width) / 2), int((ptttext_height - pttimg_height) / 2)))

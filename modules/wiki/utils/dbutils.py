@@ -8,7 +8,7 @@ from tenacity import retry, stop_after_attempt
 
 from core.elements import MessageSession
 from database import session, auto_rollback_error
-from .orm import WikiTargetSetInfo, WikiInfo, WikiAllowList, WikiBlockList
+from modules.wiki.utils.orm import WikiTargetSetInfo, WikiInfo, WikiAllowList, WikiBlockList
 
 
 class WikiTargetInfo:
@@ -129,6 +129,10 @@ class WikiSiteInfo:
         session.commit()
         return True
 
+    @staticmethod
+    def get_like_this(t: str):
+        return session.query(WikiInfo).filter(WikiInfo.apiLink.like(f"%{t}%")).first()
+
 
 class Audit:
     def __init__(self, api_link):
@@ -140,7 +144,8 @@ class Audit:
     def inAllowList(self) -> bool:
         session.expire_all()
         apilink = urlparse(self.api_link).netloc
-        return True if session.query(WikiAllowList).filter(WikiAllowList.apiLink.like(f'%{apilink}%')).first() else False
+        return True if session.query(WikiAllowList).filter(
+            WikiAllowList.apiLink.like(f'%{apilink}%')).first() else False
 
     @property
     @retry(stop=stop_after_attempt(3), reraise=True)

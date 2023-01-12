@@ -1,12 +1,17 @@
+<div align="center">
+  <img width="256" src="./assets/character_marked.png" alt="logo">
+
 # 小可 · AkariBot v4
+</div>
 
 ![GitHub issues](https://img.shields.io/github/issues/Teahouse-Studios/bot) ![GitHub pull requests](https://img.shields.io/github/issues-pr/Teahouse-Studios/bot) ![License](https://img.shields.io/github/license/Teahouse-Studios/bot) ![GitHub Repo stars](https://img.shields.io/github/stars/Teahouse-Studios/bot?style=social) ![GitHub tag](https://img.shields.io/github/v/tag/Teahouse-Studios/bot?include_prereleases)
 
 ## 介绍
 
-**小可**是基于多个框架开发的可扩展、多平台机器人。
+**小可**是基于多个框架开发的可扩展、多平台机器人。图标由 [Rin十一](https://mihuashi.com/profiles/75826?role=painter) 绘制。
 
 目前小可还正在持续开发中。
+
 
 ## 平台
 
