@@ -1,6 +1,5 @@
 from langchain import LLMChain
 from langchain.agents import AgentExecutor, LLMSingleActionAgent
-from langchain.callbacks.base import CallbackManager
 from langchain.callbacks.stdout import StdOutCallbackHandler
 from langchain.chat_models import ChatOpenAI
 
@@ -25,8 +24,6 @@ llm = ChatOpenAI(
 
 llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-manager = CallbackManager([StdOutCallbackHandler()])
-
 agent = LLMSingleActionAgent(
     llm_chain=llm_chain,
     output_parser=output_parser,
@@ -34,4 +31,6 @@ agent = LLMSingleActionAgent(
     allowed_tools=tool_names,
 )
 
-agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, callback_manager=manager)
+agent_executor = AgentExecutor.from_agent_and_tools(
+    agent=agent, tools=tools, verbose=True, callback=[
+        StdOutCallbackHandler()])

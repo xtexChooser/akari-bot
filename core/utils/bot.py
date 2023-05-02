@@ -1,4 +1,5 @@
 import asyncio
+import configparser
 import logging
 import os
 import traceback
@@ -55,7 +56,10 @@ async def load_secret():
     section = cp.sections()
     if len(section) == 0:
         raise ConfigFileNotFound(config_path) from None
-    options = cp.options('secret')
+    try:
+        options = cp.options('secret')
+    except configparser.NoSectionError:
+        options = []
     for option in options:
         value = cp.get('secret', option)
         if value.upper() not in ['', 'TRUE', 'FALSE']:

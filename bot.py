@@ -1,3 +1,5 @@
+from database import BotDBUtil, session, DBVersion
+from config import Config
 import os
 import shutil
 import subprocess
@@ -8,9 +10,9 @@ from time import sleep
 
 import psutil
 from loguru import logger
+import nest_asyncio
+nest_asyncio.apply()
 
-from config import Config
-from database import BotDBUtil, session, DBVersion
 
 encode = 'UTF-8'
 

@@ -24,6 +24,8 @@ from core.console.template import Template as MessageSession
 from core.parser.message import parser
 from core.utils.bot import init_async
 from core.logger import Logger
+import nest_asyncio
+nest_asyncio.apply()
 
 query_dbver = session.query(DBVersion).first()
 if query_dbver is None:
