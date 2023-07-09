@@ -60,6 +60,12 @@ class CFG:
         return value
 
     @classmethod
+    def get_all(cls):
+        if os.path.getmtime(config_path) != cls._ts:
+            cls.load()
+        return cls.value
+
+    @classmethod
     def write(cls, q, value, secret=False):
         q = q.lower()
         if os.path.getmtime(config_path) != cls._ts:

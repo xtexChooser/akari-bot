@@ -4,7 +4,7 @@ import re
 import traceback
 from datetime import datetime
 
-from config import Config
+from config import Config, CFG
 from core.builtins import command_prefix, ExecutionLockList, ErrorMessage, MessageTaskManager, Url, Bot
 from core.exceptions import AbuseWarning, FinishedException, InvalidCommandFormatError, InvalidHelpDocTypeError, \
     WaitCancelException, NoReportException, SendMessageFailed
@@ -64,6 +64,40 @@ async def temp_ban_check(msg: Bot.MessageSession):
                 return await msg.finish(msg.locale.t("tos.tempbanned.warning", ban_time=str(int(300 - ban_time))))
             else:
                 raise AbuseWarning(msg.locale.t("tos.reason.bypass"))
+
+
+cooldown_counter = {}  # 冷却计数
+
+
+async def check_cooldown(msg: Bot.MessageSession, module_name: str, enable_tos: bool = True):
+    cfg_dict = CFG.get_all()
+    cooldown_cfg = cfg_dict.get('cooldown')
+    if cooldown_cfg:
+        global_cooldown = cooldown_cfg.get('global')
+
+        if global_cooldown:
+            cooldown_type = global_cooldown.get('type')
+            if cooldown_type == 'total':
+                count = global_cooldown['count']
+                time = global_cooldown.get['time']
+                tos = global_cooldown.get('tos')
+                if cooldown_counter.get(msg.target.senderId) is None or datetime.now(
+                ).timestamp() - cooldown_counter[msg.target.senderId]['ts'] > time:
+                    cooldown_counter['global'][msg.target.senderId] = {'count': 1, 'ts': datetime.now().timestamp()}
+                else:
+                    cooldown_counter['global'][msg.target.senderId]['count'] += 1
+                    if cooldown_counter['global'][msg.target.senderId]['count'] > count:
+                        if tos:
+                            raise AbuseWarning(msg.locale.t("tos.reason.cooldown"))
+                        else:
+                            await msg.finish("你已经使用了太多命令了，请稍后再试。")
+            if cooldown_counter == 'interval':
+                time = global_cooldown.get('time')
+                if cooldown_counter.get(msg.target.senderId) is None or datetime.now(
+                ).timestamp() - cooldown_counter[msg.target.senderId]['ts'] > time:
+                    cooldown_counter['global'][msg.target.senderId] = {'ts': datetime.now().timestamp()}
+                else:
+                    await msg.finish("你已经使用了太多命令了，请稍后再试。")
 
 
 async def parser(msg: Bot.MessageSession, require_enable_modules: bool = True, prefix: list = None,
