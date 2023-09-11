@@ -9,7 +9,7 @@ from config import Config
 from core.builtins import Bot, Plain, Image
 from core.component import module
 from core.dirty_check import check_bool, rickroll
-from core.exceptions import NoReportException
+from database import BotDBUtil
 from .agent import agent_executor
 from .formatting import generate_latex, generate_code_snippet
 
@@ -30,39 +30,49 @@ a = module('ask', developers=['Dianliang233'], desc='{ask.help.desc}')
 @a.command('<question> {{ask.help}}')
 @a.regex(r'^(?:question||问|問)[\:：]\s?(.+?)[?？]$', flags=re.I, desc='{ask.help.regex}')
 async def _(msg: Bot.MessageSession):
-    is_superuser = msg.checkSuperUser()
+    is_superuser = msg.check_super_user()
     if not Config('openai_api_key'):
-        raise Exception(msg.locale.t('error.config.secret'))
-    if not is_superuser and msg.data.petal < 0:  # refuse
-        raise NoReportException(msg.locale.t('core.message.petal.no_petals'))
-    if hasattr(msg, 'parsed_msg'):
-        question = msg.parsed_msg['<question>']
+        raise Exception(msg.locale.t('error.config.secret.not_found'))
+    if not is_superuser and msg.data.petal <= 0:  # refuse
+        await msg.finish(msg.locale.t('core.message.petal.no_petals') + Config('issue_url'))
+
+    qc = BotDBUtil.CoolDown(msg, 'call_openai')
+    c = qc.check(60)
+    if c == 0 or msg.target.target_from == 'TEST|Console' or is_superuser:
+        if hasattr(msg, 'parsed_msg'):
+            question = msg.parsed_msg['<question>']
+        else:
+            question = msg.matched_msg[0]
+        if await check_bool(question):
+            rickroll(msg)
+        with get_openai_callback() as cb:
+            res = await agent_executor.arun(question)
+            tokens = cb.total_tokens
+        if not is_superuser:
+            price = tokens / ONE_K * PRICE_PER_1K_TOKEN
+            petal = price * USD_TO_CNY * CNY_TO_PETAL
+            msg.data.modify_petal(-petal)
+
+        blocks = parse_markdown(res)
+
+        chain = []
+        for block in blocks:
+            if block['type'] == 'text':
+                chain.append(Plain(block['content']))
+            elif block['type'] == 'latex':
+                chain.append(Image(PILImage.open(io.BytesIO(await generate_latex(block['content'])))))
+            elif block['type'] == 'code':
+                chain.append(Image(PILImage.open(
+                    io.BytesIO(await generate_code_snippet(block['content']['code'], block['content']['language'])))))
+
+        if await check_bool(res):
+            rickroll(msg)
+        await msg.send_message(chain)
+
+        if msg.target.target_from != 'TEST|Console' and not is_superuser:
+            qc.reset()
     else:
-        question = msg.matched_msg[0]
-    if await check_bool(question):
-        rickroll(msg)
-    with get_openai_callback() as cb:
-        res = await agent_executor.arun(question)
-        tokens = cb.total_tokens
-    if not is_superuser:
-        price = tokens / ONE_K * PRICE_PER_1K_TOKEN
-        petal = price * USD_TO_CNY * CNY_TO_PETAL
-        msg.data.modify_petal(-petal)
-
-    blocks = parse_markdown(res)
-
-    chain = []
-    for block in blocks:
-        if block['type'] == 'text':
-            chain.append(Plain(block['content']))
-        elif block['type'] == 'latex':
-            chain.append(Image(PILImage.open(io.BytesIO(await generate_latex(block['content'])))))
-        elif block['type'] == 'code':
-            chain.append(Image(PILImage.open(io.BytesIO(await generate_code_snippet(block['content']['code'], block['content']['language'])))))
-
-    if await check_bool(res):
-        rickroll(msg)
-    await msg.finish(chain)
+        await msg.finish(msg.locale.t('ask.message.cooldown', time=int(c)))
 
 
 def parse_markdown(md: str):

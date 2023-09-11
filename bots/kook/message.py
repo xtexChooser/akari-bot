@@ -1,19 +1,19 @@
 import re
 import traceback
-import ujson as json
 from typing import List, Union
 
 import aiohttp
+import ujson as json
 from khl import MessageTypes, Message
 
 from bots.kook.client import bot
+from bots.kook.info import client_name
 from config import Config
-from core.builtins import Bot, Plain, Image, Voice, MessageSession as MS, ErrorMessage
+from core.builtins import Bot, Plain, Image, Voice, MessageSession as MessageSessionT, ErrorMessage
 from core.builtins.message.chain import MessageChain
 from core.logger import Logger
-from core.types import MsgInfo, Session, FetchTarget as FT, FetchedSession as FS, \
+from core.types import FetchTarget as FetchTargetT, \
     FinishedSession as FinS
-from core.utils.image import image_split
 from database import BotDBUtil
 
 enable_analytics = Config('enable_analytics')
@@ -57,7 +57,7 @@ class FinishedSession(FinS):
             Logger.error(traceback.format_exc())
 
 
-class MessageSession(MS):
+class MessageSession(MessageSessionT):
     class Feature:
         image = True
         voice = True
@@ -67,71 +67,70 @@ class MessageSession(MS):
         quote = True
         wait = True
 
-    async def sendMessage(self, msgchain, quote=True, disable_secret_check=False,
-                          allow_split_image=True) -> FinishedSession:
+    async def send_message(self, message_chain, quote=True, disable_secret_check=False,
+                           allow_split_image=True) -> FinishedSession:
         self.session.message: Message
-        msgchain = MessageChain(msgchain)
-        if not msgchain.is_safe and not disable_secret_check:
-            return await self.sendMessage(Plain(ErrorMessage(self.locale.t("error.message.chain.unsafe"))))
-        self.sent.append(msgchain)
+        message_chain = MessageChain(message_chain)
+        if not message_chain.is_safe and not disable_secret_check:
+            return await self.send_message(Plain(ErrorMessage(self.locale.t("error.message.chain.unsafe"))))
+        self.sent.append(message_chain)
         count = 0
         send = []
-        for x in msgchain.asSendable(embed=False):
+        for x in message_chain.as_sendable(embed=False):
             if isinstance(x, Plain):
                 send_ = await self.session.message.reply(x.text, quote=quote if quote
                                                          and count == 0 and self.session.message else None)
 
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: {x.text}')
+                Logger.info(f'[Bot] -> [{self.target.target_id}]: {x.text}')
                 send.append(send_)
                 count += 1
             elif isinstance(x, Image):
                 url = await bot.create_asset(open(await x.get(), 'rb'))
                 send_ = await self.session.message.reply(url, type=MessageTypes.IMG, quote=quote if quote
                                                          and count == 0 and self.session.message else None)
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: Image: {str(x.__dict__)}')
+                Logger.info(f'[Bot] -> [{self.target.target_id}]: Image: {str(x.__dict__)}')
                 send.append(send_)
                 count += 1
             elif isinstance(x, Voice):
                 url = await bot.create_asset(open(x.path), 'rb')
                 send_ = await self.session.message.reply(url, type=MessageTypes.AUDIO, quote=quote if quote
                                                          and count == 0 and self.session.message else None)
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: Voice: {str(x.__dict__)}')
+                Logger.info(f'[Bot] -> [{self.target.target_id}]: Voice: {str(x.__dict__)}')
                 send.append(send_)
                 count += 1
 
-        msgIds = []
+        msg_ids = []
         for x in send:
-            msgIds.append(x['msg_id'])
-        return FinishedSession(self, msgIds, {self.session.message.channel_type.name: send})
+            msg_ids.append(x['msg_id'])
+        return FinishedSession(self, msg_ids, {self.session.message.channel_type.name: send})
 
-    async def checkPermission(self):
+    async def check_native_permission(self):
         self.session.message: Message
-        if self.session.message.channel_type.name == 'PERSON' or self.target.senderId in self.custom_admins \
-                or self.target.senderInfo.query.isSuperUser:
+        if not self.session.message:
+            channel = await bot.client.fetch_public_channel(self.session.target)
+            author = self.session.sender
+        else:
+            channel = await bot.client.fetch_public_channel(self.session.message.ctx.channel.id)
+            author = self.session.message.author.id
+        if channel.name == 'PERSON':
             return True
-        return await self.checkNativePermission()
-
-    async def checkNativePermission(self):
-        self.session.message: Message
-        if self.session.message.channel_type.name == 'PERSON':
-            return True
-        guild = await bot.client.fetch_guild(self.session.message.ctx.guild.id)
-        user_roles = (await guild.fetch_user(self.session.message.author.id)).roles
+        guild = await bot.client.fetch_guild(channel.guild_id)
+        user_roles = (await guild.fetch_user(author)).roles
         guild_roles = await guild.fetch_roles()
         for i in guild_roles:  # 遍历服务器身分组
             if i.id in user_roles and i.has_permission(0):
                 return True
-        if self.session.message.author.id == guild.master_id:
+        if author == guild.master_id:
             return True
         return False
 
-    def asDisplay(self, text_only=False):
+    def as_display(self, text_only=False):
         if self.session.message.content:
             msg = re.sub(r'\[.*]\((.*)\)', '\\1', self.session.message.content)
             return msg
         return ''
 
-    async def toMessageChain(self):
+    async def to_message_chain(self):
         lst = []
         if self.session.message.type == MessageTypes.TEXT:
             lst.append(Plain(self.session.message.content))
@@ -151,8 +150,13 @@ class MessageSession(MS):
         except Exception:
             Logger.error(traceback.format_exc())
 
+    sendMessage = send_message
+    asDisplay = as_display
+    toMessageChain = to_message_chain
+    checkNativePermission = check_native_permission
+
     class Typing:
-        def __init__(self, msg: MS):
+        def __init__(self, msg: MessageSessionT):
             self.msg = msg
 
         async def __aenter__(self):
@@ -163,23 +167,14 @@ class MessageSession(MS):
             pass
 
 
-class FetchedSession(FS):
-    def __init__(self, targetFrom, targetId):
-        self.target = MsgInfo(targetId=f'{targetFrom}|{targetId}',
-                              senderId=f'{targetFrom}|{targetId}',
-                              targetFrom=targetFrom,
-                              senderFrom=targetFrom,
-                              senderName='',
-                              clientName='Kook', messageId=0, replyId=None)
-        self.session = Session(message=False, target=targetId, sender=targetId)
-        self.parent = MessageSession(self.target, self.session)
+class FetchedSession(Bot.FetchedSession):
 
-    async def sendDirectMessage(self, msgchain, disable_secret_check=False, allow_split_image=True):
-        if self.target.targetFrom == 'Kook|GROUP':
+    async def send_direct_message(self, message_chain, disable_secret_check=False, allow_split_image=True):
+        if self.target.target_from == 'Kook|GROUP':
             get_channel = await bot.client.fetch_public_channel(self.session.target)
             if not get_channel:
                 return False
-        elif self.target.targetFrom == 'Kook|PERSON':
+        elif self.target.target_from == 'Kook|PERSON':
             get_channel = await bot.client.fetch_user(self.session.target)
             Logger.debug(f'get_channel: {get_channel}')
             if not get_channel:
@@ -187,59 +182,64 @@ class FetchedSession(FS):
         else:
             return False
 
-        msgchain = MessageChain(msgchain)
+        message_chain = MessageChain(message_chain)
 
-        for x in msgchain.asSendable(embed=False):
+        for x in message_chain.as_sendable(embed=False):
             if isinstance(x, Plain):
                 await get_channel.send(x.text)
 
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: {x.text}')
+                Logger.info(f'[Bot] -> [{self.target.target_id}]: {x.text}')
             elif isinstance(x, Image):
                 url = await bot.create_asset(open(await x.get(), 'rb'))
                 await get_channel.send(url, type=MessageTypes.IMG)
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: Image: {str(x.__dict__)}')
+                Logger.info(f'[Bot] -> [{self.target.target_id}]: Image: {str(x.__dict__)}')
             elif isinstance(x, Voice):
                 url = await bot.create_asset(open(x.path), 'rb')
                 await get_channel.send(url, type=MessageTypes.AUDIO)
-                Logger.info(f'[Bot] -> [{self.target.targetId}]: Voice: {str(x.__dict__)}')
+                Logger.info(f'[Bot] -> [{self.target.target_id}]: Voice: {str(x.__dict__)}')
 
 
-class FetchTarget(FT):
-    name = 'Kook'
+Bot.FetchedSession = FetchedSession
 
-    @staticmethod
-    async def fetch_target(targetId) -> Union[FetchedSession, bool]:
-        matchChannel = re.match(r'^(Kook\|.*?)\|(.*)', targetId)
-        if matchChannel:
-            return FetchedSession(matchChannel.group(1), matchChannel.group(2))
-        else:
-            return False
+
+class FetchTarget(FetchTargetT):
+    name = client_name
 
     @staticmethod
-    async def fetch_target_list(targetList: list) -> List[FetchedSession]:
+    async def fetch_target(target_id, sender_id=None) -> Union[Bot.FetchedSession]:
+        match_channel = re.match(r'^(Kook\|.*?)\|(.*)', target_id)
+        if match_channel:
+            target_from = sender_from = match_channel.group(1)
+            target_id = match_channel.group(2)
+            if sender_id:
+                match_sender = re.match(r'^(Kook\|User)\|(.*)', sender_id)
+                if match_sender:
+                    sender_from = match_sender.group(1)
+                    sender_id = match_sender.group(2)
+            else:
+                sender_id = target_id
+
+            return Bot.FetchedSession(target_from, target_id, sender_from, sender_id)
+
+    @staticmethod
+    async def fetch_target_list(target_list: list) -> List[Bot.FetchedSession]:
         lst = []
-        for x in targetList:
+        for x in target_list:
             fet = await FetchTarget.fetch_target(x)
             if fet:
                 lst.append(fet)
         return lst
 
     @staticmethod
-    async def post_message(module_name, message, user_list: List[FetchedSession] = None, i18n=False, **kwargs):
+    async def post_message(module_name, message, user_list: List[Bot.FetchedSession] = None, i18n=False, **kwargs):
         if user_list is not None:
             for x in user_list:
                 try:
                     if i18n:
-                        if isinstance(message, dict):
-                            if (gm := message.get(x.parent.locale.locale)) is not None:
-                                await x.sendDirectMessage(gm)
-                            else:
-                                await x.sendDirectMessage(message.get('fallback'))
-                        else:
-                            await x.sendDirectMessage(x.parent.locale.t(message, **kwargs))
+                        await x.send_direct_message(x.parent.locale.t(message, **kwargs))
 
                     else:
-                        await x.sendDirectMessage(message)
+                        await x.send_direct_message(message)
                     if enable_analytics:
                         BotDBUtil.Analytics(x).add('', module_name, 'schedule')
                 except Exception:
@@ -251,16 +251,10 @@ class FetchTarget(FT):
                 if fetch:
                     try:
                         if i18n:
-                            if isinstance(message, dict):
-                                if (gm := message.get(fetch.parent.locale.locale)) is not None:
-                                    await fetch.sendDirectMessage(gm)
-                                else:
-                                    await fetch.sendDirectMessage(message.get('fallback'))
-                            else:
-                                await fetch.sendDirectMessage(fetch.parent.locale.t(message, **kwargs))
+                            await fetch.send_direct_message(fetch.parent.locale.t(message, **kwargs))
 
                         else:
-                            await fetch.sendDirectMessage(message)
+                            await fetch.send_direct_message(message)
                         if enable_analytics:
                             BotDBUtil.Analytics(fetch).add('', module_name, 'schedule')
                     except Exception:

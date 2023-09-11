@@ -13,24 +13,24 @@ async def cytoid_profile(msg: Bot.MessageSession):
     else:
         query_id = CytoidBindInfoManager(msg).get_bind_username()
         if query_id is None:
-            await msg.finish(msg.locale.t('cytoid.message.user.unbound', prefix=msg.prefixes[0]))
+            await msg.finish(msg.locale.t('cytoid.message.user_unbound', prefix=msg.prefixes[0]))
     profile_url = 'http://services.cytoid.io/profile/' + query_id
     try:
         profile = json.loads(await get_url(profile_url, status_code=200))
     except ValueError as e:
         if str(e).startswith('404'):
-            await msg.finish(msg.locale.t('cytoid.message.user.not_found'))
+            await msg.finish(msg.locale.t('cytoid.message.user_not_found'))
         raise e
     uid = profile['user']['uid']
     nick = profile['user']['name']
     if nick is None:
         nick = False
     avatar = profile['user']['avatar']['large']
-    basicExp = profile['exp']['basicExp']
-    levelExp = profile['exp']['levelExp']
-    totalExp = profile['exp']['totalExp']
-    currentLevel = profile['exp']['currentLevel']
-    nextLevelExp = profile['exp']['nextLevelExp']
+    basic_exp = profile['exp']['basicExp']
+    level_exp = profile['exp']['levelExp']
+    total_exp = profile['exp']['totalExp']
+    current_level = profile['exp']['currentLevel']
+    next_level_exp = profile['exp']['nextLevelExp']
     rating = profile['rating']
     grade: dict = profile['grade']
     grade_t = []
@@ -66,12 +66,12 @@ async def cytoid_profile(msg: Bot.MessageSession):
         grade_t.append(f'F: {f}')
     text = f'UID: {uid}\n' + \
            (f'Nickname: {nick}\n' if nick else '') + \
-           f'BasicExp: {basicExp}\n' + \
-           f'LevelExp: {levelExp}\n' + \
-           f'TotalExp: {totalExp}\n' + \
-           f'CurrentLevel: {currentLevel}\n' + \
-           f'NextLevelExp: {nextLevelExp}\n' + \
+           f'BasicExp: {basic_exp}\n' + \
+           f'LevelExp: {level_exp}\n' + \
+           f'TotalExp: {total_exp}\n' + \
+           f'CurrentLevel: {current_level}\n' + \
+           f'NextLevelExp: {next_level_exp}\n' + \
            f'Rating: {rating}\n' + \
            f'Grade: {", ".join(grade_t)}'
-    msgchain = [Image(path=avatar), Plain(text)]
-    await msg.finish(msgchain)
+    message_chain = [Image(path=avatar), Plain(text)]
+    await msg.finish(message_chain)

@@ -14,6 +14,9 @@ from database import BotDBUtil, session, DBVersion
 
 encode = 'UTF-8'
 
+bots_required_configs = {'aiocqhttp': ['qq_host', 'qq_account'], 'discord': ['dc_token'], 'aiogram': ['tg_token'],
+                         'kook': ['kook_token'], 'matrix': ['matrix_homeserver', 'matrix_user', 'matrix_token'], }
+
 
 class RestartBot(Exception):
     pass
@@ -32,7 +35,10 @@ def enqueue_output(out, queue):
 def init_bot():
     base_superuser = Config('base_superuser')
     if base_superuser is not None:
-        BotDBUtil.SenderInfo(base_superuser).edit('isSuperUser', True)
+        if isinstance(base_superuser, str):
+            base_superuser = [base_superuser]
+        for bu in base_superuser:
+            BotDBUtil.SenderInfo(bu).edit('isSuperUser', True)
 
 
 pidlst = []
@@ -70,9 +76,20 @@ def run_bot():
     for bl in lst:
         if bl in disabled_bots:
             continue
+        if bl in bots_required_configs:
+            abort = False
+            for c in bots_required_configs[bl]:
+                if not Config(c):
+                    logger.error(f'Bot {bl} requires config {c} but not found, abort to launch.')
+                    abort = True
+                    break
+            if abort:
+                continue
+
         bot = os.path.abspath(f'{botdir}{bl}/bot.py')
         if os.path.exists(bot):
-            p = subprocess.Popen([sys.executable, bot], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            p = subprocess.Popen([sys.executable, bot, 'subprocess'], shell=False, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
                                  cwd=os.path.abspath('.'), env=envs)
             runlst.append(p)
             pidlst.append(p.pid)

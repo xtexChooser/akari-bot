@@ -1,17 +1,16 @@
 import ipaddress
 import json
 import socket
-
-from core.builtins import Bot
-from core.utils.http import get_url
-from core.component import module
 from typing import Any, Dict
 
-ip = module('ip', desc='{ip.help.desc}',
-           alias='whois', developers=['Dianliang233'])
+from core.builtins import Bot
+from core.component import module
+from core.utils.http import get_url
+
+ip = module('ip', developers=['Dianliang233'])
 
 
-@ip.handle('<ip>')
+@ip.handle('<ip> {{ip.help}}')
 async def _(msg: Bot.MessageSession, ip: str):
     try:
         ipaddress.ip_address(ip)

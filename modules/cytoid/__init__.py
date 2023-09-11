@@ -31,9 +31,9 @@ async def _(msg: Bot.MessageSession):
     else:
         query_id = CytoidBindInfoManager(msg).get_bind_username()
         if query_id is None:
-            await msg.finish(msg.locale.t('cytoid.message.user.unbound', prefix=msg.prefixes[0]))
+            await msg.finish(msg.locale.t('cytoid.message.user_unbound', prefix=msg.prefixes[0]))
     if query:
-        if msg.target.targetFrom == 'TEST|Console':
+        if msg.target.target_from == 'TEST|Console':
             c = 0
         else:
             qc = BotDBUtil.CoolDown(msg, 'cytoid_rank')
@@ -41,14 +41,14 @@ async def _(msg: Bot.MessageSession):
         if c == 0:
             img = await get_rating(query_id, query, msg)
             if 'path' in img:
-                await msg.sendMessage([Image(path=img['path'])], allow_split_image=False)
+                await msg.send_message([Image(path=img['path'])], allow_split_image=False)
             if 'text' in img:
-                await msg.sendMessage(img['text'])
-            if msg.target.targetFrom != 'TEST|Console':
+                await msg.send_message(img['text'])
+            if msg.target.target_from != 'TEST|Console':
                 if img['status']:
                     qc.reset()
         else:
-            await msg.sendMessage(msg.locale.t('cytoid.message.b30.cooldown', time=int(c)))
+            await msg.finish(msg.locale.t('cytoid.message.b30.cooldown', time=int(c)))
 
 
 @cytoid.handle('bind <username> {{cytoid.help.bind}}')

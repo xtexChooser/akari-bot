@@ -54,7 +54,7 @@ async def _(msg: Bot.MessageSession):
 async def config_modules(msg: Bot.MessageSession):
     alias = ModulesManager.modules_aliases
     modules_ = ModulesManager.return_modules_list(
-        targetFrom=msg.target.targetFrom)
+        target_from=msg.target.target_from)
     enabled_modules_list = BotDBUtil.TargetInfo(msg).enabled_modules
     wait_config = [msg.parsed_msg.get(
         '<module>')] + msg.parsed_msg.get('...', [])
@@ -82,7 +82,7 @@ async def config_modules(msg: Bot.MessageSession):
                 if module_ not in modules_:
                     msglist.append(msg.locale.t("core.message.module.enable.not_found", module=module_))
                 else:
-                    if modules_[module_].required_superuser and not msg.checkSuperUser():
+                    if modules_[module_].required_superuser and not msg.check_super_user():
                         msglist.append(msg.locale.t("cparser.superuser.permission.denied"))
                     elif modules_[module_].base:
                         msglist.append(msg.locale.t("core.message.module.enable.base", module=module_))
@@ -96,7 +96,7 @@ async def config_modules(msg: Bot.MessageSession):
         if '-g' in msg.parsed_msg and msg.parsed_msg['-g']:
             get_all_channel = await msg.get_text_channel_list()
             for x in get_all_channel:
-                query = BotDBUtil.TargetInfo(f'{msg.target.targetFrom}|{x}')
+                query = BotDBUtil.TargetInfo(f'{msg.target.target_from}|{x}')
                 query.enable(enable_list)
             for x in enable_list:
                 msglist.append(msg.locale.t("core.message.module.enable.qq_channel_global.success", module=x))
@@ -119,11 +119,7 @@ async def config_modules(msg: Bot.MessageSession):
                                                                         ))
 
                     if modules_[m].desc is not None:
-                        d_ = modules_[m].desc
-                        if locale_str := re.findall(r'\{(.*)}', d_):
-                            for l in locale_str:
-                                d_ = d_.replace(f'{{{l}}}', msg.locale.t(l, fallback_failed_prompt=False))
-                        recommend_modules_help_doc_list.append(d_)
+                        recommend_modules_help_doc_list.append(msg.locale.tl_str(modules_[m].desc))
                     hdoc = CommandParser(modules_[m], msg=msg, bind_prefix=modules_[m].bind_prefix,
                                          command_prefixes=msg.prefixes).return_formatted_help_doc()
                     if hdoc == '':
@@ -145,7 +141,7 @@ async def config_modules(msg: Bot.MessageSession):
                 if module_ not in modules_:
                     msglist.append(msg.locale.t("core.message.module.disable.not_found", module=module_))
                 else:
-                    if modules_[module_].required_superuser and not msg.checkSuperUser():
+                    if modules_[module_].required_superuser and not msg.check_super_user():
                         msglist.append(msg.locale.t("parser.superuser.permission.denied"))
                     elif modules_[module_].base:
                         msglist.append(msg.locale.t("core.message.module.disable.base", module=module_))
@@ -154,7 +150,7 @@ async def config_modules(msg: Bot.MessageSession):
         if '-g' in msg.parsed_msg and msg.parsed_msg['-g']:
             get_all_channel = await msg.get_text_channel_list()
             for x in get_all_channel:
-                query = BotDBUtil.TargetInfo(f'{msg.target.targetFrom}|{x}')
+                query = BotDBUtil.TargetInfo(f'{msg.target.target_from}|{x}')
                 query.disable(disable_list)
             for x in disable_list:
                 msglist.append(msg.locale.t("core.message.module.disable.qqchannel_global.success", module=x))
@@ -166,15 +162,18 @@ async def config_modules(msg: Bot.MessageSession):
                     else:
                         msglist.append(msg.locale.t("core.message.module.disable.success", module=x))
     elif msg.parsed_msg.get('reload', False):
-        if msg.checkSuperUser():
+        if msg.check_super_user():
             def module_reload(module, extra_modules):
-                reloadCnt = ModulesManager.reload_module(module)
-                if reloadCnt > 1:
-                    return f'{msg.locale.t("core.message.module.reload.success", module=module)}' + ('\n' if len(extra_modules) != 0 else '') + \
-                        '\n'.join(extra_modules) + msg.locale.t("core.message.module.reload.with", reloadCnt=reloadCnt - 1)
-                elif reloadCnt == 1:
+                reload_count = ModulesManager.reload_module(module)
+                if reload_count > 1:
                     return f'{msg.locale.t("core.message.module.reload.success", module=module)}' + (
-                        '\n' if len(extra_modules) != 0 else '') + '\n'.join(extra_modules) + msg.locale.t("core.message.module.reload.no_more")
+                        '\n' if len(extra_modules) != 0 else '') + \
+                        '\n'.join(extra_modules) + msg.locale.t("core.message.module.reload.with",
+                                                                reloadCnt=reload_count - 1)
+                elif reload_count == 1:
+                    return f'{msg.locale.t("core.message.module.reload.success", module=module)}' + (
+                        '\n' if len(extra_modules) != 0 else '') + '\n'.join(extra_modules) + msg.locale.t(
+                        "core.message.module.reload.no_more")
                 else:
                     return f'{msg.locale.t("core.message.module.reload.failed")}'
 
@@ -187,8 +186,8 @@ async def config_modules(msg: Bot.MessageSession):
                 else:
                     extra_reload_modules = ModulesManager.search_related_module(module_, False)
                     if len(extra_reload_modules):
-                        confirm = await msg.waitConfirm(msg.locale.t("core.message.module.reload.confirm",
-                                                                     modules='\n'.join(extra_reload_modules)))
+                        confirm = await msg.wait_confirm(msg.locale.t("core.message.module.reload.confirm",
+                                                                      modules='\n'.join(extra_reload_modules)))
                         if not confirm:
                             continue
                     unloaded_list = CFG.get('unloaded_modules')
@@ -199,7 +198,7 @@ async def config_modules(msg: Bot.MessageSession):
         else:
             msglist.append(msg.locale.t("parser.superuser.permission.denied"))
     elif msg.parsed_msg.get('load', False):
-        if msg.checkSuperUser():
+        if msg.check_super_user():
 
             for module_ in wait_config_list:
                 if module_ not in current_unloaded_modules:
@@ -218,12 +217,12 @@ async def config_modules(msg: Bot.MessageSession):
             msglist.append(msg.locale.t("parser.superuser.permission.denied"))
 
     elif msg.parsed_msg.get('unload', False):
-        if msg.checkSuperUser():
+        if msg.check_super_user():
 
             for module_ in wait_config_list:
                 if module_ not in modules_:
                     if module_ in err_modules:
-                        if await msg.waitConfirm(msg.locale.t("core.message.module.unload.unavailable.confirm")):
+                        if await msg.wait_confirm(msg.locale.t("core.message.module.unload.unavailable.confirm")):
                             unloaded_list = CFG.get('unloaded_modules')
                             if not unloaded_list:
                                 unloaded_list = []
@@ -236,7 +235,7 @@ async def config_modules(msg: Bot.MessageSession):
                     else:
                         msglist.append(msg.locale.t("core.message.module.unload.error"))
                     continue
-                if await msg.waitConfirm(msg.locale.t("core.message.module.unload.confirm")):
+                if await msg.wait_confirm(msg.locale.t("core.message.module.unload.confirm")):
                     if ModulesManager.unload_module(module_):
                         msglist.append(msg.locale.t("core.message.module.unload.success", module=module_))
                         unloaded_list = CFG.get('unloaded_modules')
@@ -254,11 +253,11 @@ async def config_modules(msg: Bot.MessageSession):
         if not recommend_modules_help_doc_list:
             await msg.finish('\n'.join(msglist))
         else:
-            await msg.sendMessage('\n'.join(msglist))
+            await msg.send_message('\n'.join(msglist))
     if recommend_modules_help_doc_list and ('-g' not in msg.parsed_msg or not msg.parsed_msg['-g']):
-        confirm = await msg.waitConfirm(msg.locale.t("core.message.module.recommends",
-                                                     msgs='\n'.join(recommend_modules_list) + '\n\n' +
-                                                     '\n'.join(recommend_modules_help_doc_list)))
+        confirm = await msg.wait_confirm(msg.locale.t("core.message.module.recommends",
+                                                      msgs='\n'.join(recommend_modules_list) + '\n\n' +
+                                                           '\n'.join(recommend_modules_help_doc_list)))
         if confirm:
             if msg.data.enable(recommend_modules_list):
                 msglist = []
@@ -278,7 +277,7 @@ hlp = module('help',
 @hlp.command('<module> {{core.help.module.help.detail}}')
 async def bot_help(msg: Bot.MessageSession):
     module_list = ModulesManager.return_modules_list(
-        targetFrom=msg.target.targetFrom)
+        target_from=msg.target.target_from)
     alias = ModulesManager.modules_aliases
     if msg.parsed_msg is not None:
         msgs = []
@@ -310,11 +309,8 @@ async def bot_help(msg: Bot.MessageSession):
                     if pattern:
                         desc = regex.desc
                         if desc:
-                            if locale_str := re.findall(r'\{(.*)}', desc):
-                                for l in locale_str:
-                                    desc = desc.replace(f'{{{l}}}', msg.locale.t(l, fallback_failed_prompt=False))
                             doc += f'\n{pattern} ' + msg.locale.t("core.message.module.help.regex.detail",
-                                                                  msg=desc)
+                                                                  msg=msg.locale.tl_str(desc))
                         else:
                             doc += f'\n{pattern} ' + msg.locale.t("core.message.module.help.regex.no_information")
             module_alias = module_.alias
@@ -351,7 +347,7 @@ async def bot_help(msg: Bot.MessageSession):
 @hlp.command('{{core.help.module.help}}')
 async def _(msg: Bot.MessageSession):
     module_list = ModulesManager.return_modules_list(
-        targetFrom=msg.target.targetFrom)
+        target_from=msg.target.target_from)
     target_enabled_list = msg.enabled_modules
     legacy_help = True
     if msg.Feature.image:
@@ -367,11 +363,7 @@ async def _(msg: Bot.MessageSession):
                                       command_prefixes=msg.prefixes)
 
                 if module_.desc is not None:
-                    d_ = module_.desc
-                    if locale_str := re.findall(r'\{(.*)}', d_):
-                        for l in locale_str:
-                            d_ = d_.replace(f'{{{l}}}', msg.locale.t(l, fallback_failed_prompt=False))
-                    doc_.append(d_)
+                    doc_.append(msg.locale.tl_str(module_.desc))
                 if help_.args:
                     doc_.append(help_.return_formatted_help_doc())
                 doc = '\n'.join(doc_)
@@ -386,11 +378,8 @@ async def _(msg: Bot.MessageSession):
                         if pattern:
                             desc = regex.desc
                             if desc:
-                                if locale_str := re.findall(r'\{(.*)}', desc):
-                                    for l in locale_str:
-                                        desc = desc.replace(f'{{{l}}}', msg.locale.t(l, fallback_failed_prompt=False))
                                 doc += f'\n{pattern} ' + msg.locale.t("core.message.module.help.regex.detail",
-                                                                      msg=desc)
+                                                                      msg=msg.locale.tl_str(desc))
                             else:
                                 doc += f'\n{pattern} ' + msg.locale.t("core.message.module.help.regex.no_information")
                 appends.append(doc)
@@ -423,7 +412,8 @@ async def _(msg: Bot.MessageSession):
                     legacy_help = False
                     await msg.finish([Image(render),
                                       Plain(msg.locale.t("core.message.module.help.more_information",
-                                                         prefix=msg.prefixes[0], help_url=Config('help_url'), donate_url=Config('donate_url')))])
+                                                         prefix=msg.prefixes[0], help_url=Config('help_url'),
+                                                         donate_url=Config('donate_url')))])
         except Exception:
             traceback.print_exc()
     if legacy_help:
@@ -449,7 +439,7 @@ async def _(msg: Bot.MessageSession):
 
 async def modules_help(msg: Bot.MessageSession):
     module_list = ModulesManager.return_modules_list(
-        targetFrom=msg.target.targetFrom)
+        target_from=msg.target.target_from)
     legacy_help = True
     if msg.Feature.image:
         try:
@@ -459,18 +449,14 @@ async def modules_help(msg: Bot.MessageSession):
                 module_ = module_list[x]
                 if x[0] == '_':
                     continue
-                if module_.base or module_.required_superuser:
+                if module_.base or module_.required_superuser or module_.required_base_superuser:
                     continue
                 appends = [module_.bind_prefix]
                 doc_ = []
                 help_ = CommandParser(
                     module_, bind_prefix=module_.bind_prefix, command_prefixes=msg.prefixes, msg=msg)
                 if module_.desc is not None:
-                    desc = module_.desc
-                    if locale_str := re.findall(r'\{(.*)}', desc):
-                        for l in locale_str:
-                            desc = desc.replace(f'{{{l}}}', msg.locale.t(l, fallback_failed_prompt=False))
-                    doc_.append(desc)
+                    doc_.append(msg.locale.tl_str(module_.desc))
                 if help_.args:
                     doc_.append(help_.return_formatted_help_doc())
                 doc = '\n'.join(doc_)
@@ -485,11 +471,8 @@ async def modules_help(msg: Bot.MessageSession):
                         if pattern:
                             desc = regex.desc
                             if desc:
-                                if locale_str := re.findall(r'\{(.*)}', desc):
-                                    for l in locale_str:
-                                        desc = desc.replace(f'{{{l}}}', msg.locale.t(l, fallback_failed_prompt=False))
                                 doc += f'\n{pattern} ' + msg.locale.t("core.message.module.help.regex.detail",
-                                                                      msg=desc)
+                                                                      msg=msg.locale.tl_str(desc))
                             else:
                                 doc += f'\n{pattern} ' + msg.locale.t("core.message.module.help.regex.no_information")
                 appends.append(doc)
@@ -520,7 +503,7 @@ async def modules_help(msg: Bot.MessageSession):
         for x in module_list:
             if x[0] == '_':
                 continue
-            if module_list[x].base or module_list[x].required_superuser:
+            if module_list[x].base or module_list[x].required_superuser or module_list[x].required_base_superuser:
                 continue
             module_.append(module_list[x].bind_prefix)
         help_msg.append(' | '.join(module_))

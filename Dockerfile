@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11
 
 LABEL org.opencontainers.image.url https://github.com/Teahouse-Studios/akari-bot
 LABEL org.opencontainers.image.documentation https://bot.teahouse.team/
@@ -11,5 +11,5 @@ MAINTAINER Teahouse Studios <admin@teahou.se>
 WORKDIR /akari-bot
 ADD . .
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-deps
 CMD ["python", "./bot.py"]
