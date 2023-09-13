@@ -10,7 +10,7 @@ from core.builtins.utils import confirm_command
 from core.exceptions import WaitCancelException
 from core.types.message import MessageSession as MessageSessionT, MsgInfo, Session
 from core.utils.i18n import Locale
-from database import BotDBUtil
+from database import BotDBUtil, AsyncBotDBUtil
 
 
 class MessageSession(MessageSessionT):
@@ -21,7 +21,13 @@ class MessageSession(MessageSessionT):
         self.session = session
         self.sent: List[MessageChain] = []
         self.prefixes: List[str] = []
-        self.data = BotDBUtil.TargetInfo(self.target.target_id)
+        self.data = None
+        self.custom_admins = []
+        self.locale = None
+
+    async def init_async(self):
+        self.data = AsyncBotDBUtil.TargetInfo(self.target.target_id)
+        await self.data.query_data()
         self.muted = self.data.is_muted
         self.options = self.data.options
         self.custom_admins = self.data.custom_admins

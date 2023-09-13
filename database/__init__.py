@@ -5,11 +5,13 @@ from typing import Union, List
 import ujson as json
 from tenacity import retry, stop_after_attempt
 
+from sqlalchemy.future import select
 from core.types.message import MessageSession, FetchTarget, FetchedSession
-from database.orm import Session
+from database.orm import Session, AsyncSession
 from database.tables import *
 
 session = Session.session
+async_session = AsyncSession.session
 
 
 def auto_rollback_error(func):
@@ -441,4 +443,21 @@ class BotDBUtil:
             return True
 
 
-__all__ = ["BotDBUtil", "auto_rollback_error", "session"]
+class AsyncBotDBUtil:
+    database_version = BotDBUtil.database_version
+
+    class TargetInfo(BotDBUtil.TargetInfo):
+        query = None
+
+        def __init__(self, msg: Union[MessageSession, FetchTarget, str]):
+            if isinstance(msg, (MessageSession, FetchTarget)):
+                self.target_id = str(msg.target.target_id)
+            else:
+                self.target_id = msg
+
+        async def query_data(self):
+            async with async_session as s:
+                self.query = (await s.scalars(select(TargetInfo).filter_by(targetId=self.target_id))).first()
+
+
+__all__ = ["BotDBUtil", "AsyncBotDBUtil", "auto_rollback_error", "session"]

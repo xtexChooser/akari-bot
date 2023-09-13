@@ -81,6 +81,7 @@ async def parser(msg: Bot.MessageSession, require_enable_modules: bool = True, p
     identify_str = f'[{msg.target.sender_id}{f" ({msg.target.target_id})" if msg.target.target_from != msg.target.sender_from else ""}]'
     # Logger.info(f'{identify_str} -> [Bot]: {display}')
     try:
+        await msg.init_async()
         asyncio.create_task(MessageTaskManager.check(msg))
         modules = ModulesManager.return_modules_list(msg.target.target_from)
 
