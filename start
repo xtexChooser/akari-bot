@@ -27,7 +27,7 @@ while true; do
         merge \
         --no-edit -m "Merge upstream" \
         --signoff --no-stat --no-squash \
-        MERGE_HEAD
+        FETCH_HEAD
     if [[ -e ".git/MERGE_HEAD" ]]; then
         echo "Failed to auto-merge"
         git merge --abort
