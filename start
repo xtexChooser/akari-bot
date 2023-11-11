@@ -12,9 +12,11 @@ while true; do
     timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 5m pip3 install -q -r requirements.txt
     exitStatus=0
     if ! timeout --preserve-status --signal=QUIT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot subprocess; then
-        if [[ "$?" != "233" ]]; then
-            exitStatus=$?
+        exitStatus=$?
+        if [[ "$exitStatus" != "233" ]]; then
             sleep 30s
+        else
+            exitStatus=0
         fi
     fi
     curl -sS "$HEALTHCHECKS_URL/$exitStatus"
