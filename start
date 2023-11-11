@@ -9,7 +9,7 @@ while true; do
     git fetch origin master
     git reset --hard origin/master
 
-    timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 5m pip3 install -r requirements.txt
+    timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 5m pip3 install -q -r requirements.txt
     exitStatus=0
     if ! timeout --preserve-status --signal=QUIT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot subprocess; then
         exitStatus=$?
@@ -36,7 +36,7 @@ while true; do
         echo "Testing auto-merged code"
         {
             set -xe
-            timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 3m pip3 install -r requirements.txt
+            timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 3m pip3 install -q -r requirements.txt
             timeout --preserve-status --signal=QUIT --verbose --kill-after=5s 1m python3 -m bots.matrix.bot subprocess
             git push
         }
