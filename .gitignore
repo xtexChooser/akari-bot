@@ -2,6 +2,7 @@
 __pycache__/
 config/*.cfg
 config/*.toml
+config/*.sh
 .idea
 .vscode
 assets/mcversion.txt
