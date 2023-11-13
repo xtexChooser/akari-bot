@@ -11,7 +11,7 @@ while true; do
 
     timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 5m pip3 install -q -r requirements.txt
     exitStatus=0
-    if ! timeout --preserve-status --signal=QUIT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot subprocess; then
+    if ! timeout --preserve-status --signal=TERM --verbose --kill-after=30s 1h python3 -m bots.matrix.bot subprocess; then
         exitStatus=$?
         if [[ "$exitStatus" != "233" ]]; then
             sleep 30s
@@ -41,7 +41,7 @@ while true; do
         {
             set -xe
             timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 3m pip3 install -q -r requirements.txt
-            timeout --preserve-status --signal=QUIT --verbose --kill-after=5s 1m python3 -m bots.matrix.bot subprocess
+            timeout --preserve-status --signal=ILL --verbose --kill-after=5s 1m python3 -m bots.matrix.bot subprocess
             git push
         }
         curl -sS --retry 3 "$HEALTHCHECKS_URL_AUTOMERGE/$?"
