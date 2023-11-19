@@ -10,14 +10,12 @@ while true; do
     git reset --hard origin/master
 
     timeout --preserve-status --signal=ABRT --verbose --kill-after=5s 5m pip3 install -q -r requirements.txt
-    exitStatus=0
-    if ! timeout --preserve-status --signal=QUIT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot subprocess; then
-        exitStatus=$?
-        if [[ "$exitStatus" != "233" ]]; then
-            sleep 30s
-        else
-            exitStatus=0
-        fi
+    timeout --preserve-status --signal=QUIT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot subprocess
+    exitStatus=$?
+    [[ "$exitStatus" == "233" ]] && exitStatus=0
+    if [[ "$exitStatus" != "0" ]]; then
+        echo Bot stopped unexpectedly
+        sleep 30s
     fi
     curl -sS "$HEALTHCHECKS_URL/$exitStatus"
 
