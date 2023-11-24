@@ -20,9 +20,9 @@ while true; do
     curl -sS "$HEALTHCHECKS_URL/$exitStatus"
 
     echo "Auto merging upstream"
+    git pull --all --prune
     headCommit="$(git rev-parse HEAD)"
     curl -sS "$HEALTHCHECKS_URL_AUTOMERGE/start"
-    git pull --all --prune
     git fetch https://github.com/Teahouse-Studios/akari-bot.git master
     git -c user.email="bot-exozyme-akaribot@xtexx.eu.org" \
         -c user.name="Akari Bot @ exozy.me" \
