@@ -98,6 +98,10 @@ async def config_gu(msg: Bot.MessageSession):
         else:
             await msg.finish(msg.locale.t("core.message.admin.already"))
     if 'remove' in msg.parsed_msg:
+        if user == msg.target.sender_id:
+            confirm = await msg.wait_confirm(msg.locale.t("core.message.confirm"))
+            if not confirm:
+                return
         if user:
             if msg.data.remove_custom_admin(user):
                 await msg.finish(msg.locale.t("core.message.admin.remove.success", user=user))
@@ -221,7 +225,7 @@ leave = module(
 
 @leave.handle()
 async def _(msg: Bot.MessageSession):
-    confirm = await msg.wait_confirm(msg.locale.t('core.message.leave.confirm'))
+    confirm = await msg.wait_confirm(msg.locale.t('core.message.confirm'))
     if confirm:
         await msg.send_message(msg.locale.t('core.message.leave.success'))
         await msg.call_api('set_group_leave', group_id=msg.session.target)
