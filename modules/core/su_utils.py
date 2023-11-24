@@ -249,7 +249,7 @@ async def _(msg: Bot.MessageSession):
         await msg.finish(msg.locale.t("core.message.abuse.unban.success", user=user))
 
 
-if Info.subprocess:
+if Info.subprocess or True:  # always enable restart on exozyme
     rst = module(
         'restart',
         alias=[
@@ -376,6 +376,7 @@ async def _(msg: Bot.MessageSession):
 
 rse = module('raise', developers=['OasisAkari, DoroWolf'], required_superuser=True, base=True)
 
+
 @rse.handle()
 async def _(msg: Bot.MessageSession):
     e = msg.locale.t("core.message.raise")
@@ -396,6 +397,7 @@ def isfloat(num):
         return True
     except ValueError:
         return False
+
 
 def isint(num):
     try:
@@ -422,7 +424,7 @@ async def _(msg: Bot.MessageSession):
     elif re.match(r'^\[.*\]$', value):
         try:
             value = json.loads(value)
-        except:
+        except BaseException:
             await msg.finish(msg.locale.t("core.message.config.write.failed"))
 
     CFG.write(msg.parsed_msg['<k>'], value, msg.parsed_msg['-s'])
