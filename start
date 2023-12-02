@@ -38,8 +38,8 @@ while true; do
         echo "Testing auto-merged code"
         {
             set -xe
-            timeout --preserve-status --signal=KILL --verbose --kill-after=5s 3m pip3 install -q -r requirements.txt
-            timeout --preserve-status --signal=KILL --verbose --kill-after=2s 1m python3 -m bots.matrix.bot
+            timeout --preserve-status --signal=TERM --verbose --kill-after=5s 3m pip3 install -q -r requirements.txt
+            timeout --preserve-status --signal=TERM --verbose --kill-after=2s 1m python3 -m bots.matrix.bot
             git push
         }
         curl -sS --retry 3 "$HEALTHCHECKS_URL_AUTOMERGE/$?"
