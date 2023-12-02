@@ -299,6 +299,7 @@ if Info.subprocess or True:  # always enable restart on exozyme
         # confirm = await msg.wait_confirm(msg.locale.t("core.message.confirm"), append_instruction=False)
         # if confirm:
         if True:
+            ExecutionLockList.remove(msg)
             restart_time.append(datetime.now().timestamp())
             await wait_for_restart(msg)
             write_version_cache(msg)
