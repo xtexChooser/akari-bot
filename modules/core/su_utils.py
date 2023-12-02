@@ -27,7 +27,7 @@ su = module('superuser', alias='su', developers=['OasisAkari', 'Dianliang233'], 
 async def add_su(msg: Bot.MessageSession):
     user = msg.parsed_msg['<UserID>']
     if not user.startswith(f'{msg.target.sender_from}|'):
-        await msg.finish(msg.locale.t("core.message.superuser.invalid", prefix=msg.prefixes[0]))
+        await msg.finish(msg.locale.t("core.message.superuser.invalid", target=msg.target.sender_from))
     if user:
         if BotDBUtil.SenderInfo(user).edit('isSuperUser', True):
             await msg.finish(msg.locale.t("success"))
@@ -37,7 +37,7 @@ async def add_su(msg: Bot.MessageSession):
 async def del_su(msg: Bot.MessageSession):
     user = msg.parsed_msg['<UserID>']
     if not user.startswith(f'{msg.target.sender_from}|'):
-        await msg.finish(msg.locale.t("core.message.superuser.invalid", prefix=msg.prefixes[0]))
+        await msg.finish(msg.locale.t("core.message.superuser.invalid", target=msg.target.sender_from))
     if user == msg.target.sender_id:
         confirm = await msg.wait_confirm(msg.locale.t("core.message.confirm"), append_instruction=False)
         if not confirm:
@@ -260,7 +260,7 @@ if Info.subprocess or True:  # always enable restart on exozyme
             'update',
             'update&restart',
             'u&r'],
-        developers=['OasisAkari'],
+        developers=['OasisAkari', 'xtex'],
         required_superuser=True,
         base=True)
 
@@ -296,8 +296,9 @@ if Info.subprocess or True:  # always enable restart on exozyme
 
     @rst.handle()
     async def restart_bot(msg: Bot.MessageSession):
-        confirm = await msg.wait_confirm(msg.locale.t("core.message.confirm"), append_instruction=False)
-        if confirm:
+        # confirm = await msg.wait_confirm(msg.locale.t("core.message.confirm"), append_instruction=False)
+        # if confirm:
+        if True:
             restart_time.append(datetime.now().timestamp())
             await wait_for_restart(msg)
             write_version_cache(msg)
@@ -377,7 +378,7 @@ say = module('say', developers=['OasisAkari'], required_superuser=True, base=Tru
 async def _(msg: Bot.MessageSession):
     await msg.finish(msg.parsed_msg['<display_msg>'], quote=False)
 
-rse = module('raise', developers=['OasisAkari, DoroWolf'], required_superuser=True, base=True)
+rse = module('raise', developers=['OasisAkari'], required_superuser=True, base=True)
 
 
 @rse.handle()
