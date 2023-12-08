@@ -29,7 +29,7 @@ while true; do
         merge \
         --no-edit -m "Merge upstream" \
         --signoff --no-stat --no-squash \
-        FETCH_HEAD
+        FETCH_HEAD || true
     if [[ -e ".git/MERGE_HEAD" ]]; then
         echo "Failed to auto-merge"
         git merge --abort
@@ -41,6 +41,7 @@ while true; do
             timeout --preserve-status --signal=INT --verbose --kill-after=5s 3m pip3 install -q -r requirements.txt
             timeout --preserve-status --signal=INT --verbose --kill-after=2s 1m python3 -m bots.matrix.bot
             git push
+            set +xe
         }
         curl -sS --retry 3 "$HEALTHCHECKS_URL_AUTOMERGE/$?"
     else
