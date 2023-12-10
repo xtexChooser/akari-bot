@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Union, Dict
+from typing import List, Self, Union, Dict
 
 from core.exceptions import FinishedException
 from .chain import MessageChain
@@ -200,6 +200,13 @@ class MessageSession:
         用于检查消息发送者原本在聊天平台中是否具有管理员权限。
         """
         raise NotImplementedError
+
+    def is_quick_confirm(self, target: Self = None) -> bool:
+        """
+        用于检查消息是否可用作快速确认事件。
+        :param target: 确认的目标消息
+        """
+        return False
 
     async def fake_forward_msg(self, nodelist):
         """
