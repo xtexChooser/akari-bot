@@ -66,7 +66,8 @@ async def load_prompt(bot) -> None:
                 await m.send_direct_message(m.parent.locale.t('error.loader.load.success'))
             open_loader_cache.close()
             open_author_cache.close()
-            os.remove(author_cache)
+            if not os.path.exists(no_load_succ):
+                os.remove(author_cache)
             os.remove(loader_cache)
 
     update_log_cache = os.path.abspath(PrivateAssets.path + '/xtex_cache_update_log')
