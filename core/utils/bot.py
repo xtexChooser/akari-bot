@@ -53,6 +53,7 @@ async def load_prompt(bot) -> None:
     author_cache = os.path.abspath(PrivateAssets.path + '/cache_restart_author')
     loader_cache = os.path.abspath(PrivateAssets.path + '/.cache_loader')
     no_load_succ = os.path.abspath(PrivateAssets.path + '/xtex_no_load_succ')
+    author = None
     if os.path.exists(author_cache):
         open_author_cache = open(author_cache, 'r')
         author = json.loads(open_author_cache.read())['ID']
