@@ -85,6 +85,7 @@ reexc = module('stop', required_superuser=True, base=True)
 async def stop_bot(msg: Bot.MessageSession):
     if True:
         ExecutionLockList.remove(msg)
+        restart_time.append(datetime.now().timestamp())
         await wait_for_restart(msg)
         write_version_cache(msg)
         sys.exit(234)
@@ -97,6 +98,7 @@ reexc = module('reexec', required_superuser=True, base=True)
 async def reexec_bot(msg: Bot.MessageSession):
     if True:
         ExecutionLockList.remove(msg)
+        restart_time.append(datetime.now().timestamp())
         await wait_for_restart(msg)
         write_version_cache(msg)
         sys.exit(235)
