@@ -11,9 +11,10 @@ import ujson as json
 from dateutil.relativedelta import relativedelta
 
 from config import Config, CFG
-from core.builtins import Bot, PrivateAssets, Image, Plain, ExecutionLockList, Temp, MessageTaskManager
+from core.builtins import Bot, Image, Plain, Temp
 from core.component import module
 from core.loader import ModulesManager
+from core.logger import Logger
 from core.parser.message import remove_temp_ban
 from core.scheduler import CronTrigger
 from core.tos import pardon_user, warn_user
@@ -22,7 +23,7 @@ from core.utils.info import Info
 from core.utils.storedata import get_stored_list, update_stored_list
 from database import BotDBUtil
 
-su = module('superuser', alias='su', developers=['OasisAkari', 'Dianliang233'], required_superuser=True, base=True)
+su = module('superuser', alias='su', required_superuser=True, base=True)
 
 
 @su.command('add <UserID>')
@@ -146,7 +147,7 @@ async def _(msg: Bot.MessageSession):
         await msg.finish([Plain(result), Image(path)])
 
 
-purge = module('purge', developers=['DoroWolf'], required_superuser=True, base=True)
+purge = module('purge', required_superuser=True, base=True)
 
 
 @purge.command()
@@ -214,7 +215,7 @@ async def _(msg: Bot.MessageSession):
     await msg.finish(msg.locale.t("core.message.set.help.option.success", k=k, v=v))
 
 
-ae = module('abuse', alias='ae', developers=['Dianliang233'], required_superuser=True, base=True)
+ae = module('abuse', alias='ae', required_superuser=True, base=True)
 
 
 @ae.command('check <user>')
@@ -282,60 +283,8 @@ async def _(msg: Bot.MessageSession):
         await msg.finish(msg.locale.t("core.message.abuse.unban.success", user=user))
 
 
-if Info.subprocess or True:  # always enable restart on exozyme
-    rst = module(
-        'restart',
-        alias=[
-            'update',
-            'update&restart',
-            'u&r'],
-        developers=['OasisAkari', 'xtex'],
-        required_superuser=True,
-        base=True)
-
-    def restart():
-        sys.exit(233)
-
-    def write_version_cache(msg: Bot.MessageSession):
-        update = os.path.abspath(PrivateAssets.path + '/cache_restart_author')
-        write_version = open(update, 'w')
-        write_version.write(json.dumps({'From': msg.target.target_from, 'ID': msg.target.target_id}))
-        write_version.close()
-
-    restart_time = []
-
-    async def wait_for_restart(msg: Bot.MessageSession):
-        get = ExecutionLockList.get()
-        if datetime.now().timestamp() - restart_time[0] < 60:
-            if len(get) != 0:
-                await msg.send_message(msg.locale.t("core.message.restart.wait", count=len(get)))
-                await asyncio.sleep(10)
-                return await wait_for_restart(msg)
-            else:
-                await msg.send_message(msg.locale.t("core.message.restart.restarting"))
-                get_wait_list = MessageTaskManager.get()
-                for x in get_wait_list:
-                    for y in get_wait_list[x]:
-                        for z in get_wait_list[x][y]:
-                            if get_wait_list[x][y][z]['active']:
-                                await z.send_message(z.locale.t("core.message.restart.prompt"))
-
-        else:
-            await msg.send_message(msg.locale.t("core.message.restart.timeout"))
-
-    @rst.command()
-    async def restart_bot(msg: Bot.MessageSession):
-        # confirm = await msg.wait_confirm(msg.locale.t("core.message.confirm"), append_instruction=False)
-        # if confirm:
-        if True:
-            ExecutionLockList.remove(msg)
-            restart_time.append(datetime.now().timestamp())
-            await wait_for_restart(msg)
-            write_version_cache(msg)
-            restart()
-
 if Bot.FetchTarget.name == 'QQ':
-    resume = module('resume', developers=['OasisAkari'], required_base_superuser=True)
+    resume = module('resume', required_base_superuser=True)
 
     @resume.command()
     async def resume_sending_group_message(msg: Bot.MessageSession):
@@ -379,7 +328,7 @@ if Bot.FetchTarget.name == 'QQ':
         Temp.data['waiting_for_send_group_message'] = []
         await msg.finish(msg.locale.t("core.message.resume.clear"))
 
-    forward_msg = module('forward_msg', developers=['OasisAkari'], required_superuser=True, base=True)
+    forward_msg = module('forward_msg', required_superuser=True, base=True)
 
     @forward_msg.command()
     async def _(msg: Bot.MessageSession):
@@ -393,7 +342,7 @@ if Bot.FetchTarget.name == 'QQ':
         else:
             await msg.finish(msg.locale.t('core.message.forward_msg.disable'))
 
-echo = module('echo', developers=['OasisAkari'], required_superuser=True, base=True)
+echo = module('echo', required_superuser=True, base=True)
 
 
 @echo.command('<display_msg>')
@@ -401,14 +350,14 @@ async def _(msg: Bot.MessageSession):
     await msg.finish(msg.parsed_msg['<display_msg>'])
 
 
-say = module('say', developers=['OasisAkari'], required_superuser=True, base=True)
+say = module('say', required_superuser=True, base=True)
 
 
 @say.command('<display_msg>')
 async def _(msg: Bot.MessageSession):
     await msg.finish(msg.parsed_msg['<display_msg>'], quote=False)
 
-rse = module('raise', developers=['OasisAkari'], required_superuser=True, base=True)
+rse = module('raise', required_superuser=True, base=True)
 
 
 @rse.command()
@@ -418,11 +367,14 @@ async def _(msg: Bot.MessageSession):
 
 
 if Config('enable_eval'):
-    _eval = module('eval', developers=['Dianliang233'], required_superuser=True, base=True)
+    _eval = module('eval', required_superuser=True, base=True)
 
     @_eval.command('<display_msg>')
     async def _(msg: Bot.MessageSession):
         await msg.finish(str(eval(msg.parsed_msg['<display_msg>'], {'msg': msg})))
+
+
+_config = module('config', required_superuser=True, alias='cfg', base=True)
 
 
 def isfloat(num):
@@ -439,9 +391,6 @@ def isint(num):
         return True
     except ValueError:
         return False
-
-
-_config = module('config', developers=['OasisAkari'], required_superuser=True, alias='cfg', base=True)
 
 
 @_config.command('write <k> <v> [-s]')
@@ -474,7 +423,7 @@ async def _(msg: Bot.MessageSession):
 
 
 if Config('openai_api_key'):
-    petal = module('petal', developers=['Dianliang233'], base=True, alias='petals')
+    petal = module('petal', base=True, alias='petals')
 
     @petal.command()
     async def _(msg: Bot.MessageSession):
@@ -500,7 +449,6 @@ if Config('openai_api_key'):
             target.modify_petal(int(petal))
             await msg.finish(msg.locale.t('core.message.petal.modify.self', add_petal=petal, petal=target.petal))
 
-
 if Bot.client_name == 'QQ':
     post_whitelist = module('post_whitelist', required_superuser=True, base=True)
 
@@ -512,7 +460,7 @@ if Bot.client_name == 'QQ':
         target_data.edit_option(k, v)
         await msg.finish(msg.locale.t("core.message.set.help.option.success", k=k, v=v))
 
-    lagrange = module('lagrange', developers=['OasisAkari'], required_superuser=True, base=True)
+    lagrange = module('lagrange', required_superuser=True, base=True)
 
     @lagrange.command()
     async def _(msg: Bot.MessageSession):
