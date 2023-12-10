@@ -76,3 +76,15 @@ if Info.subprocess or True:
             await wait_for_restart(msg)
             write_version_cache(msg)
             restart()
+
+
+stp = module('stop', required_superuser=True, base=True)
+
+
+@stp.command()
+async def stop_bot(msg: Bot.MessageSession):
+    if True:
+        ExecutionLockList.remove(msg)
+        await wait_for_restart(msg)
+        write_version_cache(msg)
+        sys.exit(234)

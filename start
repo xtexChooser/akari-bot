@@ -14,6 +14,7 @@ while true; do
     timeout --preserve-status --signal=INT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot
     exitStatus=$?
     [[ "$exitStatus" == "233" ]] && exitStatus=0
+    [[ "$exitStatus" == "234" ]] && exit
     if [[ "$exitStatus" != "0" ]]; then
         echo Bot stopped unexpectedly
         sleep 30s
