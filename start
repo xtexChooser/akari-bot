@@ -15,6 +15,7 @@ while true; do
     exitStatus=$?
     [[ "$exitStatus" == "233" ]] && exitStatus=0
     [[ "$exitStatus" == "234" ]] && exit
+    [[ "$exitStatus" == "235" ]] && exec ./start
     if [[ "$exitStatus" != "0" ]]; then
         echo Bot stopped unexpectedly
         sleep 30s

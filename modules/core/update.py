@@ -78,13 +78,25 @@ if Info.subprocess or True:
             restart()
 
 
-stp = module('stop', required_superuser=True, base=True)
+reexc = module('stop', required_superuser=True, base=True)
 
 
-@stp.command()
+@reexc.command()
 async def stop_bot(msg: Bot.MessageSession):
     if True:
         ExecutionLockList.remove(msg)
         await wait_for_restart(msg)
         write_version_cache(msg)
         sys.exit(234)
+
+
+reexc = module('reexec', required_superuser=True, base=True)
+
+
+@reexc.command()
+async def reexec_bot(msg: Bot.MessageSession):
+    if True:
+        ExecutionLockList.remove(msg)
+        await wait_for_restart(msg)
+        write_version_cache(msg)
+        sys.exit(235)
