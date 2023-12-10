@@ -28,7 +28,7 @@ async def _(msg: Bot.MessageSession):
     qc = CoolDown('call_openai', msg)
     c = qc.check(60)
     if c == 0 or msg.target.target_from == 'TEST|Console' or is_superuser:
-        f_msg, _ = await msg.wait_next_message(msg.locale.t('summary.message'), append_instruction=False)
+        f_msg = await msg.wait_next_message(msg.locale.t('summary.message'), append_instruction=False)
         try:
             f = re.search(r'\[Ke:forward,id=(.*?)\]', f_msg.as_display()).group(1)
         except AttributeError:

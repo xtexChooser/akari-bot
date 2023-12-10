@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Self, Union, Dict
+from typing import List, Union, Dict
 
 from core.exceptions import FinishedException
 from .chain import MessageChain
@@ -141,13 +141,13 @@ class MessageSession:
         """
         raise NotImplementedError
 
-    async def wait_next_message(self, message_chain=None, quote=True, delete=False, append_instruction=True) -> (Self, FinishedSession):
+    async def wait_next_message(self, message_chain=None, quote=True, delete=False, append_instruction=True):
         """
         一次性模板，用于等待对象的下一条消息。
         :param message_chain: 需要发送的确认消息，可不填
         :param quote: 是否引用传入dict中的消息（默认为True）
         :param delete: 是否在触发后删除消息
-        :return: 下一条消息的MessageChain对象和发出的提示消息
+        :return: 下一条消息的MessageChain对象
         """
         raise NotImplementedError
 
@@ -200,13 +200,6 @@ class MessageSession:
         用于检查消息发送者原本在聊天平台中是否具有管理员权限。
         """
         raise NotImplementedError
-
-    def is_quick_confirm(self, target: Union[Self, FinishedSession] = None) -> bool:
-        """
-        用于检查消息是否可用作快速确认事件。
-        :param target: 确认的目标消息
-        """
-        return False
 
     async def fake_forward_msg(self, nodelist):
         """

@@ -4,7 +4,7 @@ from typing import Union
 
 import filetype
 
-from core.builtins import Bot, Plain, Image, Voice, Url, confirm_command, quick_confirm
+from core.builtins import Bot, Plain, Image, Voice, Url, confirm_command
 from core.component import module
 from core.exceptions import AbuseWarning
 from core.logger import Logger
@@ -346,12 +346,10 @@ async def query_pages(session: Union[Bot.MessageSession, QueryInfo], title: Unio
 
         async def wait_confirm():
             if wait_msg_list and session.Feature.wait:
-                confirm, sent = await session.wait_next_message(wait_msg_list, delete=True, append_instruction=False)
+                confirm = await session.wait_next_message(wait_msg_list, delete=True, append_instruction=False)
                 auto_index = False
                 index = 0
                 if confirm.as_display(text_only=True) in confirm_command:
-                    auto_index = True
-                elif quick_confirm and confirm.is_quick_confirm(sent):
                     auto_index = True
                 elif confirm.as_display(text_only=True).isdigit():
                     index = int(confirm.as_display()) - 1

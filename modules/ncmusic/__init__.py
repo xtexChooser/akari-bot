@@ -49,7 +49,7 @@ async def search(msg: Bot.MessageSession, keyword: str):
             if len(result['result']['songs']) > 10:
                 send_msg.append(Plain(msg.locale.t('ncmusic.message.search.collapse')))
             send_msg.append(Plain(msg.locale.t('ncmusic.message.search.prompt')))
-            query, _ = await msg.wait_next_message(send_msg)
+            query = await msg.wait_next_message(send_msg)
             query = query.as_display(text_only=True)
             try:
                 query = int(query)
@@ -87,7 +87,7 @@ async def search(msg: Bot.MessageSession, keyword: str):
             send_msg += msg.locale.t('ncmusic.message.search.collapse')
         send_msg += '\n'
         send_msg += msg.locale.t('ncmusic.message.search.prompt')
-        query, _ = await msg.wait_next_message(send_msg)
+        query = await msg.wait_next_message(send_msg)
         query = query.as_display(text_only=True)
         try:
             query = int(query)
