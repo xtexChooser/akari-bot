@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from sqlalchemy import exists
 
 import ujson as json
 
@@ -51,6 +52,7 @@ async def load_secret():
 async def load_prompt(bot) -> None:
     author_cache = os.path.abspath(PrivateAssets.path + '/cache_restart_author')
     loader_cache = os.path.abspath(PrivateAssets.path + '/.cache_loader')
+    no_load_succ = os.path.abspath(PrivateAssets.path + '/xtex_no_load_succ')
     if os.path.exists(author_cache):
         open_author_cache = open(author_cache, 'r')
         author = json.loads(open_author_cache.read())['ID']
@@ -59,12 +61,25 @@ async def load_prompt(bot) -> None:
         if m:
             if (read := open_loader_cache.read()) != '':
                 await m.send_direct_message(m.parent.locale.t('error.loader.load.failed', err_msg=read))
-            else:
+            elif not os.path.exists(no_load_succ):
                 await m.send_direct_message(m.parent.locale.t('error.loader.load.success'))
             open_loader_cache.close()
             open_author_cache.close()
             os.remove(author_cache)
             os.remove(loader_cache)
+
+    update_log_cache = os.path.abspath(PrivateAssets.path + '/xtex_cache_update_log')
+    if os.path.exists(update_log_cache):
+        from config import Config
+        open_update_log_cache = open(update_log_cache, 'r')
+        m = await bot.fetch_target(author if author is not None else Config('base_superuser'))
+        if m:
+            if (read := open_update_log_cache.read()) != '':
+                await m.send_direct_message(read)
+        open_update_log_cache.close()
+        os.remove(update_log_cache)
+    if os.path.exists(no_load_succ):
+        os.remove(no_load_succ)
 
 
 __all__ = ['init_async', 'load_prompt']

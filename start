@@ -10,6 +10,7 @@ while true; do
     git reset --hard origin/master
 
     timeout --preserve-status --signal=INT --verbose --kill-after=5s 5m pip3 install -q -r requirements.txt
+    rm -rf bots/matrix/assets/xtex_no_load_succ
     timeout --preserve-status --signal=INT --verbose --kill-after=30s 1h python3 -m bots.matrix.bot
     exitStatus=$?
     [[ "$exitStatus" == "233" ]] && exitStatus=0
@@ -36,13 +37,15 @@ while true; do
     fi
     if [[ "$headCommit" != "$(git rev-parse HEAD)" ]]; then
         echo "Testing auto-merged code"
-        {
+        (
             set -xe
             timeout --preserve-status --signal=INT --verbose --kill-after=5s 3m pip3 install -q -r requirements.txt
+            touch bots/matrix/assets/xtex_no_load_succ
             timeout --preserve-status --signal=INT --verbose --kill-after=2s 1m python3 -m bots.matrix.bot
             git push
+            git log "$headCommit"..HEAD --oneline --no-decorate --shortstat > bots/matrix/assets/xtex_cache_update_log
             set +xe
-        }
+        )
         curl -sS --retry 3 "$HEALTHCHECKS_URL_AUTOMERGE/$?"
     else
         echo "Nothing is merged"
