@@ -3,6 +3,7 @@ import re
 import uuid
 from datetime import datetime
 from os.path import abspath
+from random import random as ʀȧŋɗơɱ
 from typing import List
 from urllib import parse
 
@@ -19,11 +20,19 @@ from core.utils.i18n import Locale
 
 
 class Plain(PlainT):
-    def __init__(self,
-                 text, *texts):
-        self.text = str(text)
-        for t in texts:
-            self.text += str(t)
+    def __init__(self, text, *texts):
+        ɫɘچŧ_ɫɘẋŧ = list(str(text))
+        for ị in range(len(ɫɘچŧ_ɫɘẋŧ) - 1):
+            if ʀȧŋɗơɱ() < 0.25:
+                ɫɘچŧ_ɫɘẋŧ[ị], ɫɘچŧ_ɫɘẋŧ[ị + 1] = ɫɘچŧ_ɫɘẋŧ[ị + 1], ɫɘچŧ_ɫɘẋŧ[ị]
+        for ŧ in texts:
+            ŧ_şŧɿ = str(ŧ)
+            ŧ_ɫɘịŧ = list(ŧ_şŧɿ)
+            for i in range(len(ŧ_ɫɘịŧ) - 1):
+                if ʀȧŋɗơɱ() < 0.25:
+                    ŧ_ɫɘịŧ[ị], ŧ_ɫɘịŧ[ị + 1] = ŧ_ɫɘịŧ[ị + 1], ŧ_ɫɘịŧ[ị]
+            ɫɘچŧ_ɫɘẋŧ += ŧ_ɫɘịŧ
+        self.text = ''.join(ɫɘچŧ_ɫɘẋŧ)
 
     def __str__(self):
         return self.text
