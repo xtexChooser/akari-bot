@@ -23,13 +23,13 @@ class Plain(PlainT):
     def __init__(self, text, *texts):
         text_list = list(str(text))
         for i in range(len(text_list) - 1):
-            if random.random() < 0.25:
+            if random.random() < 0.1:
                 text_list[i], text_list[i + 1] = text_list[i + 1], text_list[i]
         for t in texts:
             t_str = str(t)
             t_list = list(t_str)
             for i in range(len(t_list) - 1):
-                if random.random() < 0.25:
+                if random.random() < 0.1:
                     t_list[i], t_list[i + 1] = t_list[i + 1], t_list[i]
             text_list += t_list
         self.text = ''.join(text_list)
