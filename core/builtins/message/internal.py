@@ -1,9 +1,9 @@
 import base64
+import random
 import re
 import uuid
 from datetime import datetime
 from os.path import abspath
-from random import random as ʀȧŋɗơɱ
 from typing import List
 from urllib import parse
 
@@ -21,18 +21,18 @@ from core.utils.i18n import Locale
 
 class Plain(PlainT):
     def __init__(self, text, *texts):
-        ɫɘچŧ_ɫɘẋŧ = list(str(text))
-        for ị in range(len(ɫɘچŧ_ɫɘẋŧ) - 1):
-            if ʀȧŋɗơɱ() < 0.25:
-                ɫɘچŧ_ɫɘẋŧ[ị], ɫɘچŧ_ɫɘẋŧ[ị + 1] = ɫɘچŧ_ɫɘẋŧ[ị + 1], ɫɘچŧ_ɫɘẋŧ[ị]
-        for ŧ in texts:
-            ŧ_şŧɿ = str(ŧ)
-            ŧ_ɫɘịŧ = list(ŧ_şŧɿ)
-            for i in range(len(ŧ_ɫɘịŧ) - 1):
-                if ʀȧŋɗơɱ() < 0.25:
-                    ŧ_ɫɘịŧ[ị], ŧ_ɫɘịŧ[ị + 1] = ŧ_ɫɘịŧ[ị + 1], ŧ_ɫɘịŧ[ị]
-            ɫɘچŧ_ɫɘẋŧ += ŧ_ɫɘịŧ
-        self.text = ''.join(ɫɘچŧ_ɫɘẋŧ)
+        text_list = list(str(text))
+        for i in range(len(text_list) - 1):
+            if random.random() < 0.25:
+                text_list[i], text_list[i + 1] = text_list[i + 1], text_list[i]
+        for t in texts:
+            t_str = str(t)
+            t_list = list(t_str)
+            for i in range(len(t_list) - 1):
+                if random.random() < 0.25:
+                    t_list[i], t_list[i + 1] = t_list[i + 1], t_list[i]
+            text_list += t_list
+        self.text = ''.join(text_list)
 
     def __str__(self):
         return self.text
