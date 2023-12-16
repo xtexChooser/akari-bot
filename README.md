@@ -1,7 +1,8 @@
 <div align="center">
   <img width="256" src="./assets/character_marked.png" alt="logo">
 
-# 小可 · AkariBot v4
+# 小可 · AkariBot v4 · Matrix 分支
+#### 由 xtex 维护的 Matrix 支持开发分支，[@akaribot:sakura.ci](https://matrix.to/#/@akaribot:sakura.ci)，实例运行于 [exozyme](https://exozy.me/)
 
 </div>
 
