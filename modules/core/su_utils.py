@@ -298,7 +298,7 @@ def update_dependencies():
 
 @upd.command()
 async def update_bot(msg: Bot.MessageSession):
-    restart_bot(msg)
+    await restart_bot(msg)
 
 if Info.subprocess or True:
     rst = module('restart', required_superuser=True, base=True)
@@ -348,7 +348,7 @@ if Info.subprocess or True:
 
     @upds.command()
     async def update_and_restart_bot(msg: Bot.MessageSession):
-        restart_bot(msg)
+        await restart_bot(msg)
 
     stp = module('stop', required_superuser=True, base=True)
 
