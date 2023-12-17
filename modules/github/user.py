@@ -1,4 +1,4 @@
-import traceback
+eback
 
 from core.builtins import Url, Bot
 from core.dirty_check import rickroll
