@@ -43,7 +43,7 @@ element_lists = ['He', 'Li', 'Be', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'Cl',
 def parse_elements(formula: str) -> dict:
     elements = {}
     while True:
-        if formula == '':
+        if not formula:
             break
         for element in element_lists:
             if formula.startswith(element):
@@ -61,7 +61,7 @@ def parse_elements(formula: str) -> dict:
 
 @retry(stop=stop_after_attempt(3), reraise=True)
 async def search_csr(id=None):
-    if id is not None:
+    if id:
         answer_id = id
     else:
         answer_id = random.randint(1, CSID_RANGE_MAX)
@@ -221,7 +221,7 @@ async def chemical_code(msg: Bot.MessageSession, id=None, random_mode=True, capt
             else:
                 send_ = wait.locale.t('chemical_code.message.correct')
                 if random_mode:
-                    if (g_msg := await gained_petal(wait, 2)):
+                    if (g_msg := await gained_petal(wait, 1)):
                         send_ += '\n' + g_msg
                 await wait.send_message(send_)
                 play_state[msg.target.target_id]['active'] = False
@@ -249,7 +249,7 @@ async def chemical_code(msg: Bot.MessageSession, id=None, random_mode=True, capt
         if play_state[msg.target.target_id]['active']:
             if result.as_display(text_only=True) == csr['name']:
                 send_ = msg.locale.t('chemical_code.message.correct')
-                if (g_msg := await gained_petal(wait, 1)):
+                if (g_msg := await gained_petal(msg, 2)):
                     send_ += '\n' + g_msg
                 await result.send_message(send_)
             else:

@@ -1,9 +1,10 @@
 import os
 import shutil
+import traceback
 
 import ujson as json
 
-from core.builtins import Plain, Image
+from core.builtins import Bot, Plain, Image
 from core.logger import Logger
 from core.utils.cache import random_cache_path
 from core.utils.http import get_url, post_url, download_to_cache
@@ -45,8 +46,8 @@ async def update_covers():
     return True
 
 
-async def get_info(music: Music, *details):
-    info = [Plain(f"{music.id}\u200B. {music.title}{' (DX)' if music['type'] == 'DX' else ''}")]
+async def get_info(msg: Bot.MessageSession, music: Music, *details):
+    info = [Plain(f"{music.id}\u200B. {music.title}{msg.locale.t('message.brackets', msg='DX') if music['type'] == 'DX' else ''}")]
     try:
         img = f"https://www.diving-fish.com/covers/{get_cover_len5_id(music.id)}.png"
         await get_url(img, 200, attempt=1, fmt='read')
@@ -105,7 +106,7 @@ async def get_record(msg, payload):
                               data=json.dumps(payload),
                               status_code=200,
                               headers={'Content-Type': 'application/json', 'accept': '*/*'}, fmt='json')
-    except Exception as e:
+    except ValueError as e:
         if str(e).startswith('400'):
             if "qq" in payload:
                 await msg.finish(msg.locale.t("maimai.message.user_unbound"))
@@ -114,7 +115,8 @@ async def get_record(msg, payload):
         elif str(e).startswith('403'):
             await msg.finish(msg.locale.t("maimai.message.forbidden"))
         else:
-            raise
+            traceback.print_exc()
+
     return data
 
 
@@ -125,7 +127,7 @@ async def get_plate(msg, payload):
                               data=json.dumps(payload),
                               status_code=200,
                               headers={'Content-Type': 'application/json', 'accept': '*/*'}, fmt='json')
-    except Exception as e:
+    except ValueError as e:
         if str(e).startswith('400'):
             if "qq" in payload:
                 await msg.finish(msg.locale.t("maimai.message.user_unbound"))
@@ -134,5 +136,6 @@ async def get_plate(msg, payload):
         elif str(e).startswith('403'):
             await msg.finish(msg.locale.t("maimai.message.forbidden"))
         else:
-            raise
+            traceback.print_exc()
+            
     return data

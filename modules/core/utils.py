@@ -125,14 +125,14 @@ async def config_ban(msg: Bot.MessageSession):
             await msg.finish(msg.locale.t("core.message.admin.ban.not_yet"))
 
 
-locale = module('locale', base=True)
+locale = module('locale', base=True, desc='{core.help.locale.desc}')
 
 
-@locale.command('{{core.help.locale}}')
+@locale.command()
 async def _(msg: Bot.MessageSession):
     avaliable_lang = msg.locale.t("message.delimiter").join(get_available_locales())
     await msg.finish(
-        f"{msg.locale.t('core.message.locale')}{msg.locale.t('language')}\n{msg.locale.t('core.message.locale.set.prompt', langlist=avaliable_lang, prefix=command_prefix[0])}")
+        f"{msg.locale.t('core.message.locale')}{msg.locale.t('language')}\n{msg.locale.t('core.message.locale.set.prompt', langlist=avaliable_lang, prefix=msg.prefixes[0])}")
 
 
 @locale.command('<lang> {{core.help.locale.set}}', required_admin=True)
@@ -228,12 +228,7 @@ async def _(msg: Bot.MessageSession):
         await msg.finish(msg.locale.t('core.message.mute.disable'))
 
 
-leave = module(
-    'leave',
-    base=True,
-    required_admin=True,
-    available_for='QQ|Group',
-    alias='dismiss')
+leave = module('leave', base=True, required_admin=True, available_for='QQ|Group', alias='dismiss')
 
 
 @leave.command('{{core.help.leave}}')

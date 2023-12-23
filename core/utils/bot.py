@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-from sqlalchemy import exists
 
 import ujson as json
 
@@ -45,7 +44,7 @@ async def load_secret():
     for x in CFG.value:
         if x == 'secret':
             for y in CFG().value[x]:
-                if CFG().value[x][y] is not None:
+                if CFG().value[x][y]:
                     Secret.add(str(CFG().value[x][y]).upper())
 
 
@@ -62,7 +61,7 @@ async def load_prompt(bot) -> None:
         if m:
             if (read := open_loader_cache.read()) != '':
                 await m.send_direct_message(m.parent.locale.t('error.loader.load.failed', err_msg=read))
-            elif not os.path.exists(no_load_succ):
+            else:
                 await m.send_direct_message(m.parent.locale.t('error.loader.load.success'))
             open_loader_cache.close()
             open_author_cache.close()
