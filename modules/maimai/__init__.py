@@ -8,7 +8,7 @@ from core.utils.image import msgchain2image
 from modules.maimai.libraries.best50 import computeRa, generate
 from modules.maimai.libraries.apidata import get_alias, get_info, search_by_alias, update_alias, update_covers
 from modules.maimai.libraries.music import get_cover_len5_id, TotalList
-from modules.maimai.libraries.utils import get_level_process, \
+from modules.maimai.libraries.utils import get_grade_info, get_level_process, \
     get_plate_process, get_player_score, get_rank, get_score_list
 from .regex import *
 
@@ -443,6 +443,12 @@ async def _(msg: Bot.MessageSession, diff: str, sid: str, score: float):
 async def _(msg: Bot.MessageSession, base: float, score: float):
     if score:
         await msg.finish([Plain(max(0, computeRa(base, score)))])
+
+
+@mai.command('grade <grade> {{maimai.help.grade}}')
+async def _(msg: Bot.MessageSession, grade: str):
+    res = await get_grade_info(msg, grade)
+    await msg.finish(res)
 
 
 @mai.command('update', required_superuser=True)
