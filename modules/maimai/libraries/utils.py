@@ -67,6 +67,20 @@ grade_conversion = {
     '里皆传': 'tgrade12',
     '裡皆傳': 'tgrade12',
     '裏皆傳': 'tgrade12',
+    'expert初级': 'expert1',
+    'expert初級': 'expert1',
+    'expert中级': 'expert2',
+    'expert中級': 'expert2',
+    'expert上级': 'expert3',
+    'expert上級': 'expert3',
+    'master初级': 'master1',
+    'master初級': 'master1',
+    'master中级': 'master2',
+    'master中級': 'master2',
+    'master上级': 'master3',
+    'master上級': 'master3',
+    'master超上级': 'master4',
+    'master超上級': 'master4',
 }
 
 score_to_rank = {
@@ -493,6 +507,7 @@ async def get_grade_info(msg, grade):
     with open(file_path, 'r') as file:
         data = json.load(file)
 
+    grade = grade.lower()
     if grade in list(grade_conversion.keys()):
         grade_key = grade_conversion[grade]
     else:
@@ -507,18 +522,30 @@ async def get_grade_info(msg, grade):
 
     chart_info = []
     if grade_type != 'rgrade':
-        grade_data = data[grade_type][grade_key].get(grade_key)
+        grade_data = data[grade_type][grade_key]
         charts = grade_data["charts"]
         condition = grade_data["condition"]
         life = grade_data["life"]
 
         for chart in charts:
-            music = (await total_list.get()).by_id(chart['song_id'])
+            music = (await total_list.get()).by_id(str(chart['song_id']))
             level = chart['level_index']
-            chart_info.append(f"{music.title}{' (DX)' if music['type'] == 'DX' else ''} {diffs[level]} {music['level'][level]}")
+            chart_info.append(f"{music['id']}\u200B. {music['title']}{' (DX)' if music['type'] == 'DX' else ''} {diffs[level]} {music['level'][level]}")
+            
+    else:
+        grade_data = data[grade_type][grade_key]
+        base = grade_data["base"]
+        condition = grade_data["condition"]
+        level = grade_data["level_index"]
+        life = grade_data["life"]
+        music_data = (await total_list.get()).filter(ds=(base[0], base[1]), diff=[level])
 
-        output_lines = '\n'.join(chart_info)
-        condition_info = f"GREAT{condition[0]}/GOOD{condition[1]}/MISS{condition[2]}/CLEAR{condition[3]}"
+        for i in range(4):
+            music = music_data.random()
+            chart_info.append(f"{music['id']}\u200B. {music['title']}{' (DX)' if music['type'] == 'DX' else ''} {diffs[level]} {music['level'][level]}")
 
-        res = f"以下为{grade}段位列表：\n{output_lines}\n血量上限：{life}\n{condition_info}"
-        return res
+    output_lines = '\n'.join(chart_info)
+    condition_info = f"GREAT{condition[0]}/GOOD{condition[1]}/MISS{condition[2]}/CLEAR{condition[3]}"
+
+    res = f"以下为{grade}段位列表：\n{output_lines}\n血量上限：{life}\n{condition_info}"
+    return res
