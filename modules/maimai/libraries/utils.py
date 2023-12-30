@@ -12,7 +12,7 @@ JINGLEBELL_SONG_ID = 70
 assets_path = os.path.abspath('./assets/maimai')
 total_list = TotalList()
 
-plate_to_version = {
+plate_conversion = {
     '初': 'maimai',
     '真': 'maimai PLUS',
     '超': 'maimai GreeN',
@@ -67,20 +67,20 @@ grade_conversion = {
     '里皆传': 'tgrade12',
     '裡皆傳': 'tgrade12',
     '裏皆傳': 'tgrade12',
-    'expert初级': 'expert1',
-    'expert初級': 'expert1',
-    'expert中级': 'expert2',
-    'expert中級': 'expert2',
-    'expert上级': 'expert3',
-    'expert上級': 'expert3',
-    'master初级': 'master1',
-    'master初級': 'master1',
-    'master中级': 'master2',
-    'master中級': 'master2',
-    'master上级': 'master3',
-    'master上級': 'master3',
-    'master超上级': 'master4',
-    'master超上級': 'master4',
+    'Expert初级': 'expert1',
+    'Expert初級': 'expert1',
+    'Expert中级': 'expert2',
+    'Expert中級': 'expert2',
+    'Expert上级': 'expert3',
+    'Expert上級': 'expert3',
+    'Master初级': 'master1',
+    'Master初級': 'master1',
+    'Master中级': 'master2',
+    'Master中級': 'master2',
+    'Master上级': 'master3',
+    'Master上級': 'master3',
+    'Master超上级': 'master4',
+    'Master超上級': 'master4',
 }
 
 score_to_rank = {
@@ -168,7 +168,7 @@ async def get_rank(msg, payload):
 
 
 async def get_player_score(msg, payload, input_id):
-    payload['version'] = list(set(version for version in plate_to_version.values()))  # 全版本
+    payload['version'] = list(set(version for version in plate_conversion.values()))  # 全版本
     res = await get_plate(msg, payload)  # 获取用户成绩信息
     verlist = res["verlist"]
 
@@ -215,7 +215,7 @@ async def get_level_process(msg, payload, process, goal):
     song_played = []
     song_remain = []
 
-    payload['version'] = list(set(version for version in plate_to_version.values()))  # 全版本
+    payload['version'] = list(set(version for version in plate_conversion.values()))  # 全版本
     res = await get_plate(msg, payload)  # 获取用户成绩信息
     verlist = res["verlist"]
 
@@ -290,7 +290,7 @@ async def get_score_list(msg, payload, level):
     player_data = await get_record(msg, payload)
     username = player_data['username']
 
-    payload['version'] = list(set(version for version in plate_to_version.values()))  # 全版本
+    payload['version'] = list(set(version for version in plate_conversion.values()))  # 全版本
     res = await get_plate(msg, payload)  # 获取用户成绩信息
     verlist = res["verlist"]
 
@@ -335,9 +335,9 @@ async def get_plate_process(msg, payload, plate):
     if version == '真':  # 真代为无印版本
         payload['version'] = ['maimai', 'maimai PLUS']
     elif version in ['霸', '舞']:  # 霸者和舞牌需要全版本
-        payload['version'] = list(set(version for version in list(plate_to_version.values())[:-9]))
-    elif version in plate_to_version and version != '初':  # “初”不是版本名称
-        payload['version'] = [plate_to_version[version]]
+        payload['version'] = list(set(version for version in list(plate_conversion.values())[:-9]))
+    elif version in plate_conversion and version != '初':  # “初”不是版本名称
+        payload['version'] = [plate_conversion[version]]
     else:
         await msg.finish(msg.locale.t('maimai.message.plate.plate_not_found'))
 
@@ -507,11 +507,12 @@ async def get_grade_info(msg, grade):
     with open(file_path, 'r') as file:
         data = json.load(file)
 
-    grade = grade.lower()
-    if grade in list(grade_conversion.keys()):
-        grade_key = grade_conversion[grade]
+    if grade.lower() in [key.lower() for key in grade_conversion.keys()]:
+        lowerconv = {k.lower(): v for k, v in grade_conversion.items()}  # 将字典的所有键转为小写
+        grade_key = lowerconv.get(grade.lower(), None)  # 获取json内的键名
+        grade = next(k for k, v in grade_conversion.items() if v == grade_key)  # 获取原始段位名
     else:
-        await msg.finish("无效的段位")
+        await msg.finish(msg.locale.t('maimai.message.grade.grade_not_found'))
 
     if grade_key.startswith('tgrade'):
         grade_type = 'tgrade'
@@ -521,11 +522,10 @@ async def get_grade_info(msg, grade):
         grade_type = 'rgrade'
 
     chart_info = []
+    grade_data = data[grade_type][grade_key]
+    condition = grade_data["condition"]
     if grade_type != 'rgrade':
-        grade_data = data[grade_type][grade_key]
         charts = grade_data["charts"]
-        condition = grade_data["condition"]
-        life = grade_data["life"]
 
         for chart in charts:
             music = (await total_list.get()).by_id(str(chart['song_id']))
@@ -533,19 +533,15 @@ async def get_grade_info(msg, grade):
             chart_info.append(f"{music['id']}\u200B. {music['title']}{' (DX)' if music['type'] == 'DX' else ''} {diffs[level]} {music['level'][level]}")
             
     else:
-        grade_data = data[grade_type][grade_key]
         base = grade_data["base"]
-        condition = grade_data["condition"]
         level = grade_data["level_index"]
-        life = grade_data["life"]
         music_data = (await total_list.get()).filter(ds=(base[0], base[1]), diff=[level])
 
         for i in range(4):
             music = music_data.random()
             chart_info.append(f"{music['id']}\u200B. {music['title']}{' (DX)' if music['type'] == 'DX' else ''} {diffs[level]} {music['level'][level]}")
 
-    output_lines = '\n'.join(chart_info)
+    content = '\n'.join(chart_info)
     condition_info = f"GREAT{condition[0]}/GOOD{condition[1]}/MISS{condition[2]}/CLEAR{condition[3]}"
 
-    res = f"以下为{grade}段位列表：\n{output_lines}\n血量上限：{life}\n{condition_info}"
-    return res
+    await msg.finish(msg.locale.t('maimai.message.grade', grade=grade, content=content, life=grade_data["life"], condition=condition_info))
