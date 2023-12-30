@@ -65,8 +65,8 @@ grade_conversion = {
     '真皆伝': 'tgrade11',
     '真皆传': 'tgrade11',
     '真皆傳': 'tgrade11',
-    '里皆传': 'tgrade12',
     '裏皆伝': 'tgrade12',
+    '里皆传': 'tgrade12',
     '裡皆傳': 'tgrade12',
     '裏皆傳': 'tgrade12',
     'EXPERT初級': 'expert1',
@@ -349,9 +349,9 @@ async def get_plate_process(msg, payload, plate):
 
     if version in version_mapping:
         version = version_mapping[version]
-        
     if goal in goal_mapping:
         goal = goal_mapping[goal]
+    plate = version + goal
 
     if version == '真':  # 真代为无印版本
         payload['version'] = ['maimai', 'maimai PLUS']
