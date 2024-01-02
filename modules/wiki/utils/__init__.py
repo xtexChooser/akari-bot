@@ -10,15 +10,16 @@ from .newbie import newbie
 from .rc import rc
 from .rc_qq import rc_qq
 
-rc_ = module('rc', developers=['OasisAkari'])
+rc_ = module('rc', developers=['OasisAkari'], recommend_modules='wiki')
 
 
 @rc_.command(['{{wiki.help.rc}}',
-             'legacy {{wiki.help.rc.legacy}}'])
-async def rc_loader(msg: Bot.MessageSession):
+             'legacy [<count>] {{wiki.help.rc.legacy}}'],
+           available_for=['QQ', 'QQ|Group'])
+async def rc_loader(msg: Bot.MessageSession, count: int = None):
     start_wiki = WikiTargetInfo(msg).get_start_wiki()
     if not start_wiki:
-        return await msg.finish(msg.locale.t('wiki.message.not_set'))
+        await msg.finish(msg.locale.t('wiki.message.not_set'))
     legacy = True
     if not msg.parsed_msg and msg.Feature.forward and msg.target.target_from == 'QQ|Group':
         try:
@@ -29,19 +30,32 @@ async def rc_loader(msg: Bot.MessageSession):
             traceback.print_exc()
             await msg.send_message(msg.locale.t('wiki.message.rollback'))
     if legacy:
-        res = await rc(msg, start_wiki)
+        count = 5 if not count else count
+        res = await rc(msg, start_wiki, count)
         await msg.finish(res)
 
 
-a = module('ab', developers=['OasisAkari'])
+@rc_.command(['[<count>] {{wiki.help.rc}}'],
+           exclude_from=['QQ', 'QQ|Group'])
+async def rc_loader(msg: Bot.MessageSession, count: int = None):
+    start_wiki = WikiTargetInfo(msg).get_start_wiki()
+    if not start_wiki:
+        await msg.finish(msg.locale.t('wiki.message.not_set'))
+    count = 5 if not count else count
+    res = await rc(msg, start_wiki, count)
+    await msg.finish(res)
+
+
+a = module('ab', developers=['OasisAkari'], recommend_modules='wiki')
 
 
 @a.command(['{{wiki.help.ab}}',
-           'legacy {{wiki.help.ab.legacy}}'])
-async def ab_loader(msg: Bot.MessageSession):
+           'legacy [<count>] {{wiki.help.ab.legacy}}'],
+           available_for=['QQ', 'QQ|Group'])
+async def ab_loader(msg: Bot.MessageSession, count: int = None):
     start_wiki = WikiTargetInfo(msg).get_start_wiki()
     if not start_wiki:
-        return await msg.finish(msg.locale.t('wiki.message.not_set'))
+        await msg.finish(msg.locale.t('wiki.message.not_set'))
     legacy = True
     if not msg.parsed_msg and msg.Feature.forward and msg.target.target_from == 'QQ|Group':
         try:
@@ -52,17 +66,30 @@ async def ab_loader(msg: Bot.MessageSession):
             traceback.print_exc()
             await msg.send_message(msg.locale.t('wiki.message.rollback'))
     if legacy:
-        res = await ab(msg, start_wiki)
+        count = 5 if not count else count
+        res = await ab(msg, start_wiki, count)
         await msg.finish(res)
 
 
-n = module('newbie', desc='{wiki.help.newbie.desc}', developers=['OasisAkari'])
-
-
-@n.command()
-async def newbie_loader(msg: Bot.MessageSession):
+@a.command(['[<count>] {{wiki.help.ab}}'],
+           exclude_from=['QQ', 'QQ|Group'])
+async def ab_loader(msg: Bot.MessageSession, count: int = None):
     start_wiki = WikiTargetInfo(msg).get_start_wiki()
     if not start_wiki:
-        return await msg.finish(msg.locale.t('wiki.message.not_set'))
-    res = await newbie(msg, start_wiki)
+        await msg.finish(msg.locale.t('wiki.message.not_set'))
+    count = 5 if not count else count
+    res = await ab(msg, start_wiki, count)
+    await msg.finish(res)
+
+
+n = module('newbie', developers=['OasisAkari'], recommend_modules='wiki')
+
+
+@n.command('[<count>] {{wiki.help.newbie}}')
+async def newbie_loader(msg: Bot.MessageSession, count: int = None):
+    start_wiki = WikiTargetInfo(msg).get_start_wiki()
+    if not start_wiki:
+        await msg.finish(msg.locale.t('wiki.message.not_set'))
+    count = 5 if not count else count
+    res = await newbie(msg, start_wiki, count)
     await msg.finish(res)
