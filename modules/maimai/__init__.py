@@ -1,3 +1,4 @@
+import re
 import traceback
 
 from config import Config
@@ -357,9 +358,14 @@ async def _(msg: Bot.MessageSession, level: str, username: str = None):
 
 @mai.command('random <diff+level> [<dx_type>] {{maimai.help.random.filter}}')
 async def _(msg: Bot.MessageSession, dx_type: str = None):
-    filter = msg.parsed_msg['<diff+level>']
-    level = ''
-    diff = ''
+    input_ = msg.parsed_msg['<diff+level>']
+    
+    pattern = re.compile(r'(?P<diff>[a-zA-Z*]+)(?P<level>\d+[+]?)')
+    match = pattern.match(input_)
+    if match:
+        diff = match.group('diff')
+        level = match.group('level')
+
     try:
         if dx_type in ["dx", "DX"]:
             dx_type = ["DX"]
@@ -367,12 +373,6 @@ async def _(msg: Bot.MessageSession, dx_type: str = None):
             dx_type = ["SD"]
         else:
             dx_type = ["SD", "DX"]
-
-        for char in filter:
-            if char.isdigit() or char == '+':
-                level += char
-            else:
-                diff += char
 
         if level == "":
             if diff == "*":
