@@ -142,7 +142,6 @@ def key_process(input_key, conv_dict):
     else:
         return None, input_key
 
-
 async def get_rank(msg, payload):
     time = msg.ts2strftime(datetime.now().timestamp(), timezone=False)
 
@@ -298,15 +297,13 @@ async def get_level_process(msg, payload, process, goal):
 
 
 async def get_score_list(msg, payload, level, page):
-    song_list = []
-
     player_data = await get_record(msg, payload)
-    username = player_data['username']
 
     payload['version'] = list(set(version for version in plate_conversion.values()))  # 全版本
     res = await get_plate(msg, payload)  # 获取用户成绩信息
     verlist = res["verlist"]
 
+    song_list = []
     for song in verlist:
         if song['level'] == level:
             song_list.append(song)  # 将符合难度的成绩加入列表
@@ -325,7 +322,7 @@ async def get_score_list(msg, payload, level, page):
             output_lines.append(output)
 
     outputs = '\n'.join(output_lines)
-    res = f"{msg.locale.t('maimai.message.scorelist', user=username, level=level)}\n{outputs}"
+    res = f"{msg.locale.t('maimai.message.scorelist', user=player_data['username'], level=level)}\n{outputs}"
     get_img = False
 
     if len(output_lines) == 0:
