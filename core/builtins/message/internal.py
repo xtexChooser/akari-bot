@@ -84,10 +84,10 @@ class FormattedTime:
                 else:
                     ftime_template.append(msg.locale.t("time.time.nosec.format"))
             if self.timezone:
-                if self._tz_offset == "+0":
+                if msg._tz_offset == "+0":
                     ftime_template.append("(UTC)")
                 else:
-                    ftime_template.append(f"(UTC{self._tz_offset})")
+                    ftime_template.append(f"(UTC{msg._tz_offset})")
         else:
             ftime_template.append('%Y-%m-%d %H:%M:%S')
         if not msg:
@@ -102,8 +102,15 @@ class FormattedTime:
         return f'FormattedTime(time={self.timestamp})'
 
     def to_dict(self):
-        return {'type': 'formatted_time', 'data': {'timestamp': self.timestamp, 'date': self.date, 'iso': self.iso,
-                                                   'time': self.time, 'seconds': self.seconds, 'timezone': self.timezone}}
+        return {
+            'type': 'formatted_time',
+            'data': {
+                'timestamp': self.timestamp,
+                'date': self.date,
+                'iso': self.iso,
+                'time': self.time,
+                'seconds': self.seconds,
+                'timezone': self.timezone}}
 
 
 class I18NContext:
@@ -129,8 +136,9 @@ class ErrorMessage(EMsg):
             if locale_str := re.findall(r'\{(.*)}', error_message):
                 for l in locale_str:
                     error_message = error_message.replace(f'{{{l}}}', locale.t(l))
-            self.error_message = locale.t('error.prompt', error_msg=error_message) + \
-                str(Url(Config('bug_report_url')))
+            self.error_message = locale.t('error') + error_message
+            if Config('bug_report_url'):
+                self.error_message += '\n' + locale.t('error.prompt.address', url=str(Url(Config('bug_report_url'))))
 
     def __str__(self):
         return self.error_message
