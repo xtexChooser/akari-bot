@@ -2,7 +2,7 @@ import os
 import json
 import traceback
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from config import Config
 from core.builtins import Bot
@@ -27,7 +27,7 @@ async def get_petal_exchange_rate():
     api_key = Config('exchange_rate_api_key')
     api_url = f'https://v6.exchangerate-api.com/v6/{api_key}/pair/USD/CNY'
     try:
-        data = await get_url(api_url, 200, fmt='json')
+        data = await get_url(api_url, 200, attempt=1, fmt='json', logging_err_resp=False)
         if data['result'] == "success":
             exchange_rate = data['conversion_rate']
             petal_value = exchange_rate * CNY_TO_PETAL
@@ -53,7 +53,14 @@ async def load_or_refresh_cache():
         return exchanged_petal_data["exchanged_petal"]
 
 
-async def count_petal(tokens: int, gpt4: bool = False):
+async def count_petal(msg: Bot.MessageSession, tokens: int, gpt4: bool = False):
+    '''计算并减少使用功能时消耗的花瓣数量。
+
+    :param msg: 消息会话。
+    :param tokens: 使用功能时花费的token数量。
+    :param gpt4: 是否以GPT-4的开销计算。
+    :returns: 消耗的花瓣数量，保留两位小数。
+    '''
     Logger.info(f'{tokens} tokens have been consumed while calling AI.')
     petal_exchange_rate = await load_or_refresh_cache()
     if gpt4:
@@ -65,10 +72,22 @@ async def count_petal(tokens: int, gpt4: bool = False):
     else:
         Logger.warn(f'Unable to obtain real-time exchange rate, use {USD_TO_CNY} to calculate petals.')
         petal = price * USD_TO_CNY * CNY_TO_PETAL
+
+    if Config('db_path').startswith('sqlite'):
+        amount = petal.quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+        msg.data.modify_petal(-int(amount))
+    else:
+        msg.data.modify_petal(petal)
     return round(petal, 2)
 
 
 async def gained_petal(msg: Bot.MessageSession, amount):
+    '''增加花瓣。
+
+    :param msg: 消息会话。
+    :param amount: 增加的花瓣数量。
+    :returns: 增加花瓣的提示消息。
+    '''
     if Config('openai_api_key') and Config('enable_get_petal'):
         limit = Config('petal_gained_limit', 10)
         p = get_stored_list(msg.target.client_name, 'gainedpetal')
@@ -99,6 +118,12 @@ async def gained_petal(msg: Bot.MessageSession, amount):
 
 
 async def lost_petal(msg: Bot.MessageSession, amount):
+    '''减少花瓣。
+
+    :param msg: 消息会话。
+    :param amount: 减少的花瓣数量。
+    :returns: 减少花瓣的提示消息。
+    '''
     if Config('openai_api_key') and Config('enable_get_petal'):
         limit = Config('petal_lost_limit', 5)
         p = get_stored_list(msg.target.client_name, 'lostpetal')
