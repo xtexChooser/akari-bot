@@ -1,4 +1,3 @@
-import asyncio
 import os
 import re
 import shutil
@@ -309,7 +308,7 @@ if Info.subprocess or True:
         if datetime.now().timestamp() - restart_time[0] < 60:
             if len(get) != 0:
                 await msg.send_message(msg.locale.t("core.message.restart.wait", count=len(get)))
-                await asyncio.sleep(10)
+                await msg.sleep(10)
                 return await wait_for_restart(msg)
             else:
                 await msg.send_message(msg.locale.t("core.message.restart.restarting"))
@@ -377,7 +376,7 @@ if Bot.FetchTarget.name == 'QQ':
                 else:
                     await x['fetch'].send_direct_message(x['message'])
                 Temp.data['waiting_for_send_group_message'].remove(x)
-                await asyncio.sleep(30)
+                await msg.sleep(30)
             await msg.finish(msg.locale.t("core.message.resume.done"))
         else:
             await msg.finish(msg.locale.t("core.message.resume.nothing"))
@@ -397,7 +396,7 @@ if Bot.FetchTarget.name == 'QQ':
                 else:
                     await x['fetch'].send_direct_message(x['message'])
                 Temp.data['waiting_for_send_group_message'].remove(x)
-                await asyncio.sleep(30)
+                await msg.sleep(30)
             await msg.finish(msg.locale.t("core.message.resume.done"))
         else:
             await msg.finish(msg.locale.t("core.message.resume.nothing"))
