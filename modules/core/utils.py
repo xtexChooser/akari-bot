@@ -85,7 +85,7 @@ async def config_gu(msg: Bot.MessageSession):
         if user == msg.target.sender_id:
             confirm = await msg.wait_confirm(msg.locale.t("core.message.admin.remove.confirm"))
             if not confirm:
-                return
+                await msg.finish()
         if user:
             if msg.data.remove_custom_admin(user):
                 await msg.finish(msg.locale.t("core.message.admin.remove.success", user=user))
@@ -162,13 +162,12 @@ async def _(msg: Bot.MessageSession):
     if msg.check_super_user():
         perm += '\n' + msg.locale.t("core.message.whoami.superuser")
     await msg.finish(
-        msg.locale.t('core.message.whoami', senderid=msg.target.sender_id, targetid=msg.target.target_id) + perm,
-        disable_secret_check=True)
+        msg.locale.t('core.message.whoami', senderid=msg.target.sender_id, targetid=msg.target.target_id) + perm)
 
 
-setup = module('setup', base=True, required_admin=True, desc='{core.help.setup.desc}', alias='toggle')
+setup = module('setup', base=True, desc='{core.help.setup.desc}', alias='toggle')
 
-"""
+
 @setup.command('typing {{core.help.setup.typing}}')
 async def _(msg: Bot.MessageSession):
     target = BotDBUtil.SenderInfo(msg.target.sender_id)
@@ -179,10 +178,9 @@ async def _(msg: Bot.MessageSession):
     else:
         target.edit('disable_typing', False)
         await msg.finish(msg.locale.t('core.message.setup.typing.enable'))
-"""
 
-
-@setup.command('check {{core.help.setup.check}}')
+'''
+@setup.command('check {{core.help.setup.check}}', required_admin=True)
 async def _(msg: Bot.MessageSession):
     state = msg.options.get('typo_check')
     if state:
@@ -191,9 +189,9 @@ async def _(msg: Bot.MessageSession):
     else:
         msg.data.edit_option('typo_check', True)
         await msg.finish(msg.locale.t('core.message.setup.check.disable'))
+'''
 
-
-@setup.command('timeoffset <offset> {{core.help.setup.timeoffset}}')
+@setup.command('timeoffset <offset> {{core.help.setup.timeoffset}}', required_admin=True)
 async def _(msg: Bot.MessageSession, offset: str):
     try:
         tstr_split = [int(part) for part in offset.split(':')]
@@ -234,6 +232,8 @@ async def _(msg: Bot.MessageSession):
     if confirm:
         await msg.send_message(msg.locale.t('core.message.leave.success'))
         await msg.call_api('set_group_leave', group_id=msg.session.target)
+    else:
+        await msg.finish()
 
 
 token = module('token', base=True)

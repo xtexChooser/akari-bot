@@ -2,12 +2,12 @@ from core.builtins import Bot
 from core.component import module
 from .dice import GenerateMessage
 
-dice = module('dice', alias='rd', developers=['Light-Beacon'], desc='{dice.help.desc}', )
+dice = module('dice', alias=['rd', 'roll'], developers=['Light-Beacon'], desc='{dice.help.desc}')
 
 
 @dice.command('<dices> [<dc>] {{dice.help}}',
               options_desc={
-                  '{dice.help.option.polynomial.title}': '{dice.help.option.polynomial}',
+                  '{dice.help.option.expression.title}': '{dice.help.option.expression}',
                   'n': '{dice.help.option.n}',
                   'm': '{dice.help.option.m}',
                   'kx': '{dice.help.option.kx}',
@@ -22,9 +22,9 @@ async def _(msg: Bot.MessageSession, dices, dc='0'):
         times = dices.partition('x')[0]
         dices = dices.partition('x')[2]
     if not times.isdigit():
-        await msg.finish(msg.locale.t('dice.message.error.N.invalid') + times)
+        await msg.finish(msg.locale.t('dice.message.N.invalid') + times)
     if not dc.isdigit():
-        await msg.finish(msg.locale.t('dice.message.error.dc.invalid') + dc)
+        await msg.finish(msg.locale.t('dice.message.dc.invalid') + dc)
     await msg.finish(await GenerateMessage(msg, dices, int(times), int(dc)))
 
 

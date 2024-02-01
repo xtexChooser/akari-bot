@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 from config import Config, CFG
 from core.builtins import Bot, PrivateAssets, Image, Plain, ExecutionLockList, Temp, MessageTaskManager
 from core.component import module
-from core.exceptions import TestException
+from core.exceptions import NoReportException, TestException
 from core.loader import ModulesManager
 from core.logger import Logger
 from core.parser.message import remove_temp_ban
@@ -45,7 +45,7 @@ async def del_su(msg: Bot.MessageSession):
     if user == msg.target.sender_id:
         confirm = await msg.wait_confirm(msg.locale.t("core.message.admin.remove.confirm"), append_instruction=False)
         if not confirm:
-            return
+            await msg.finish()
     if user:
         if BotDBUtil.SenderInfo(user).edit('isSuperUser', False):
             await msg.finish(msg.locale.t("success"))
@@ -178,7 +178,7 @@ async def _(msg: Bot.MessageSession):
     if not target_data.query:
         confirm = await msg.wait_confirm(msg.locale.t("core.message.set.confirm.init"), append_instruction=False)
         if not confirm:
-            return
+            await msg.finish()
     modules = [m for m in [msg.parsed_msg['<modules>']] + msg.parsed_msg.get('...', [])
                if m in ModulesManager.return_modules_list(msg.target.target_from)]
     target_data.enable(modules)
@@ -196,7 +196,7 @@ async def _(msg: Bot.MessageSession):
     if not target_data.query:
         confirm = await msg.wait_confirm(msg.locale.t("core.message.set.confirm.init"), append_instruction=False)
         if not confirm:
-            return
+            await msg.finish()
     if v.startswith(('[', '{')):
         v = json.loads(v)
     elif v.upper() == 'TRUE':
@@ -279,7 +279,7 @@ upd = module('update', required_superuser=True, base=True)
 
 
 def pull_repo():
-    return
+    return ''
 
 
 def update_dependencies():
@@ -331,6 +331,8 @@ if Info.subprocess or True:
             await wait_for_restart(msg)
             write_version_cache(msg)
             restart()
+        else:
+            await msg.finish()
 
 
 if Info.subprocess or True:
@@ -451,7 +453,10 @@ if Config('enable_eval'):
 
     @_eval.command('<display_msg>')
     async def _(msg: Bot.MessageSession):
-        await msg.finish(str(eval(msg.parsed_msg['<display_msg>'], {'msg': msg})))
+        try:
+            await msg.finish(str(eval(msg.parsed_msg['<display_msg>'], {'msg': msg})))
+        except Exception as e:
+            raise NoReportException(e)
 
 
 cfg_ = module('config', required_superuser=True, alias='cfg', base=True)

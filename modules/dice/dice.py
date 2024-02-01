@@ -14,7 +14,7 @@ MIN_MOD_NUMBER = Config('dice_mod_min', -10000)  # 骰子最小加权值
 MAX_OUTPUT_CNT = Config('dice_output_count', 50)  # 输出的最多数据量
 MAX_OUTPUT_LEN = Config('dice_output_len', 200)  # 输出的最大长度
 MAX_DETAIL_CNT = Config('dice_detail_count', 5)  # n次投掷的骰子的总量超过该值时将不再显示详细信息
-MAX_ITEM_COUNT = Config('dice_count_limit', 10)  # 骰子多项式最多的项数
+MAX_ITEM_COUNT = Config('dice_count_limit', 10)  # 骰子表达式最多的项数
 
 
 class DiceSyntaxError(Exception):
@@ -52,7 +52,7 @@ class DiceItemBase(object):
     def GetDetail(self):
         return self.detail
 
-    def Roll(self, msg, use_markdown=False):
+    def Roll(self, msg, use_markdown: bool=False):
         pass
 
 
@@ -63,13 +63,13 @@ class DiceMod(DiceItemBase):
         super().__init__(dice_code, positive)
         if not dice_code.isdigit():
             raise DiceValueError(msg,
-                                 msg.locale.t("dice.message.error.value.M.invalid"),
+                                 msg.locale.t("dice.message.error.value.y.invalid"),
                                  '+' if self.positive else '-' + dice_code)
         else:
             self.result = int(dice_code)
             if self.result > MAX_MOD_NUMBER or self.result < MIN_MOD_NUMBER:
                 raise DiceValueError(msg,
-                                     msg.locale.t("dice.message.error.value.M.out_of_range", min=MIN_MOD_NUMBER,
+                                     msg.locale.t("dice.message.error.value.y.out_of_range", min=MIN_MOD_NUMBER,
                                                       max=MAX_MOD_NUMBER),
                                      self.result)
 
@@ -94,7 +94,7 @@ class Dice(DiceItemBase):
                                  self.count)
         if self.type <= 0:
             raise DiceValueError(msg,
-                                 msg.locale.t("dice.message.error.value.n.less2"),
+                                 msg.locale.t("dice.message.error.value.n.less_2"),
                                  self.count)
         if self.type == 1:
             raise DiceValueError(msg, msg.locale.t("dice.message.error.value.n.d1"))
@@ -158,7 +158,7 @@ class Dice(DiceItemBase):
                 if use_markdown:
                     if i in indexes:
                         new_results.append(dice_results[i])
-                        output_buffer += f"**{str(dice_results[i])}**"
+                        output_buffer += f"*{str(dice_results[i])}*"
                     else:                
                         output_buffer += f"{str(dice_results[i])}"
                 else:
@@ -246,7 +246,7 @@ async def GenerateMessage(msg, dices: str, times: int, dc: int):
             else:
                 output_line += str(dice.GetResult())
             result += dice.GetResult(False)
-        output_line = remove_prefix(output_line, '+')  # 移除多项式首个+
+        output_line = remove_prefix(output_line, '+')  # 移除表达式首个+
         output_line += ' = ' + str(result)
         if dc != 0:
             if msg.data.options.get('dice_dc_reversed'):

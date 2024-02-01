@@ -1,5 +1,4 @@
 from datetime import datetime
-import traceback
 
 from core.builtins import Bot, Image, Plain, Url
 from core.utils.cooldown import CoolDown
@@ -23,13 +22,12 @@ async def get_video_info(msg: Bot.MessageSession, query, get_detail=False):
             res = await get_url(url, 200, headers=headers, fmt='json')
             if res['code'] != 0:
                 if res['code'] == -400:
-                    await msg.finish(msg.locale.t("bilibili.message.error.invalid"))
+                    await msg.finish(msg.locale.t("bilibili.message.invalid"))
                 else:
                     await msg.finish(msg.locale.t('bilibili.message.not_found'))
         except ValueError as e:
             if str(e).startswith('412'):
                 await msg.finish(msg.locale.t('bilibili.message.error.rejected'))
-            traceback.print_exc()
 
         view = res['data']['View']
         stat = view['stat']
