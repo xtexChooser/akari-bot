@@ -20,7 +20,7 @@ while true; do
         echo Bot stopped unexpectedly
         sleep 30s
     fi
-    curl -sS "$HEALTHCHECKS_URL/$exitStatus"
+    curl -sS --retry 3 "$HEALTHCHECKS_URL/$exitStatus"
 
     echo "Auto merging upstream"
     git pull --all --prune
