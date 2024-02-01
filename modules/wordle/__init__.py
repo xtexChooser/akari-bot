@@ -177,9 +177,6 @@ class WordleBoardImage:
     def save_image(self, filename):
         self.image.save(filename)
 
-def create_wordle_board():
-    wordle_board = WordleBoard.from_random_word()
-    return wordle_board
 
 @wordle.command('{{wordle.help}}')
 async def _(msg: Bot.MessageSession):
@@ -188,15 +185,16 @@ async def _(msg: Bot.MessageSession):
     if msg.target.target_from == 'TEST|Console':
         c = 0
     else:
-        qc = CoolDown('wordle', msg)
+        qc = CoolDown('wordle', msg, all=True)
         c = qc.check(30)
 
     if c == 0:
-        play_state.update({msg.target.target_id: {'active': True}})
-        board = create_wordle_board()
+        board = WordleBoard.from_random_word()
         board_image = WordleBoardImage(msg.data.options.get('wordle_dark_theme'))
         path = os.path.join(Config('cache_path'), f'{msg.session.target}_wordle_board.png')
         board_image.save_image(path)
+        play_state[msg.target.target_id] = {'answer': board.word}
+        play_state[msg.target.target_id].update({'active': True})
         Logger.info(f'Answer: {board.word}')
         await msg.send_message([BImage(path), Plain(msg.locale.t('wordle.message.start'))])
 
@@ -228,6 +226,7 @@ async def _(msg: Bot.MessageSession):
             g_msg = msg.locale.t('wordle.message.finish.success', attempt=board.get_trials() - 1)
             if reward := await gained_petal(msg, 1):
                 g_msg += '\n' + reward
+        qc.reset()
         await msg.finish([BImage(path), Plain(g_msg)], quote=False)
     else:
         await msg.finish(msg.locale.t('message.cooldown', time=int(c), cd_time='30'))
@@ -235,14 +234,15 @@ async def _(msg: Bot.MessageSession):
 
 @wordle.command('stop {{game.help.stop}}')
 async def terminate(msg: Bot.MessageSession):
-    board = create_wordle_board()
+    board = WordleBoard.from_random_word()
+    qc = CoolDown('wordle', msg, all=True)
     state = play_state.get(msg.target.target_id, {})  # 尝试获取 play_state 中是否有此对象的游戏状态
     if state:
         if state['active']:  # 检查是否为活跃状态
             play_state[msg.target.target_id]['active'] = False
-            answer = board.word
             board.reset_board()
-            await msg.finish(msg.locale.t('wordle.message.stop', answer=answer))
+            qc.reset()
+            await msg.finish(msg.locale.t('wordle.message.stop', answer=state['answer']))
         else:
             await msg.finish(msg.locale.t('game.message.stop.none'))
     else:

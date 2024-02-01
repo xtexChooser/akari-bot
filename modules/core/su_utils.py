@@ -477,6 +477,10 @@ def isint(num):
         return False
 
 
+@cfg_.command('get <k>')
+async def _(msg: Bot.MessageSession):
+    await msg.finish(str(Config(msg.parsed_msg['<k>'])))
+
 @cfg_.command('write <k> <v> [-s]')
 async def _(msg: Bot.MessageSession):
     value = msg.parsed_msg['<v>']
