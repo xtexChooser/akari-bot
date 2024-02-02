@@ -224,6 +224,8 @@ async def start():
 
     await bot.set_presence('offline')
 
+    await bot.set_presence('offline')
+
 
 if bot:
     if 'subprocess' in sys.argv:
