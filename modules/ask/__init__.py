@@ -1,4 +1,3 @@
-import asyncio
 import io
 import re
 
@@ -47,6 +46,8 @@ if Config('openai_api_key'):
     #     tools=[{"type": "code_interpreter"}],
     #     model="gpt-4-1106-preview"
     # )
+else:
+    pass
 
     a = module('ask', developers=['Dianliang233'], desc='{ask.help.desc}')
 
@@ -93,7 +94,7 @@ if Config('openai_api_key'):
                         Logger.warn(run.last_error.json())
                         raise NoReportException(msg.locale.t('ask.message.rate_limit_exceeded'))
                     raise RuntimeError(run.last_error.json())
-                await asyncio.sleep(4)
+                await msg.sleep(4)
 
             messages = await client.beta.threads.messages.list(
                 thread_id=thread.id
