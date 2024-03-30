@@ -13,6 +13,7 @@ from core.queue import JobQueue
 from core.scheduler import Scheduler
 from core.types import PrivateAssets, Secret
 from core.utils.info import Info
+from core.utils.web_render import check_web_render
 
 
 async def init_async(start_scheduler=True) -> None:
@@ -33,9 +34,10 @@ async def init_async(start_scheduler=True) -> None:
         Scheduler.start()
     logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
     await load_secret()
+    await check_web_render()
     try:
         Info.version = os.popen('git rev-parse HEAD', 'r').read()
-    except Exception as e:
+    except Exception:
         Logger.warn(f'Failed to get Git commit hash, is it a Git repository?')
     Logger.info(f'Hello, {bot_name}!')
 
@@ -49,33 +51,36 @@ async def load_secret():
 
 
 async def load_prompt(bot) -> None:
-    author_cache = os.path.abspath(PrivateAssets.path + '/cache_restart_author')
-    loader_cache = os.path.abspath(PrivateAssets.path + '/.cache_loader')
-    no_load_succ = os.path.abspath(PrivateAssets.path + '/xtex_no_load_succ')
+    author_cache = os.path.abspath(PrivateAssets.path + "/cache_restart_author")
+    loader_cache = os.path.abspath(PrivateAssets.path + "/.cache_loader")
+    no_load_succ = os.path.abspath(PrivateAssets.path + "/xtex_no_load_succ")
     author = None
     if os.path.exists(author_cache):
-        open_author_cache = open(author_cache, 'r')
-        author = json.loads(open_author_cache.read())['ID']
-        open_loader_cache = open(loader_cache, 'r')
+        open_author_cache = open(author_cache, "r")
+        author = json.loads(open_author_cache.read())["ID"]
+        open_loader_cache = open(loader_cache, "r")
         m = await bot.fetch_target(author)
         if m:
             if (read := open_loader_cache.read()) != '':
-                await m.send_direct_message(m.parent.locale.t('error.loader.load.failed', detail=read))
+                await m.send_direct_message(m.parent.locale.t('loader.load.failed', detail=read))
             else:
-                await m.send_direct_message(m.parent.locale.t('error.loader.load.success'))
+                await m.send_direct_message(m.parent.locale.t('loader.load.success'))
             open_loader_cache.close()
             open_author_cache.close()
             if not os.path.exists(no_load_succ):
                 os.remove(author_cache)
             os.remove(loader_cache)
 
-    update_log_cache = os.path.abspath(PrivateAssets.path + '/xtex_cache_update_log')
+    update_log_cache = os.path.abspath(PrivateAssets.path + "/xtex_cache_update_log")
     if os.path.exists(update_log_cache):
         from config import Config
-        open_update_log_cache = open(update_log_cache, 'r')
-        m = await bot.fetch_target(author if author is not None else Config('base_superuser'))
+
+        open_update_log_cache = open(update_log_cache, "r")
+        m = await bot.fetch_target(
+            author if author is not None else Config("base_superuser")
+        )
         if m:
-            if (read := open_update_log_cache.read()) != '':
+            if (read := open_update_log_cache.read()) != "":
                 await m.send_direct_message(read)
         open_update_log_cache.close()
         os.remove(update_log_cache)

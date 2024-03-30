@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List
 
 from config import Config
@@ -44,7 +44,7 @@ class MessageSession(MessageSessionT):
         if message_chain:
             message_chain = MessageChain(message_chain)
             if append_instruction:
-                message_chain.append(Plain(self.locale.t("message.wait.confirm.prompt.type1")))
+                message_chain.append(Plain(self.locale.t("message.wait.prompt.confirm")))
             send = await self.send_message(message_chain, quote)
         flag = asyncio.Event()
         MessageTaskManager.add_task(self, flag, timeout=timeout)
@@ -71,7 +71,7 @@ class MessageSession(MessageSessionT):
         if message_chain:
             message_chain = MessageChain(message_chain)
             if append_instruction:
-                message_chain.append(Plain(self.locale.t("message.wait.confirm.prompt.type2")))
+                message_chain.append(Plain(self.locale.t("message.wait.prompt.next_message")))
             send = await self.send_message(message_chain, quote)
         flag = asyncio.Event()
         MessageTaskManager.add_task(self, flag, timeout=timeout)
@@ -172,7 +172,7 @@ class MessageSession(MessageSessionT):
                 ftime_template.append("(UTC)")
             else:
                 ftime_template.append(f"(UTC{self._tz_offset})")
-        return (datetime.utcfromtimestamp(timestamp) + self.timezone_offset).strftime(' '.join(ftime_template))
+        return (datetime.fromtimestamp(timestamp, UTC) + self.timezone_offset).strftime(' '.join(ftime_template))
 
 
 __all__ = ["MessageSession"]
